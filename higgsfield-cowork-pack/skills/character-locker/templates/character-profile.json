@@ -1,0 +1,15 @@
+{
+  "name": "REPLACE: display name (e.g. Maya)",
+  "slug": "REPLACE: kebab-case version (e.g. maya)",
+  "created_at": "REPLACE: ISO 8601 timestamp",
+  "archetype": "REPLACE: one of [gym-bro-twenties, busy-mom-thirties, gen-z-creator, white-collar-professional, outdoorsy-thirties, senior]",
+  "specifics": "REPLACE: one paragraph of override details (skin tone, hair, age, vibe twists)",
+  "default_scene": "REPLACE: e.g. sunlit kitchen counter, home gym, bathroom mirror",
+  "higgsfield": {
+    "job_id": "REPLACE: Higgsfield job UUID",
+    "model": "soul_cast",
+    "raw_url": "REPLACE: CloudFront URL from job_display, optional but useful"
+  },
+  "soul_prompt": "REPLACE: full text of the SOUL prompt used. Required for regeneration.",
+  "tags": ["REPLACE", "with", "search", "tags"]
+}

@@ -1,0 +1,30 @@
+{
+  "url": "REPLACE: original URL",
+  "fetched_at": "REPLACE: ISO 8601 timestamp",
+  "domain_tier": "REPLACE: 1 (full) | 2 (partial) | 3 (best-effort) | unsupported",
+  "fetch_method": "REPLACE: web_fetch | chrome_mcp | manual_paste",
+  "product": {
+    "name": "REPLACE: extracted product name",
+    "hero_image_url": "REPLACE: source URL of hero image",
+    "hero_image_local_path": "REPLACE: local path after download, e.g. outputs/ads/<slug>/source-hero.png",
+    "price": "REPLACE: extracted price string e.g. $24.99",
+    "description": "REPLACE: first paragraph or short description",
+    "features": [
+      "REPLACE: bullet 1",
+      "REPLACE: bullet 2",
+      "REPLACE: bullet 3"
+    ],
+    "brand": "REPLACE: brand name or seller",
+    "variant": "OPTIONAL: color/size/flavor if present",
+    "rating": "OPTIONAL: star rating if present",
+    "review_count": "OPTIONAL: number of reviews if present"
+  },
+  "parser_warnings": [
+    "OPTIONAL: any fields that fell back to defaults or couldn't be extracted"
+  ],
+  "inferred_buyer": {
+    "archetype": "REPLACE: gym-bro-twenties | busy-mom-thirties | gen-z-creator | white-collar-professional | outdoorsy-thirties | senior",
+    "confidence": "REPLACE: high | medium | low",
+    "reason": "REPLACE: short note on why this archetype was inferred"
+  }
+}

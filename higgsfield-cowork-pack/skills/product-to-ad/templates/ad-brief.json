@@ -1,0 +1,28 @@
+{
+  "product": {
+    "name": "REPLACE: short product name (e.g. Ice Roller)",
+    "image_path": "REPLACE: full path to product image, e.g. /Users/you/Desktop/products/ice-roller.png",
+    "what_it_is": "REPLACE: one sentence description (e.g. A 12-dollar handheld ice roller for your face)",
+    "what_it_does": "REPLACE: one sentence outcome (e.g. De-puffs your face in 5 minutes)",
+    "price": "REPLACE: e.g. $12, $49, free trial"
+  },
+  "buyer": {
+    "archetype": "REPLACE: one of [gym-bro-twenties, busy-mom-thirties, gen-z-creator, white-collar-professional, outdoorsy-thirties, senior]",
+    "specifics": "REPLACE: any audience details (e.g. women 28-40, post-partum, tired-of-puffy-mornings)"
+  },
+  "vibe": "REPLACE: one of [excited-high-energy, calm-educational, sarcastic-funny, soft-aspirational]",
+  "cta": {
+    "type": "REPLACE: one of [link-in-bio, comment-keyword, code-discount, follow-for-more]",
+    "details": "REPLACE: e.g. ICE for the link, code SAVE20 at checkout"
+  },
+  "scene": {
+    "preset": "REPLACE: one of [1-bathroom, 2-kitchen, 3-bedroom, 4-office, 5-car, 6-gym, 7-outdoor-walk, 8-unboxing, 9-couch, 10-backyard]",
+    "custom_setting": "OPTIONAL: free-text scene override"
+  },
+  "video": {
+    "platform": "REPLACE: tiktok | reels | youtube-shorts (all 9:16, this affects caption + hashtags)",
+    "length_seconds": 30,
+    "clips": 3
+  },
+  "saved_character_id": "OPTIONAL: Higgsfield job_id of a previously generated actor (from /character-locker), to reuse the same face"
+}

@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+.DS_Store?
+._*
+
+# Archives (unzip locally, don't commit binaries)
+*.zip
+*.tar.gz
+
+# Claude Code local machine config — not shared
+.claude/settings.local.json
+.claude/skills/
+
+# Eval/review artifacts
+*.html
+
+# Node (if any tooling gets added)
+node_modules/

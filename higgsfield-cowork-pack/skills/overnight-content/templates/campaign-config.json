@@ -1,0 +1,31 @@
+{
+  "campaign_slug": "REPLACE: kebab-case identifier (e.g. ice-roller-april)",
+  "created_at": "REPLACE: ISO timestamp",
+  "source": {
+    "type": "REPLACE: products-folder | urls | single-product-variations",
+    "products_folder": "OPTIONAL: path under inputs/products/ if type=products-folder",
+    "urls": ["OPTIONAL: list of URLs if type=urls"],
+    "single_product_path": "OPTIONAL: path to one product image if type=single-product-variations"
+  },
+  "ads_per_night": 1,
+  "characters": {
+    "mode": "REPLACE: saved | rotate-saved | new-each-night",
+    "saved_slug": "OPTIONAL: which character to use if mode=saved (e.g. 'maya')",
+    "rotation_pool": ["OPTIONAL: list of saved character slugs if mode=rotate-saved"]
+  },
+  "vibes": [
+    "REPLACE: list 1-4 of [excited-high-energy, calm-educational, sarcastic-funny, soft-aspirational]"
+  ],
+  "schedule": {
+    "start_date": "REPLACE: YYYY-MM-DD",
+    "end_date": "REPLACE: YYYY-MM-DD",
+    "run_time_local": "02:00",
+    "timezone": "REPLACE: IANA tz, e.g. America/Chicago"
+  },
+  "credit_budget": {
+    "estimated_per_ad": 7,
+    "estimated_total": "REPLACE: ads_per_night * nights * 7",
+    "balance_check_at_start": true
+  },
+  "output_pattern": "outputs/morning/{date}/{ad-slug}/"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "higgsfield-cowork-pack",
+  "description": "End-to-end UGC ad and content pipeline powered by Higgsfield (SOUL, Nano Banana Pro, Higgsfield Video) via the Higgsfield MCP. Turn product photos or URLs into finished video ads, lock reusable UGC characters, generate cinematic Instagram carousels, and schedule nightly content drops — all inside Claude Cowork.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Brock Mesarich"
+  }
+}
