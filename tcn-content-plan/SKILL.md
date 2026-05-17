@@ -25,6 +25,17 @@ Handles three modes. Identify which one the user is requesting and jump straight
 - `references/note-formats.md` — all 7 Note formats with word counts and examples
 - `references/posting-rules.md` — posting windows, weekly cadence, flagship-day structure
 
+**Sister skills to delegate to** (use the Skill tool, do not freehand the prose):
+- `tcn-post` — for every X/Twitter standalone or thread draft
+- `tcn-substack-notes` — for every Substack Note draft
+- `tcn-text-humanizer` — for the final AI-tells pass on the assembled file. This is the TCN-calibrated humanizer (Justin's voice, punctuation philosophy, "AI hit list"). Not `humanize-writing`, which is voice-agnostic and only produces a report.
+
+**Voice context to load before any drafting** (read once per session, then keep them in working context):
+1. `/Users/justin/Documents/substack-research/Substack Research/CLAUDE.md` — wiki agent rules, themes, "Writing Voice — Prose and Narration" section at the bottom
+2. `/Users/justin/Documents/substack-research/Substack Research/workspace/core/anti-ai-writing-style.md` — VOICE DNA, banned list, BIG ONE (negative parallelisms), formatting rules
+
+If either file has been read earlier in the conversation, do not re-read — rely on what is already in context. Otherwise read both **before** drafting any prose in Mode 2.
+
 ---
 
 ## Mode 1: Check Today's Plan
@@ -79,22 +90,35 @@ Load `references/note-formats.md` for format definitions before drafting.
 
 **Flagship day** = Friday AND the monthly plan lists a flagship article publishing this week. Flagship days have a different structure — see `references/posting-rules.md`.
 
-### Step 5: Draft the X standalone
+### Step 5: Draft the X standalone (delegate to `tcn-post`)
 
-Post anytime, no CTA. Draft 2–3 options using different angles (raw data, analytical frame, narrative). Each option: ≤50 words, self-contained, no link. Include a recommendation that specifies which option to use and when.
+Invoke the `tcn-post` skill via the Skill tool. Pass it:
+- Today's live news (from Step 1)
+- The SPENT/FRESH lists (from Step 2)
+- The instruction: "Draft 2–3 X standalone options for today, no CTA, ≤50 words each, self-contained, different angles (raw data / analytical frame / narrative). Cite source in the post itself."
 
-On flagship days, draft a 10-post X thread instead (see `references/posting-rules.md`).
+Do not freehand the X copy in this skill. `tcn-post` owns the X voice, hook rules, and Civic Node viral-post process. Capture its output verbatim under the "X STANDALONE" section of the plan file.
 
-### Step 6: Draft the Notes
+On flagship days, ask `tcn-post` for a 10-post X thread instead of standalones (see `references/posting-rules.md` for thread structure).
 
-For each Note format assigned to this day, write 2–3 options with full prose copy — not scaffolds or outlines, actual text ready to post. Each option must:
+After receiving the draft, add a one-sentence recommendation specifying which option to use and when (you, the planner, make this call — `tcn-post` returns options, the plan picks).
 
-- **Be FRESH** — no data, frame, or claim from the SPENT list
-- **Hit the word count target** — see `references/note-formats.md`
-- **Cite the source** — name it in the Note text
-- **Deliver what the format promises** — read the format definition before drafting; a Primary Source Drop that editorializes has failed its format; a Framework Hand that only presents data and draws no analytical move has failed its format
+### Step 6: Draft the Notes (delegate to `tcn-substack-notes`)
 
-After the options for each Note, add: image/screenshot guidance (needed or not, and which one) and a one-sentence recommendation specifying which option to use and why.
+For each Note slot assigned to this day, invoke the `tcn-substack-notes` skill via the Skill tool. Pass it:
+- The assigned format (Framework Hand, Primary Source Drop, etc.) — load the format definition from `references/note-formats.md` first and include the key constraints in the request
+- The SPENT/FRESH lists (from Step 2) — `tcn-substack-notes` must avoid the SPENT items
+- The live news context (from Step 1) and the source citation it should anchor to
+- The instruction: "Draft 2–3 options for one Note in [format]. Each option must hit the word count, name the source, deliver what the format promises, and respect the FRESH/SPENT split."
+
+Do not freehand the Note prose in this skill. `tcn-substack-notes` owns Justin's Substack voice, the Marcus reader persona, the conversion-driving frame, and the format-specific quality bars. Capture its output verbatim under each Note's heading.
+
+After receiving each draft, add: image/screenshot guidance (needed or not, and which one) and a one-sentence recommendation specifying which option to use and why.
+
+**Format-quality contract** — when invoking `tcn-substack-notes`, repeat these constraints from `references/note-formats.md` in the request so they don't drift:
+- A Primary Source Drop that editorializes has failed its format
+- A Framework Hand that only presents data and draws no analytical move has failed its format
+- An Operator Observation that doesn't speak in first-person operational specifics has failed its format
 
 ### Step 7: Draft LinkedIn repost (flagship days only)
 
@@ -108,24 +132,53 @@ For restacks: describe what kind of Note to look for (the argument to restack) a
 
 ### Step 9: Write the file
 
-Save to `workspace/notes/YYYY-MM-DD-dayN-options.md`. Required frontmatter:
+Save to `workspace/notes/YYYY-MM-DD-dayN-options.md`.
+
+**YAML formatting rules** (Obsidian uses a strict parser — violating these makes the file render with a broken frontmatter block):
+
+1. **Wrap every list item value in double quotes.** Any unquoted string that contains `:` followed by a space, an apostrophe, a comma followed by space, `#`, `&`, `*`, `[`, `]`, `{`, `}`, `|`, `>`, `%`, `@`, `` ` ``, or a leading `-`/`?` will break the parser. Quoting unconditionally is simpler than auditing for unsafe characters.
+2. **Use `|` block scalars for any value longer than one line.** Block-scalar content does not need internal escaping — colons, dashes, apostrophes all pass through literally. This is the right choice for the SPENT/FRESH narrative blocks.
+3. **`formats` must be a YAML list, not a comma-joined string.** Use either block style (one item per line with `-`) or flow style (`[A, B, C]`). Never write `formats: A, B, C` — that parses as a single string.
+4. **Escape any literal `"` inside a double-quoted value as `\"`.**
+5. **Indent list items two spaces under their key.** Indent continuation lines of a block scalar two spaces beyond the key.
+
+Required frontmatter template:
 
 ```yaml
 ---
 date: YYYY-MM-DD
 week: N
 day: N
-formats: [Format1, Format2, Format3]
+formats:
+  - "Format 1"
+  - "Format 2"
+  - "Format 3"
 status: draft
 live_news:
-  - [live news items from Step 1]
+  - "First live news item. Colons, apostrophes, em dashes all safe inside the quotes."
+  - "Second item: data release, vote, decision, or breaking story."
 duplication_audit:
-  - SPENT this week (do not repeat): [specific data points, frames, sources — not just topics]
-  - FRESH today: [what this day introduces for the first time]
+  spent_this_week: |
+    Use a literal block scalar for the SPENT list. Semicolon-separated phrases work
+    well here because the parser doesn't try to interpret any of the punctuation.
+    Example: Hormuz 191/3,000 crossings; April CPI energy +3.8% MoM + Hormuz
+    mechanism; rate tool doesn't reach supply shocks; instrument > independence.
+  fresh_today: |
+    Same format. List the new data, sources, and analytical moves this day
+    introduces for the first time.
 ---
 ```
 
-Add `flagship_prep:` block on flagship days (humanize checklist, framing fixes to make before publish).
+On flagship days, append a `flagship_prep:` block — also as a block scalar:
+
+```yaml
+flagship_prep: |
+  Draft: workspace/drafts/[slug].md
+  Needs humanize pass before midnight tonight.
+  Fix [specific framing issue] before publish.
+```
+
+**Before writing**, sanity-check the YAML by mentally parsing each value: if you removed the quotes, would the parser still treat it as one string? If not, the quotes are doing real work and must stay.
 
 End every plan with a schedule summary table:
 
@@ -133,6 +186,27 @@ End every plan with a schedule summary table:
 | Time | Platform | Content |
 |------|----------|---------|
 ```
+
+### Step 10: AI-tells check (final pass — required, do not skip)
+
+Even though `tcn-post` and `tcn-substack-notes` are voice-aware, the assembled options file can still leak AI fingerprints: banned vocabulary, closed em dashes, negative parallelisms, "It's not X, it's Y" constructions, rule-of-three lists, copulative avoidance, title-case headers, dead transitions, dismissal labels without explanation.
+
+Invoke the `tcn-text-humanizer` skill via the Skill tool — **not** `humanize-writing`. `tcn-text-humanizer` is the TCN-specific humanizer: it knows Justin's punctuation philosophy (semicolons over em dashes, parentheses for asides), his rhythm references (Hunter S. Thompson, Vonnegut, R.L. Stine), and his explicit "AI hit list" of phrases that auto-fail. It also actively rewrites the prose rather than handing back a report.
+
+Pass `tcn-text-humanizer` the prose blocks from the just-written options file at `workspace/notes/YYYY-MM-DD-dayN-options.md`: the Note option bodies, the X option bodies, the restack addenda, and the engagement comment angles. Do not feed it the YAML frontmatter, schedule table, or section headings — those aren't voice surfaces.
+
+For each block returned, replace the original prose in the file with the humanized version via Edit. Preserve the surrounding scaffolding (option labels like "### Option A", italicized meta-commentary, image guidance lines) — only the prose body changes.
+
+**Hard fail conditions** — if any of these survive `tcn-text-humanizer`'s pass, fix them immediately even if the skill didn't flag them. These are the non-negotiables from `anti-ai-writing-style.md`:
+- A closed em dash (`—`) used as interruption or decoration inside drafted prose. Spaced em dashes used sparingly as connectives are acceptable per Justin's punctuation philosophy; closed em dashes are not.
+- Any banned word from anti-ai-writing-style.md section 3A (delve, realm, harness, unlock, leverage, robust, seamless, etc.)
+- Any negative parallelism (anti-ai-writing-style.md section 3F): "This isn't X, it's Y", "Not X. Y.", "It's not about X, it's about Y", etc.
+- A dismissal label as substitute for explanation (anti-ai-writing-style.md section 3H): "X is theater", "X is a press release", etc.
+- Title case in a header inside drafted prose (sentence case is the rule)
+- A copulative-avoidance verb: "serves as", "stands as", "represents", "marks a", "boasts a"
+- Any phrase from Justin's "AI hit list" (loaded inside `tcn-text-humanizer`): "Picture this:", "Dive into…", "It's important to note…", "A testament to…", "That really hits", etc.
+
+After fixes, update the file's `status:` field from `draft` to `voice-checked` so future check-mode reads can see the file passed the gate.
 
 ---
 
@@ -192,9 +266,12 @@ Save to `workspace/plans/tcn-notes-30-day-map.md`. Include a "Source Hooks" sect
 ## Quality bar
 
 A daily plan works when:
+- The YAML frontmatter parses cleanly in Obsidian (list items quoted, multi-line content uses `|` block scalars, `formats` is a real list)
+- Notes were drafted by the `tcn-substack-notes` skill and X copy by `tcn-post`, not freehanded inside this skill
 - Every Note uses content not in the SPENT list — verifiable by checking the prior files
 - Each Note has 2–3 options with actual prose, not outlines
 - The recommendation for each Note tells the user which option to use and why — not just "option A is good"
 - The SPENT list is specific (cites data points and frames, not just topics) so it prevents future duplication
 - Notes feel distinct from each other — they don't make the same analytical move in different words
 - The schedule table gives a complete picture of the day at a glance
+- The `tcn-text-humanizer` check ran and the file's `status:` is `voice-checked` — no closed em dashes, no banned vocab, no negative parallelisms, no "AI hit list" phrases in the drafted prose
