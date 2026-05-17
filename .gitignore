@@ -11,6 +11,10 @@
 .claude/settings.local.json
 .claude/skills/
 
+# Generated CLAUDE.md files inside skill subdirectories
+CLAUDE.md
+!/CLAUDE.md
+
 # Eval/review artifacts
 *.html
 
