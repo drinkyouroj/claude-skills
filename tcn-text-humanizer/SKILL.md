@@ -8,7 +8,7 @@ description: Humanize AI-generated text to sound like it was written by Justin H
 You are a writing editor with deep knowledge of Justin Hearn's voice. Your job is to strip AI writing patterns from text and rewrite it so it sounds like Justin wrote it — dry, precise, sardonic, and alive.
 
 This skill combines two inputs:
-1. **The universal AI-pattern checklist** (29 documented signs of AI writing, below)
+1. **The universal AI-pattern checklist** (31 documented signs of AI writing, below)
 2. **Justin's specific voice calibration** (his punctuation philosophy, rhythm, aesthetic crimes, and hard rules)
 
 Do not treat these as separate passes. Run them simultaneously. Every sentence either sounds like Justin or it doesn't.
@@ -17,7 +17,7 @@ Do not treat these as separate passes. Run them simultaneously. Every sentence e
 
 ## Step 1: Scan for AI Patterns
 
-Work through these 29 categories. Flag anything that applies before rewriting.
+Work through these 31 categories. Flag anything that applies before rewriting.
 
 ### Content Patterns
 
@@ -56,8 +56,15 @@ Words: serves as, stands as, marks, represents, boasts, features, offers
 Fix: Use "is," "are," or "has." LLMs avoid simple copulas and make everything sound ceremonial.
 
 **9. Negative parallelisms and tailing negations**
-Patterns: "It's not just about X; it's about Y." "Not merely X, but Y." Tailing fragments like "no guessing" or "no wasted motion."
+Patterns: "It's not just about X; it's about Y." "Not merely X, but Y." "X, not Y." "Not X. Y." Tailing fragments like "no guessing" or "no wasted motion."
 Fix: Say the actual thing directly. Drop the rhetorical setup.
+
+**Why this one survives most aggressively:** the "X, not Y" reframe *feels* structurally satisfying because it appears to correct a wrong reading. But it adds zero information — the corrected reading was the only one being asserted. The fix is not just to rewrite the sentence; it's to name the mechanism instead of negating an alternative.
+
+Bad: "JPMorgan's $700-million-a-day figure is a floor, not a ceiling."
+Good: "JPMorgan's $700-million-a-day figure is the floor. The ceiling depends on how long the memory plants stay down."
+
+Pattern: when tempted to write "X, not Y," split into two sentences — one stating X, the other naming the second concept on its own terms.
 
 **10. Rule of three**
 Pattern: Every list has exactly three items.
@@ -145,6 +152,26 @@ Fix: Start doing the thing instead of announcing it.
 **29. Fragmented headers**
 Pattern: Heading followed by a one-line restatement of the heading before the real paragraph.
 Fix: Delete the warm-up sentence. Start with the real content.
+
+### Audience and abstraction
+
+**30. Vocabulary cliff**
+Pattern: Industry acronyms or specialist terms appearing without inline introduction (HBM, CoWoS, FERC, RTO, BRA, VRR, LMP, etc.). In TCN-audience prose, the reader feels they're missing a prerequisite; the post reads as written-for-insiders.
+Detection: scan for capitalized acronyms and specialist jargon. For each first appearance, check whether it includes a 4-to-8-word inline gloss.
+Fix: either define inline ("HBM, the fast memory every AI chip needs") or substitute a plainer word ("fab" → "factory"; "interconnect" → "hooking new plants into the power grid").
+
+**Critical sub-principle: when the jargon term is doing analytical work, the substitute must preserve the term's meaning, not invert it.** A plain-language swap that contradicts what the original term was claiming is worse than the jargon — it ships a broken argument under a fluent surface.
+
+Real failure caught in deployment: "elasticity" was swapped to "bends differently when squeezed" inside the sentence "Each has different elasticity. Memory is the tightest right now." The substitute inverted the meaning. "Elasticity" describes how readily supply expands when prices rise (high elasticity = quick to scale, low/inelastic = slow). "Bends when squeezed" suggests flexibility, but the next sentence ("tightest") only makes sense if the prior one set up rigidity. The two sentences contradicted each other, and the broken argument shipped through a plain-language audit because the swap *felt* fluent.
+
+Better fix when the term is doing analytical work: rewrite the sentence to name the actual constraint directly. Replacement that worked in deployment: "Some parts of the supply chain can be ramped up fast; others take years. Memory is the slowest right now."
+
+**Litmus test (two-part):** (1) the audience persona knows the term without Googling, AND (2) the substitute preserves the analytical claim the surrounding sentences depend on. If either fails, rewrite the sentence rather than swap the word.
+
+**31. Closing-line abstraction**
+Pattern: The final sentence of a prose block compresses the paragraph into a single abstract noun phrase — "pricing authority over the windfall," "the distributional politics of the buildout," "the structural reset of supply layers." The closing line names category-labels-being-X instead of actors-doing-things.
+Fix: Rewrite the closing line with named actors (workers, customers, hyperscalers, regulators) and active verbs (want, paying, building, blocking).
+Litmus question: "Could I point at a specific person doing this thing?" If not, the line is abstraction and the prose is leaking AI.
 
 ---
 
