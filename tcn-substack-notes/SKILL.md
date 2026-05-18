@@ -80,7 +80,7 @@ If a draft Note feels like it would do well on a creator-economy account, that i
 
 **Lines 2 to 5, the substance.** The frame, the connection, the contradiction. One claim, supported. There is no room to bury anything.
 
-**Last line, land it and stop.** A reframe, an implication, a flat observation. Apply the cover test: cover the last line. If the reader already thought it from the setup, the ending is weak. Upgrade it.
+**Last line, land it and stop.** A reframe, an implication, a flat observation. Apply the cover test: cover the last line. If the reader already thought it from the setup, the ending is weak. Upgrade it. Then run the closing-line plain-language check (see Line-Level Quality Checks below).
 
 **No CTA inside the Note.** "Subscribe for more" is broadcasting and it underperforms. The Note itself is the pitch. If it lands, they click the profile.
 
@@ -147,6 +147,61 @@ Run all five before presenting any Note.
 3. **Send test.** Would Marcus forward this to one specific person? Not "some people," one specific person.
 4. **Jersey test.** Does this only resonate with people who already agree? Tribal Notes don't convert; they collect their own kind.
 5. **Subscribe test (Notes-specific).** If a non-follower stumbles onto this in their Notes feed, would the voice + frame make them click the profile and want more?
+
+---
+
+## Line-Level Quality Checks
+
+Run these after the Marcus Tests pass. They catch failure modes that survive a conceptual filter: sentences that *feel* fluent but ship a broken claim, parallels that *sound* symmetric but aren't, jargon that bounces casual readers off otherwise-strong Notes.
+
+### Closing-line plain-language check (all formats)
+
+Scan the closing line for category labels standing in for actors-doing-things. The closing line is where abstract noun clusters do the most damage. It's the line the reader carries away. If it floats above ground, it floats away from them.
+
+**Bad (caught in real use):** "Two layers of the AI supply chain are simultaneously asking who has pricing authority over the windfall." Four abstractions in one sentence (*layers*, *simultaneously*, *pricing authority*, *windfall*).
+
+**Good rewrite:** "Same boom. The workers want a piece of what it brings in. The customers are paying for what it costs." Named actors (workers, customers), active verbs (wanting, paying).
+
+**Rule:** in the closing line of any Note, prefer named actors + active verbs over category labels + abstract noun clusters. If you reach for an abstract noun phrase, rewrite it to name the people and what they're doing.
+
+**Litmus:** could I point at a specific person doing this thing? If no, rewrite.
+
+### Cross-Domain Connection symmetry check (CDC format only)
+
+When connecting two stories from different beats, verify the underlying mechanism is genuinely shared, not just rhetorically similar.
+
+**Failure mode caught in deployment:** claiming "same money, two fights" about Samsung HBM workers wanting a profit share AND PJM ratepayers absorbing capacity costs. Both trace to the AI buildout, but they are literally different money flows in different countries. The parallel was rhetorical, not mechanical.
+
+**Rule:** if the parallel is asymmetric (one side capturing upside, the other absorbing cost), name what IS shared (the cause, the boom, the buildout) AND what is different (the direction, the position, the response). Don't compress past the truth.
+
+**Honest asymmetric framing example:** "Same boom. The workers want a piece of what it brings in. The customers are paying for what it costs." One cause named, two divergent positions named, no false equivalence.
+
+### Vocabulary cliff audit (all formats)
+
+Scan for industry acronyms and insider terms that haven't been introduced inline. Common offenders observed in TCN drafts: *HBM, CoWoS, accelerator, fab, foundry, interconnect, layer* (when used as a supply-chain handle), *elasticity* (when used as economics jargon).
+
+For each unintroduced term: either define inline on first use ("HBM, the fast memory every AI chip needs to work") OR replace with a plainer word ("fab" → "factory", "accelerator" → "AI chip", "layer" → "part of the supply chain").
+
+**Critical sub-principle: when the jargon term is doing analytical work, the substitute must preserve the term's meaning, not invert it.** A plain-language swap that contradicts what the original term was claiming is worse than the jargon. It ships a broken argument under a fluent surface.
+
+**Real failure caught in deployment:** "elasticity" → "bends differently when squeezed" was applied to the sentence "Each has different elasticity. Memory is the tightest right now." The substitute inverted the meaning. *Elasticity* describes how readily supply expands when prices rise (high elasticity = quick to scale, low or inelastic = slow to scale). *Bends when squeezed* suggests flexibility, but the next sentence ("tightest") only makes sense if the prior set up rigidity. The two sentences contradicted each other, and the broken argument shipped through a plain-language audit because the swap *felt* fluent.
+
+**Better fix when the term is doing analytical work:** rewrite the sentence to name the actual constraint directly. The replacement that worked in deployment: "Some parts of the supply chain can be ramped up fast; others take years. Memory is the slowest right now."
+
+**Two-part litmus test:**
+
+1. Would the audience persona (Marcus the systems-thinker, not a chip engineer) know this term without Googling?
+2. Does the substitute preserve the analytical claim the original sentence was making?
+
+If either answer is no, swap or rewrite the sentence.
+
+### Why these checks exist
+
+A closer that said "same money, two fights" sounded analytical but was factually wrong on inspection. Plain language exposes claims, which is how you catch the ones that don't hold up.
+
+Acronym-heavy prose makes readers feel they're missing prerequisites and bounces them off otherwise-strong posts.
+
+Most subtly: a confident-feeling plain-language substitute can quietly invert the analytical claim if the swap isn't checked against the surrounding sentences. Single-axis vocabulary audits (audience comprehension only) miss this. The two-part litmus closes the gap.
 
 ---
 
