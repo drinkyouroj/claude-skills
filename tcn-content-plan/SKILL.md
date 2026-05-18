@@ -42,7 +42,10 @@ If either file has been read earlier in the conversation, do not re-read — rel
 
 1. Determine today's date. Construct the expected filename: `YYYY-MM-DD-dayN-options.md` in `workspace/notes/`.
 2. To find the correct day number N, check `workspace/plans/tcn-notes-30-day-map.md` for the entry matching today's date. If no monthly plan exists, count the existing note files in `workspace/notes/` to infer N.
-3. **File exists** → read it and display its full contents. Summarize the day's Notes, X standalone recommendation, and schedule table. Ask if anything needs updating.
+3. **File exists** → read it. Then check the **Status update** block at the top of the file (template defined in Step 9):
+   - **Block absent, empty, or timestamped more than ~2 hours ago** → prompt the user: "What's happened since [last timestamp or 'drafting time']? Any triggers fired or fizzled?" Use the answer plus the shelf-life labels on each option to fill in (or refresh) the block — mark every Frame-forward option as safe to post, mark every Data-forward / Conditional option as safe or hold based on whether its trigger fired, and write the result to the file before summarizing. The block is the answer to "what can I post?" so populate it first; don't make the user re-derive option dependencies from prose.
+   - **Block is fresh** → display it directly. That's already the answer.
+   After the status update is fresh, summarize the day's Notes, X standalone recommendation, and schedule table. Ask if anything else needs updating.
 4. **File missing** → say "No plan exists for today yet — drafting one now" and proceed to Mode 2 for today's date.
 
 ---
@@ -90,18 +93,35 @@ Load `references/note-formats.md` for format definitions before drafting.
 
 **Flagship day** = Friday AND the monthly plan lists a flagship article publishing this week. Flagship days have a different structure — see `references/posting-rules.md`.
 
+### Step 4b: Shelf-life rule (read before drafting)
+
+**Schedule note**: Time-sensitive content has two layers — the **durable analytical frame** (the argument or pattern that survives any outcome) and the **perishable operational claim** (the news-cycle hook the post is anchored to). The post's life is determined by the shorter of the two; a strong frame welded to a stale claim dies with the claim. Surface that split at the option level so future-you doesn't have to re-derive it at posting time.
+
+Every option produced in Step 5 and Step 6 must carry one of three shelf-life labels, written inline next to the option header:
+
+- **Frame-forward** — durable across multiple outcomes. References things that have already happened (vote cast, demand published, data already reported, statement on the record). Survives whether the predicted event lands or not. This is the default-safe pick.
+- **Data-forward** — depends on a specific news cycle pointing the same direction (collapse confirmed, walkout proceeding, deal announced, ruling landed). Lives or dies with that direction.
+- **Conditional** — tied to a specific event that may or may not happen by posting time (court ruling, vote outcome, mediation result). Becomes unpostable if the event flips or fails to occur on schedule.
+
+**Every slot must produce at least one Frame-forward option as the default-safe pick.** The other 1–2 options can be Data-forward or Conditional to capture the upside when a trigger fires — but the slot must never depend on a trigger firing in order to post at all.
+
+Each option's shelf-life label feeds two downstream artifacts in this file:
+1. The **Depends on** cell in the schedule summary table (Step 9) — written as the specific trigger phrase ("walkout confirmation", "court ruling landed by 11am", "no trigger needed").
+2. The **Status update** block (Step 9) — at re-check time, the labels determine which options are safe to post and which are on hold.
+
 ### Step 5: Draft the X standalone (delegate to `tcn-post`)
 
 Invoke the `tcn-post` skill via the Skill tool. Pass it:
 - Today's live news (from Step 1)
 - The SPENT/FRESH lists (from Step 2)
-- The instruction: "Draft 2–3 X standalone options for today, no CTA, ≤50 words each, self-contained, different angles (raw data / analytical frame / narrative). Cite source in the post itself."
+- The shelf-life rule (from Step 4b) — `tcn-post` must label each option
+- The instruction: "Draft 2–3 X standalone options for today, no CTA, ≤50 words each, self-contained, different angles (raw data / analytical frame / narrative). Cite source in the post itself. **Tag each option with a shelf-life label — Frame-forward, Data-forward, or Conditional — and the specific news trigger it depends on (e.g., 'walkout confirmation', 'no trigger needed').** At least one option must be Frame-forward so the slot is postable regardless of how the news breaks."
 
 Do not freehand the X copy in this skill. `tcn-post` owns the X voice, hook rules, and Civic Node viral-post process. Capture its output verbatim under the "X STANDALONE" section of the plan file.
 
-On flagship days, ask `tcn-post` for a 10-post X thread instead of standalones (see `references/posting-rules.md` for thread structure).
+On flagship days, ask `tcn-post` for a 10-post X thread instead of standalones (see `references/posting-rules.md` for thread structure). The thread as a whole carries one shelf-life label; if any single post inside it is Conditional, the thread inherits the Conditional rating.
 
-After receiving the draft, add a one-sentence recommendation specifying which option to use and when (you, the planner, make this call — `tcn-post` returns options, the plan picks).
+After receiving the draft, add a one-sentence recommendation that names the conditional logic explicitly — e.g., "Use Option A (Frame-forward) by default; switch to Option B (Data-forward) if the walkout is confirmed before the posting window." `tcn-post` returns options; the plan picks and states the dependency in plain English.
 
 ### Step 6: Draft the Notes (delegate to `tcn-substack-notes`)
 
@@ -109,11 +129,12 @@ For each Note slot assigned to this day, invoke the `tcn-substack-notes` skill v
 - The assigned format (Framework Hand, Primary Source Drop, etc.) — load the format definition from `references/note-formats.md` first and include the key constraints in the request
 - The SPENT/FRESH lists (from Step 2) — `tcn-substack-notes` must avoid the SPENT items
 - The live news context (from Step 1) and the source citation it should anchor to
-- The instruction: "Draft 2–3 options for one Note in [format]. Each option must hit the word count, name the source, deliver what the format promises, and respect the FRESH/SPENT split."
+- The shelf-life rule (from Step 4b) — `tcn-substack-notes` must label each option
+- The instruction: "Draft 2–3 options for one Note in [format]. Each option must hit the word count, name the source, deliver what the format promises, and respect the FRESH/SPENT split. **Tag each option with a shelf-life label — Frame-forward, Data-forward, or Conditional — and the specific news trigger it depends on.** At least one option per slot must be Frame-forward so the slot is postable regardless of how the news breaks."
 
 Do not freehand the Note prose in this skill. `tcn-substack-notes` owns Justin's Substack voice, the Marcus reader persona, the conversion-driving frame, and the format-specific quality bars. Capture its output verbatim under each Note's heading.
 
-After receiving each draft, add: image/screenshot guidance (needed or not, and which one) and a one-sentence recommendation specifying which option to use and why.
+After receiving each draft, add: image/screenshot guidance (needed or not, and which one), and a one-sentence recommendation that names the conditional logic explicitly — e.g., "Default to Option A (Frame-forward, no trigger needed); use Option C (Conditional) only if the court ruling lands before noon."
 
 **Format-quality contract** — when invoking `tcn-substack-notes`, repeat these constraints from `references/note-formats.md` in the request so they don't drift:
 - A Primary Source Drop that editorializes has failed its format
@@ -180,12 +201,43 @@ flagship_prep: |
 
 **Before writing**, sanity-check the YAML by mentally parsing each value: if you removed the quotes, would the parser still treat it as one string? If not, the quotes are doing real work and must stay.
 
-End every plan with a schedule summary table:
+**Status update block (template — leave the body empty at drafting time)**
+
+Place this section directly under the YAML frontmatter, before any other content. At drafting time, write the heading and leave the body fields empty (or write the literal placeholders below). The block gets filled in at the day's first re-check — manual prompt like "what can I post?" or via `/loop` monitoring — and answers the posting question in roughly 10 seconds without re-reading the rest of the file. Do not try to predict the news state at drafting time; the point of the block is to capture state at posting time.
+
+```markdown
+## Status update — [HH:MM ET, day of week] (empty until first re-check)
+
+**News state since drafting:**
+- [what changed — vote happened, deal collapsed, hearing scheduled, walkout proceeded]
+- [what is still pending — which expected trigger has not fired yet]
+
+**Safe to post today:**
+
+| Slot | Option | Why this survives any outcome |
+|------|--------|-------------------------------|
+| [HH:MM, platform] | [A/B/C, label] | [one sentence — names the durable claim that holds regardless of the pending trigger] |
+
+**Hold (trigger has not fired):**
+- [Slot, option letter] — waiting on [specific news condition]
+- [Slot, option letter] — waiting on [specific news condition]
+```
+
+The block is short on purpose. If it grows past ~10 lines you're rewriting the plan instead of indexing it; cut back to the safe/hold split.
+
+**Schedule summary table** — end every plan with this table. The **Depends on** column is the key scanning surface: each row states the specific news condition the recommended option requires, so the user can map a slot to a postability decision in one glance.
 
 ```
-| Time | Platform | Content |
-|------|----------|---------|
+| Time | Platform | Content | Depends on |
+|------|----------|---------|------------|
 ```
+
+`Depends on` cell phrasing — match the option's shelf-life label:
+- Frame-forward → `no trigger needed (frame survives any outcome)`
+- Data-forward → the specific direction the news must point, e.g. `walkout proceeding`, `deal announced`, `collapse confirmed`
+- Conditional → the specific event that must occur by posting time, e.g. `court ruling landed by 11am`, `vote passes before 3pm window`
+
+If a slot's recommendation is itself conditional ("Option A unless walkout confirmed, then Option B"), put the dominant case in the row and add a second row beneath it for the fallback, so each row has exactly one trigger phrase.
 
 ### Step 10: AI-tells check (final pass — required, do not skip)
 
@@ -270,8 +322,11 @@ A daily plan works when:
 - Notes were drafted by the `tcn-substack-notes` skill and X copy by `tcn-post`, not freehanded inside this skill
 - Every Note uses content not in the SPENT list — verifiable by checking the prior files
 - Each Note has 2–3 options with actual prose, not outlines
-- The recommendation for each Note tells the user which option to use and why — not just "option A is good"
+- **Every option carries a shelf-life label (Frame-forward, Data-forward, or Conditional) and a specific dependency phrase** — labels are not optional and not generic
+- **Every slot has at least one Frame-forward option** so the slot is postable regardless of how the news breaks
+- The recommendation for each slot names the conditional logic explicitly — "Option A by default; B if X" — not just "option A is good"
 - The SPENT list is specific (cites data points and frames, not just topics) so it prevents future duplication
 - Notes feel distinct from each other — they don't make the same analytical move in different words
-- The schedule table gives a complete picture of the day at a glance
+- **The schedule summary table has a populated `Depends on` column** — every row states the specific trigger or "no trigger needed"
+- **An empty Status update block exists at the top of the file**, ready to be filled in at the first re-check
 - The `tcn-text-humanizer` check ran and the file's `status:` is `voice-checked` — no closed em dashes, no banned vocab, no negative parallelisms, no "AI hit list" phrases in the drafted prose
