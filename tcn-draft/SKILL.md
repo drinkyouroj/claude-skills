@@ -72,8 +72,28 @@ Review:
 1. The approved outline — every bullet point, source reference, and section note
 2. The approved headline and subheadline — the promise the draft must deliver on
 3. The viral trigger — this determines tone and structural emphasis throughout
+4. **A locked opener, if one was supplied** — see "Locked-opener input contract" below
 
 Confirm the opener strategy and close strategy from the outline. These are the two ends of the piece; everything between them must connect.
+
+---
+
+## Locked-opener input contract
+
+When this skill is invoked as part of the `tcn-article-builder` workflow (or any pipeline that ran `tcn-opener` before `tcn-draft`), the caller supplies a **locked opener** — the opener variant the user already approved at a separate step. The locked opener is supplied in the invocation prompt under an explicit heading like:
+
+> Locked opener (use verbatim — do not regenerate):
+> ```
+> <opener paragraph(s)>
+> ```
+
+When a locked opener is present:
+
+1. **Use it verbatim** as the article's opening paragraph(s). Do not rewrite, condense, or re-pace it. The user already evaluated and approved this opener separately.
+2. **Build the rest of the draft around it.** Treat the locked opener as fixed scaffolding the rest of the piece must connect to. The body sections must advance from where the locked opener leaves off; the close must call back to whatever image, fact, tension, or question the locked opener established (the opener-close contract from `tcn-opener` ships with the locked opener — honor it).
+3. **Do not run the "The Opener" generation rules below for this draft.** Those rules describe how to generate an opener from outline strategy; they don't apply when one is supplied.
+
+When no locked opener is supplied (standalone single-step use of `tcn-draft`), follow the outline's opener strategy and generate the opener inline using the rules in the "The Opener" subsection below. This is the original behavior — the locked-opener contract is additive, not breaking.
 
 ---
 
@@ -91,7 +111,9 @@ Follow the outline's section order. For each section:
 
 ### The Opener
 
-The opener is the most important paragraph in the piece. Justin opens with an **analogy that narrows from broad to specific** — the lighthouse that attracts the ship.
+**Skip this subsection if a locked opener was supplied** (see "Locked-opener input contract" above). When a locked opener is present, use it verbatim and do not regenerate.
+
+When no locked opener is supplied: the opener is the most important paragraph in the piece. Justin opens with an **analogy that narrows from broad to specific** — the lighthouse that attracts the ship.
 
 Rules:
 - Engage from the first word. No throat-clearing ("In today's rapidly changing..." is instant death)
