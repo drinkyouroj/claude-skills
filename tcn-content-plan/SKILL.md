@@ -40,8 +40,8 @@ If either file has been read earlier in the conversation, do not re-read — rel
 
 ## Mode 1: Check Today's Plan
 
-1. Determine today's date. Construct the expected filename: `YYYY-MM-DD-dayN-options.md` in `workspace/notes/`.
-2. To find the correct day number N, check `workspace/plans/tcn-notes-30-day-map.md` for the entry matching today's date. If no monthly plan exists, count the existing note files in `workspace/notes/` to infer N.
+1. Determine today's date and weekday. Construct the expected filename: `YYYY-MM-DD-{lowercase_weekday}-options.md` in `workspace/notes/` (e.g., `2026-05-15-friday-options.md`). The weekday is lowercase and spelled in full — `friday`, not `Friday`, not `fri`.
+2. To find the correct day number N (still needed for the title block and frontmatter), check `workspace/plans/tcn-notes-30-day-map.md` for the entry matching today's date. If no monthly plan exists, read the `day:` frontmatter field from each existing note file in `workspace/notes/` and take the max + 1 as today's N. Do not try to parse N from filenames — filenames now use the lowercase weekday, not the day number.
 3. **File exists** → read it. Then check the **Status update** block at the top of the file (template defined in Step 9):
    - **Block absent, empty, or timestamped more than ~2 hours ago** → prompt the user: "What's happened since [last timestamp or 'drafting time']? Any triggers fired or fizzled?" Use the answer plus the shelf-life labels on each option to fill in (or refresh) the block — mark every Frame-forward option as safe to post, mark every Data-forward / Conditional option as safe or hold based on whether its trigger fired, and write the result to the file before summarizing. The block is the answer to "what can I post?" so populate it first; don't make the user re-derive option dependencies from prose.
    - **Block is fresh** → display it directly. That's already the answer.
@@ -153,7 +153,7 @@ For restacks: describe what kind of Note to look for (the argument to restack) a
 
 ### Step 9: Write the file
 
-Save to `workspace/notes/YYYY-MM-DD-dayN-options.md`.
+Save to `workspace/notes/YYYY-MM-DD-{lowercase_weekday}-options.md` (e.g., `2026-05-15-friday-options.md`). The day number lives in the frontmatter and the title block, not the filename — the weekday in the filename makes operationally important patterns visible at a glance (Friday = flagship publish day, weekend = restricted posting window).
 
 **YAML formatting rules** (Obsidian uses a strict parser — violating these makes the file render with a broken frontmatter block):
 
@@ -168,6 +168,7 @@ Required frontmatter template:
 ```yaml
 ---
 date: YYYY-MM-DD
+weekday: lowercase_weekday   # full name, lowercase — e.g., friday, saturday
 week: N
 day: N
 formats:
@@ -245,7 +246,7 @@ Even though `tcn-post` and `tcn-substack-notes` are voice-aware, the assembled o
 
 Invoke the `tcn-text-humanizer` skill via the Skill tool — **not** `humanize-writing`. `tcn-text-humanizer` is the TCN-specific humanizer: it knows Justin's punctuation philosophy (semicolons over em dashes, parentheses for asides), his rhythm references (Hunter S. Thompson, Vonnegut, R.L. Stine), and his explicit "AI hit list" of phrases that auto-fail. It also actively rewrites the prose rather than handing back a report.
 
-Pass `tcn-text-humanizer` the prose blocks from the just-written options file at `workspace/notes/YYYY-MM-DD-dayN-options.md`: the Note option bodies, the X option bodies, the restack addenda, and the engagement comment angles. Do not feed it the YAML frontmatter, schedule table, or section headings — those aren't voice surfaces.
+Pass `tcn-text-humanizer` the prose blocks from the just-written options file at `workspace/notes/YYYY-MM-DD-{lowercase_weekday}-options.md`: the Note option bodies, the X option bodies, the restack addenda, and the engagement comment angles. Do not feed it the YAML frontmatter, schedule table, or section headings — those aren't voice surfaces.
 
 For each block returned, replace the original prose in the file with the humanized version via Edit. Preserve the surrounding scaffolding (option labels like "### Option A", italicized meta-commentary, image guidance lines) — only the prose body changes.
 
@@ -307,7 +308,7 @@ Save to `workspace/plans/tcn-notes-30-day-map.md`. Include a "Source Hooks" sect
 
 | File | Path |
 |---|---|
-| Daily plans | `workspace/notes/YYYY-MM-DD-dayN-options.md` |
+| Daily plans | `workspace/notes/YYYY-MM-DD-{lowercase_weekday}-options.md` |
 | Monthly plan | `workspace/plans/tcn-notes-30-day-map.md` |
 | Wiki overview | `wiki/overview.md` |
 | Wiki syntheses | `wiki/syntheses/` |
