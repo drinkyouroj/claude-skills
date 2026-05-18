@@ -41,6 +41,33 @@ tags: [tag1, tag2, tag3]
 
 ---
 
+## Direct quotes worth preserving
+
+{**Required for primary sources** (regulatory filings, journal articles, court filings, official reports, on-the-record interviews). Optional/omittable for secondary sources (news summaries, blog posts, derivative analyses) when no on-the-record voice exists.
+
+The most valuable extraction from a primary source is often a direct quote where the source names a structural mechanism, takes a position, or describes a structural fact in their own words — *more valuable than the headline number*. A market monitor saying on the record that data center costs shouldn't be shifted onto residential ratepayers anchors a piece in a way no statistic can. Look for sentences that name a mechanism, take a position, or describe a structural fact — not sentences that merely report a number.
+
+Capture 1-5 quotes. Preserve exact wording and punctuation. Each quote gets a one-line tag describing *why* it is citable (what the speaker is naming).}
+
+> "{Exact quote, preserving original punctuation and emphasis.}"
+> — {Speaker or document, page/section reference if available}
+
+*Why citable*: {One line — what mechanism, position, or structural fact this names.}
+
+> "{Another quote.}"
+> — {Attribution}
+
+*Why citable*: {One line.}
+
+**Worked example** (PJM IMM Q1 2026 State of the Market Report):
+
+> "Other PJM customers, whether residential, commercial or industrial, should not be treated as a free source of insurance, or collateral, or financing for data centers."
+> — PJM Independent Market Monitor, Q1 2026 State of the Market Report
+
+*Why citable*: A market monitor naming, on the record in a regulatory filing, the cost-shifting mechanism by which data center load externalizes risk onto other ratepayer classes. Anchors any piece on data-center-driven capacity prices in a way the $13.77B headline number cannot.
+
+---
+
 ## Connections
 
 **Entities mentioned**: [[entity-1]], [[entity-2]]  

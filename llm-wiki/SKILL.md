@@ -77,12 +77,18 @@ List the files created. Explain that they should drop source files into `raw/` a
 
 **Before starting**: Read `CLAUDE.md` and `index.md` from the wiki root.
 
+### Critical rules (read before every ingest)
+
+- **Ingest from full documents, never search-engine snippets.** When researching a topic, never cite a claim based solely on a search result snippet. Always fetch the full document and verify the claim is actually in it. Search engines occasionally merge content from multiple pages on the same domain into a single snippet — citing the snippet's source URL when the claim actually came from a different page produces a false attribution that then propagates through every downstream wiki page. *Near-miss caught this way*: a search snippet about Oracle's Project Jupiter merged content from two pages on the Enki AI domain. The Project Jupiter claim was attributed to a gas-to-power article that doesn't mention Project Jupiter at all; the correct source was a separate Data Center Knowledge piece. The error was only caught when the full Enki article was fetched during ingest. *Rule*: every `wiki/sources/{slug}.md` page must be backed by a raw file in `raw/` that was fetched in full (or scraped manually for paywalled content) — not by a snippet. If a primary URL fails to fetch, file a placeholder with `status: paywalled` in frontmatter and ask the user to scrape it. Never cite from snippet text.
+
+- **Prefer aggregation over fragmentation when creating entity pages.** When multiple sources cover the same event (e.g., five articles about a single labor strike from different outlets), each source becomes its own page in `wiki/sources/` (different document = different source page) — but they all feed into a *single* entity page rather than spawning five event-specific entities. The entity (e.g., `[[Samsung]]`, `[[PJM Interconnection]]`) is the aggregator; the source pages are the receipts. The entity page's "In the Sources" table grows as new sources come in. *Rule*: before creating a new entity page, check `index.md` for an existing entity that can absorb the new source. Fragmentation makes the wiki less queryable, not more.
+
 ### Steps
 
-1. **Read the source** — Read the file the user provided (or fetch the URL)
+1. **Read the source** — Read the full file the user provided (or fetch the URL in full). Do not proceed on a snippet.
 2. **Discuss** — Briefly summarize the key takeaways and ask the user if there's anything specific to emphasize or deprioritize
-3. **Write the source summary page** — `wiki/sources/{slug}.md` — title, metadata frontmatter, 300-500 word synthesis, key claims, notable quotes (short), links to related wiki pages
-4. **Update entity pages** — For each person, org, or product mentioned, update or create the relevant `wiki/entities/{name}.md` page
+3. **Write the source summary page** — `wiki/sources/{slug}.md` — title, metadata frontmatter, 300-500 word synthesis, key claims, direct quotes worth preserving (for primary sources — see `references/page-formats.md`), links to related wiki pages
+4. **Update entity pages** — For each person, org, or product mentioned, update or create the relevant `wiki/entities/{name}.md` page. Check `index.md` first for an existing entity that can absorb the new source before spawning a new page (see aggregation rule above).
 5. **Update concept pages** — For each major idea or framework, update or create the relevant `wiki/concepts/{term}.md` page
 6. **Update overview.md** — If the source shifts the overall synthesis or adds a significant data point, update the overview
 7. **Update index.md** — Append the new source summary page (and any new entity/concept pages) to the catalog
