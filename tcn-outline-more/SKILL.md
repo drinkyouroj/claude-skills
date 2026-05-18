@@ -24,7 +24,32 @@ in one uninterrupted pass.
 
 Load `references/article-templates.md` for full template section detail.
 Load `references/marcus-long-form.md` for the long-form reader persona.
-Load `references/voice-rules.md` for voice and rhetorical principles (including "Paragraph Rhythm and Grounding Cadence" — the shared source of truth for accessibility used by `tcn-draft` and `tcn-readability`).
+Load `references/voice-rules.md` for the draft-form rhetorical principles this skill anticipates (including "Paragraph Rhythm and Grounding Cadence" — the shared source of truth for accessibility used by `tcn-draft` and `tcn-readability`). Banned vocabulary, negative parallelisms, vocabulary cliff, and closing-line abstraction live in the canonical voice file — see next section.
+
+---
+
+## Voice & vocabulary canonical source
+
+This skill MUST load `workspace/core/anti-ai-writing-style.md` from the active project's root before making any voice, vocabulary, substitution, or AI-tells decision. That file is the single source of truth for the audience vocabulary list and always-gloss-on-first-use rule (§ 1), the banned-words list (§ 3A), dead phrases / transitions / engagement bait / hype language (§ 3B–§ 3E), the negative-parallelism rule (§ 3F), tribal-coded crypto cringe and operational shibboleths (§ 3G), the dismissal-label rule (§ 3H), the vocabulary cliff rules including the meaning-preservation sub-principle (§ 3I), the closing-line abstraction rule (§ 3J), the broader AI writing patterns to avoid (§ 4), and the anti-overfitting guide (§ 5).
+
+This skill MUST NOT maintain its own duplicate copy of any of the following:
+- The audience vocabulary list
+- Substitution examples
+- Banned words
+- Voice patterns
+- AI-tells checklists
+
+If a vocabulary or substitution decision is needed mid-task, resolve it by referring to the canonical file at runtime, not by relying on a copy embedded in this spec. Any short examples cited here are illustrative only — the canonical file is authoritative.
+
+Note: this is the detailed-outline step. There is still no prose, but the Grounding plan and Statistic framing fields (per paragraph block) anticipate how jargon will land in the draft — that's where vocabulary cliff considerations enter at this stage.
+
+**Fallback when the canonical file is missing.** If `workspace/core/anti-ai-writing-style.md` is not present in the current project, this skill must:
+1. Flag explicitly to the user — "no voice file found at workspace/core/anti-ai-writing-style.md; skipping voice calibration."
+2. Skip the vocabulary-cliff anticipation in Grounding plan and Statistic framing fields (leave them populated with what the user provides, but do not propose substitutions).
+3. NOT apply generic vocabulary heuristics from training data — those risk shipping wrong substitutions downstream (the elasticity-bug failure mode).
+4. Continue with non-voice work this skill can still do: still produce the detailed paragraph-level content blocks, rhetorical suggestions, humor location flags, opener and close approach maps, accessibility pre-check, Marcus pre-assessment, and source gaps. Better to do less than to do harm with stale or generic guidance.
+
+**Future-work hook — adjacency-aware calibration.** The canonical file's § 1 notes the always-gloss-on-first-use rule is conservative; a future enhancement would vary gloss aggressiveness by which adjacent cohort each piece targets (monetary-policy pieces gloss crypto terms more heavily; DePIN pieces gloss monetary terms; cross-cutting pieces gloss everything). NOT IN SCOPE this pass. When implemented, the per-paragraph Grounding plan field would consume an adjacency signal to flag which abstractions need extra grounding for the targeted cohort.
 
 ---
 

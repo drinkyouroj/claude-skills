@@ -22,7 +22,30 @@ calibrated to go viral with Marcus — the ideal reader — by applying Justin's
 triggers, and the five Marcus tests before any output leaves the draft.
 
 Load `references/viral-process.md` if you need the full five-step process with detail.
-Load `references/voice-rules.md` if you need the complete voice and style reference.
+Load `references/voice-rules.md` if you need this skill's voice-rules reference (post-specific rhythm, hook structures, character-limit pressure rules). Banned vocabulary, negative-parallelism rules, vocabulary cliff, and closing-line abstraction live in the canonical voice file — see next section.
+
+---
+
+## Voice & vocabulary canonical source
+
+This skill MUST load `workspace/core/anti-ai-writing-style.md` from the active project's root before making any voice, vocabulary, substitution, or AI-tells decision. That file is the single source of truth for the audience vocabulary list and always-gloss-on-first-use rule (§ 1), the banned-words list (§ 3A), dead phrases / transitions / engagement bait / hype language (§ 3B–§ 3E), the negative-parallelism rule (§ 3F), tribal-coded crypto cringe and operational shibboleths (§ 3G), the dismissal-label rule (§ 3H), the vocabulary cliff rules including the meaning-preservation sub-principle (§ 3I), the closing-line abstraction rule (§ 3J), the broader AI writing patterns to avoid (§ 4), and the anti-overfitting guide (§ 5).
+
+This skill MUST NOT maintain its own duplicate copy of any of the following:
+- The audience vocabulary list
+- Substitution examples
+- Banned words
+- Voice patterns
+- AI-tells checklists
+
+If a vocabulary or substitution decision is needed mid-task, resolve it by referring to the canonical file at runtime, not by relying on a copy embedded in this spec. Any short examples cited here are illustrative only — the canonical file is authoritative.
+
+**Fallback when the canonical file is missing.** If `workspace/core/anti-ai-writing-style.md` is not present in the current project, this skill must:
+1. Flag explicitly to the user — "no voice file found at workspace/core/anti-ai-writing-style.md; skipping voice calibration."
+2. Skip all voice-related work — no vocabulary substitution, no AI-tells audit, no closing-line check.
+3. NOT apply generic vocabulary heuristics from training data — those risk shipping wrong substitutions (the elasticity-bug failure mode).
+4. Continue with non-voice work this skill can still do: still produce options labeled by viral trigger, hook structure, frame-forward / data-forward durability, and exact character counts; skip the voice non-negotiables enforcement and flag that gap in the meta-commentary. Better to do less than to do harm with stale or generic guidance.
+
+**Future-work hook — adjacency-aware calibration.** The canonical file's § 1 notes the always-gloss-on-first-use rule is conservative; a future enhancement would vary gloss aggressiveness by which adjacent cohort each piece targets (monetary-policy pieces gloss crypto terms more heavily; DePIN pieces gloss monetary terms; cross-cutting pieces gloss everything). NOT IN SCOPE this pass. When implemented, the trigger-selection / angle-labeling step would consume an adjacency signal to tune which references the post can assume.
 
 ---
 
@@ -90,12 +113,12 @@ Apply these internally before presenting any output. State which tests each opti
 
 ## Voice Non-Negotiables
 
-These are hard rules. Violating any one of them breaks the voice entirely.
+These are hard rules specific to the X / Twitter / Bluesky post form. The full banned-vocabulary list, dead phrases, negative-parallelism rule, and vocabulary cliff rules are canonical — see `workspace/core/anti-ai-writing-style.md` § 3A–§ 3J. Do not duplicate that list here; resolve specific phrases at runtime from the canonical file.
 
 **Never:**
 - Explain the joke. Ever. If it needs explanation, rewrite the observation.
 - Use em dashes closed (`—word—`). Spaced em dash only, and rarely.
-- Use these phrases: "dive into," "it's important to note," "navigating the complexities of," "a testament to," "without further ado," "have you ever wondered," "picture this," "delve," "tapestry," "vibrant," "landscape," "realm," "embark," "pivotal," "moreover," "notably," "arguably"
+- Use any banned phrase from `workspace/core/anti-ai-writing-style.md` § 3A–§ 3E or any negative-parallelism construction from § 3F.
 - Use the "[X] without [Y] is a press release" formula — formula dressed as insight. No matter what fills X and Y, it reads as a cliché.
 - Add one more sentence after the punchline lands. When it lands, stop.
 - Use ragebait. It attracts the wrong people.

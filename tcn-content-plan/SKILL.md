@@ -21,6 +21,31 @@ Handles three modes. Identify which one the user is requesting and jump straight
 | "Create the plan for [date]" / "day N" / explicit date | **Mode 2: Create Daily Plan** |
 | "Monthly plan" / "30-day map" / "start of month" | **Mode 3: Create Monthly Plan** |
 
+---
+
+## Voice & vocabulary canonical source
+
+This skill MUST load `workspace/core/anti-ai-writing-style.md` from the active project's root before making any voice, vocabulary, substitution, or AI-tells decision. That file is the single source of truth for the audience vocabulary list and always-gloss-on-first-use rule (§ 1), the banned-words list (§ 3A), dead phrases / transitions / engagement bait / hype language (§ 3B–§ 3E), the negative-parallelism rule (§ 3F), tribal-coded crypto cringe and operational shibboleths (§ 3G), the dismissal-label rule (§ 3H), the vocabulary cliff rules including the meaning-preservation sub-principle (§ 3I), the closing-line abstraction rule (§ 3J), the broader AI writing patterns to avoid (§ 4), and the anti-overfitting guide (§ 5).
+
+This skill MUST NOT maintain its own duplicate copy of any of the following:
+- The audience vocabulary list
+- Substitution examples
+- Banned words
+- Voice patterns
+- AI-tells checklists
+
+If a vocabulary or substitution decision is needed mid-task, resolve it by referring to the canonical file at runtime, not by relying on a copy embedded in this spec. Any examples cited here for illustration only must include a pointer back to the canonical file as authoritative.
+
+**Fallback when the canonical file is missing.** If `workspace/core/anti-ai-writing-style.md` is not present in the current project, this skill must:
+1. Flag explicitly to the user — "no voice file found at workspace/core/anti-ai-writing-style.md; skipping voice calibration."
+2. Skip all voice-related work — no vocabulary substitution, no AI-tells audit, no closing-line check, no Step 10 humanize pass.
+3. NOT apply generic vocabulary heuristics from training data — those risk shipping wrong substitutions (the elasticity-bug failure mode).
+4. Continue with non-voice work this skill can still do: produce the structural plan for Modes 1, 2, and 3 (status block, shelf-life labels, schedule table, format assignments, duplication audit, source citations) and surface drafts from sister skills as-is; mark the file's `status:` as `draft` rather than `voice-checked`. Better to do less than to do harm with stale or generic guidance.
+
+**Future-work hook — adjacency-aware calibration.** The canonical file's § 1 notes the always-gloss-on-first-use rule is conservative; a future enhancement would vary gloss aggressiveness by which adjacent cohort each piece targets (monetary-policy pieces gloss crypto terms more heavily; DePIN pieces gloss monetary terms; cross-cutting pieces gloss everything). NOT IN SCOPE this pass. When implemented, Steps 5 and 6 would pass an adjacency label to `tcn-post` and `tcn-substack-notes` so they can tune gloss aggressiveness per option.
+
+---
+
 **Reference files** (load when needed):
 - `references/note-formats.md` — all 7 Note formats with word counts and examples
 - `references/posting-rules.md` — posting windows, weekly cadence, flagship-day structure
@@ -28,11 +53,11 @@ Handles three modes. Identify which one the user is requesting and jump straight
 **Sister skills to delegate to** (use the Skill tool, do not freehand the prose):
 - `tcn-post` — for every X/Twitter standalone or thread draft
 - `tcn-substack-notes` — for every Substack Note draft
-- `tcn-text-humanizer` — for the final AI-tells pass on the assembled file. This is the TCN-calibrated humanizer (Justin's voice, punctuation philosophy, "AI hit list"). Not `humanize-writing`, which is voice-agnostic and only produces a report.
+- `tcn-text-humanizer` — for the final AI-tells pass on the assembled file. Justin's voice, punctuation philosophy, and rhythm references live in that skill spec; banned vocabulary, negative parallelisms, vocabulary cliff, and closing-line rules live in the canonical `workspace/core/anti-ai-writing-style.md`. Not `humanize-writing`, which is voice-agnostic and only produces a report.
 
 **Voice context to load before any drafting** (read once per session, then keep them in working context):
 1. `/Users/justin/Documents/substack-research/Substack Research/CLAUDE.md` — wiki agent rules, themes, "Writing Voice — Prose and Narration" section at the bottom
-2. `/Users/justin/Documents/substack-research/Substack Research/workspace/core/anti-ai-writing-style.md` — VOICE DNA, banned list, BIG ONE (negative parallelisms), formatting rules
+2. `workspace/core/anti-ai-writing-style.md` (project-relative) — VOICE DNA, banned list, negative parallelisms, vocabulary cliff, closing-line abstraction, formatting rules. This is the canonical source named in the section above.
 
 If either file has been read earlier in the conversation, do not re-read — rely on what is already in context. Otherwise read both **before** drafting any prose in Mode 2.
 
@@ -242,24 +267,23 @@ If a slot's recommendation is itself conditional ("Option A unless walkout confi
 
 ### Step 10: AI-tells check (final pass — required, do not skip)
 
-Even though `tcn-post` and `tcn-substack-notes` are voice-aware, the assembled options file can still leak AI fingerprints: banned vocabulary, closed em dashes, negative parallelisms, "It's not X, it's Y" constructions, rule-of-three lists, copulative avoidance, title-case headers, dead transitions, dismissal labels without explanation.
-
-Invoke the `tcn-text-humanizer` skill via the Skill tool — **not** `humanize-writing`. `tcn-text-humanizer` is the TCN-specific humanizer: it knows Justin's punctuation philosophy (semicolons over em dashes, parentheses for asides), his rhythm references (Hunter S. Thompson, Vonnegut, R.L. Stine), and his explicit "AI hit list" of phrases that auto-fail. It also actively rewrites the prose rather than handing back a report.
+Even though `tcn-post` and `tcn-substack-notes` are voice-aware, the assembled options file can still leak AI fingerprints. Invoke the `tcn-text-humanizer` skill via the Skill tool — **not** `humanize-writing`. `tcn-text-humanizer` is the TCN-specific humanizer: it loads Justin's voice calibration from its own spec (punctuation philosophy, rhythm references) and the universal AI-pattern catalog from `workspace/core/anti-ai-writing-style.md`. It actively rewrites the prose rather than handing back a report.
 
 Pass `tcn-text-humanizer` the prose blocks from the just-written options file at `workspace/notes/YYYY-MM-DD-{lowercase_weekday}-options.md`: the Note option bodies, the X option bodies, the restack addenda, and the engagement comment angles. Do not feed it the YAML frontmatter, schedule table, or section headings — those aren't voice surfaces.
 
 For each block returned, replace the original prose in the file with the humanized version via Edit. Preserve the surrounding scaffolding (option labels like "### Option A", italicized meta-commentary, image guidance lines) — only the prose body changes.
 
-**Hard fail conditions** — if any of these survive `tcn-text-humanizer`'s pass, fix them immediately even if the skill didn't flag them. These are the non-negotiables from `anti-ai-writing-style.md`:
-- A closed em dash (`—`) used as interruption or decoration inside drafted prose. Spaced em dashes used sparingly as connectives are acceptable per Justin's punctuation philosophy; closed em dashes are not.
-- Any banned word from anti-ai-writing-style.md section 3A (delve, realm, harness, unlock, leverage, robust, seamless, etc.)
-- Any negative parallelism (anti-ai-writing-style.md section 3F): "This isn't X, it's Y", "Not X. Y.", "It's not about X, it's about Y", etc.
-- A dismissal label as substitute for explanation (anti-ai-writing-style.md section 3H): "X is theater", "X is a press release", etc.
-- Title case in a header inside drafted prose (sentence case is the rule)
-- A copulative-avoidance verb: "serves as", "stands as", "represents", "marks a", "boasts a"
-- Any phrase from Justin's "AI hit list" (loaded inside `tcn-text-humanizer`): "Picture this:", "Dive into…", "It's important to note…", "A testament to…", "That really hits", etc.
+**Hard fail conditions.** After `tcn-text-humanizer`'s pass, audit the assembled file against the canonical catalog in `workspace/core/anti-ai-writing-style.md`:
+- Banned vocabulary — § 3A
+- Negative parallelisms — § 3F
+- Dismissal labels — § 3H
+- Vocabulary cliff and meaning-preservation — § 3I
+- Closing-line abstraction — § 3J
+- Plus per-skill voice non-negotiables from `tcn-text-humanizer` (closed em dashes, copulative-avoidance verbs, sentence-case headers, Justin's TCN-specific hit-list phrases)
 
-After fixes, update the file's `status:` field from `draft` to `voice-checked` so future check-mode reads can see the file passed the gate.
+Do not duplicate the lists here. If a check needs to verify a specific term or phrase, read the canonical file. If any item fires, fix immediately even if the skill didn't flag it.
+
+After fixes, update the file's `status:` field from `draft` to `voice-checked` so future check-mode reads can see the file passed the gate. If the canonical file was missing (fallback case), leave `status: draft` and surface the missing-file note in the status update block.
 
 ---
 

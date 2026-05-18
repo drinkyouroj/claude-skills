@@ -15,8 +15,31 @@ description: >
 
 Produces a full Substack article draft — section by section, in Justin Hearn's voice, from an approved outline and headline. The draft is presented for the user's review and editing.
 
-Load `references/voice-rules.md` for the complete voice and style reference.
+Load `references/voice-rules.md` for this skill's draft-specific voice and rhythm reference (paragraph rhythm and grounding cadence, draft-form punctuation, model sentences). Banned vocabulary, negative parallelisms, vocabulary cliff, and closing-line abstraction live in the canonical voice file — see next section.
 Load `references/article-templates.md` for section structures, word counts, and tone notes.
+
+---
+
+## Voice & vocabulary canonical source
+
+This skill MUST load `workspace/core/anti-ai-writing-style.md` from the active project's root before making any voice, vocabulary, substitution, or AI-tells decision. That file is the single source of truth for the audience vocabulary list and always-gloss-on-first-use rule (§ 1), the banned-words list (§ 3A), dead phrases / transitions / engagement bait / hype language (§ 3B–§ 3E), the negative-parallelism rule (§ 3F), tribal-coded crypto cringe and operational shibboleths (§ 3G), the dismissal-label rule (§ 3H), the vocabulary cliff rules including the meaning-preservation sub-principle (§ 3I), the closing-line abstraction rule (§ 3J), the broader AI writing patterns to avoid (§ 4), and the anti-overfitting guide (§ 5).
+
+This skill MUST NOT maintain its own duplicate copy of any of the following:
+- The audience vocabulary list
+- Substitution examples
+- Banned words
+- Voice patterns
+- AI-tells checklists
+
+If a vocabulary or substitution decision is needed mid-task, resolve it by referring to the canonical file at runtime, not by relying on a copy embedded in this spec. Any short examples cited here are illustrative only — the canonical file is authoritative.
+
+**Fallback when the canonical file is missing.** If `workspace/core/anti-ai-writing-style.md` is not present in the current project, this skill must:
+1. Flag explicitly to the user — "no voice file found at workspace/core/anti-ai-writing-style.md; skipping voice calibration."
+2. Skip all voice-related work — no vocabulary substitution, no AI-tells audit, no closing-line check.
+3. NOT apply generic vocabulary heuristics from training data — those risk shipping wrong substitutions (the elasticity-bug failure mode).
+4. Continue with non-voice work this skill can still do: still draft the structural sections (opener, body sections per template, personal reflection, close), still apply the Drafting for Accessibility principles, still cite sources inline, still pass through Marcus tests. Skip the voice rules pass and note the gap in the draft's "Draft notes" block. Better to do less than to do harm with stale or generic guidance.
+
+**Future-work hook — adjacency-aware calibration.** The canonical file's § 1 notes the always-gloss-on-first-use rule is conservative; a future enhancement would vary gloss aggressiveness by which adjacent cohort each piece targets (monetary-policy pieces gloss crypto terms more heavily; DePIN pieces gloss monetary terms; cross-cutting pieces gloss everything). NOT IN SCOPE this pass. When implemented, the per-section tone note in the outline (and the per-paragraph Grounding plan in `tcn-outline-more`) would feed an adjacency signal here so the draft tunes which jargon needs gloss vs. plain-language swap.
 
 ---
 
@@ -193,29 +216,32 @@ Test: if the parallelism does rhythmic or argumentative work no other constructi
 
 ---
 
-## Voice Rules (Condensed — see references/voice-rules.md for full)
+## Voice Rules (Draft-Form Overlay — see references/voice-rules.md for full draft-form depth)
 
-### Hard Rules
+The canonical voice DNA — banned vocabulary, AI hit-list phrases, negative parallelisms, dismissal labels, vocabulary cliff, closing-line abstraction — lives in `workspace/core/anti-ai-writing-style.md` § 3A–§ 3J. Load it before drafting. The rules below are draft-form-specific only.
+
+### Hard Rules (draft-form-specific)
 
 **Never:**
-- Explain the joke. If it needs explanation, fix the delivery
-- Use em dashes closed (`—word—`). Spaced em dash only, and rarely
-- Use AI hit-list phrases: "dive into," "it's important to note," "navigating the complexities of," "delve," "tapestry," "vibrant," "landscape," "realm," "embark," "pivotal," "moreover," "notably," "arguably"
+- Explain the joke. If it needs explanation, fix the delivery.
+- Use em dashes closed (`—word—`). Spaced em dash only, and rarely.
 - Use the "[X] without [Y] is a press release" formula — formula dressed as insight. No matter what fills the variables, it reads as a cliché.
-- Add one more sentence after the punchline lands
-- Use ragebait or engagement farming patterns
-- Avoid the AI default of three-item lists inside a single sentence (use two or four — but deliberate anaphora across three or four sentences is encouraged when it does rhythmic work; see "Drafting for Accessibility" above)
-- Use therapy-speak unironically: "holding space," "toxic positivity," "somatic," "processing"
-- Use PhD-level vocabulary without earning the difficulty
+- Add one more sentence after the punchline lands.
+- Use ragebait or engagement farming patterns.
+- Default to three-item lists inside a single sentence (use two or four — but deliberate anaphora across three or four sentences is encouraged when it does rhythmic work; see "Drafting for Accessibility" above).
+- Use therapy-speak unironically: "holding space," "toxic positivity," "somatic," "processing."
+- Use PhD-level vocabulary without earning the difficulty.
+
+For banned individual words, banned phrases, and the broader AI-pattern catalog: resolve at runtime from `workspace/core/anti-ai-writing-style.md`. Do not duplicate that list here.
 
 **Always:**
-- Semicolons connect; em dashes are rare and spaced
-- Parentheses are comedic whispers
-- Profanity is a scarce resource — one use per piece maximum, only when it hits harder than anything else
-- Short sentences hit harder. Build complexity in longer sentences; land the point in a short one
-- Go for the second thought, not the first. The first punchline is the one everyone thinks of
-- Specific over general: names, numbers, companies, dates
-- Humor to ease tension on heavy pieces — the sardonic edge is a pressure valve, not decoration
+- Semicolons connect; em dashes are rare and spaced.
+- Parentheses are comedic whispers.
+- Profanity is a scarce resource — one use per piece maximum, only when it hits harder than anything else.
+- Short sentences hit harder. Build complexity in longer sentences; land the point in a short one.
+- Go for the second thought, not the first. The first punchline is the one everyone thinks of.
+- Specific over general: names, numbers, companies, dates.
+- Humor to ease tension on heavy pieces — the sardonic edge is a pressure valve, not decoration.
 
 ### The Litmus Test
 

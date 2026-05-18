@@ -15,7 +15,30 @@ description: >
 
 Produces 3 headline + subheadline options for a Civic Node Substack article, calibrated to Marcus and tested against the signal and send tests. The user selects one before drafting (tcn-draft) begins.
 
-Load `references/voice-rules.md` for the full voice and style reference.
+Load `references/voice-rules.md` for this skill's headline-form voice and style reference. Banned vocabulary, negative parallelisms, vocabulary cliff, and closing-line abstraction live in the canonical voice file — see next section.
+
+---
+
+## Voice & vocabulary canonical source
+
+This skill MUST load `workspace/core/anti-ai-writing-style.md` from the active project's root before making any voice, vocabulary, substitution, or AI-tells decision. That file is the single source of truth for the audience vocabulary list and always-gloss-on-first-use rule (§ 1), the banned-words list (§ 3A), dead phrases / transitions / engagement bait / hype language (§ 3B–§ 3E), the negative-parallelism rule (§ 3F), tribal-coded crypto cringe and operational shibboleths (§ 3G), the dismissal-label rule (§ 3H), the vocabulary cliff rules including the meaning-preservation sub-principle (§ 3I), the closing-line abstraction rule (§ 3J), the broader AI writing patterns to avoid (§ 4), and the anti-overfitting guide (§ 5).
+
+This skill MUST NOT maintain its own duplicate copy of any of the following:
+- The audience vocabulary list
+- Substitution examples
+- Banned words
+- Voice patterns
+- AI-tells checklists
+
+If a vocabulary or substitution decision is needed mid-task, resolve it by referring to the canonical file at runtime, not by relying on a copy embedded in this spec. Any short examples cited here are illustrative only — the canonical file is authoritative.
+
+**Fallback when the canonical file is missing.** If `workspace/core/anti-ai-writing-style.md` is not present in the current project, this skill must:
+1. Flag explicitly to the user — "no voice file found at workspace/core/anti-ai-writing-style.md; skipping voice calibration."
+2. Skip all voice-related work — no AI-hit-list cross-check on candidate headlines.
+3. NOT apply generic vocabulary heuristics from training data — those risk shipping wrong substitutions (the elasticity-bug failure mode).
+4. Continue with non-voice work this skill can still do: still produce 3 headline + subheadline options using the four hook structures (Borrowed Frame, Premise + Implication, Compressed Narrative, Question That Contains Its Answer), still apply the headline-specific anti-patterns (numbered lists, power words, teaching words, vague theme headlines, question-mark overuse), still run the Signal and Send tests. Flag "voice rules pass" as not enforced in the recommendation. Better to do less than to do harm with stale or generic guidance.
+
+**Future-work hook — adjacency-aware calibration.** The canonical file's § 1 notes the always-gloss-on-first-use rule is conservative; a future enhancement would vary gloss aggressiveness by which adjacent cohort each piece targets (monetary-policy pieces gloss crypto terms more heavily; DePIN pieces gloss monetary terms; cross-cutting pieces gloss everything). NOT IN SCOPE this pass. When implemented, the hook-structure selection step would consume an adjacency signal — pieces targeting a wider cohort lean toward hooks that don't assume insider vocabulary; pieces targeting a denser cohort can use compressed-narrative headlines with domain shorthand.
 
 ---
 

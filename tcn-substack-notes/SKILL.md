@@ -22,6 +22,29 @@ Notes is not Twitter. The mechanics are different and so is the playbook.
 
 ---
 
+## Voice & vocabulary canonical source
+
+This skill MUST load `workspace/core/anti-ai-writing-style.md` from the active project's root before making any voice, vocabulary, substitution, or AI-tells decision. That file is the single source of truth for the audience vocabulary list and always-gloss-on-first-use rule (§ 1), the banned-words list (§ 3A), dead phrases / transitions / engagement bait / hype language (§ 3B–§ 3E), the negative-parallelism rule (§ 3F), tribal-coded crypto cringe and operational shibboleths (§ 3G), the dismissal-label rule (§ 3H), the vocabulary cliff rules including the meaning-preservation sub-principle (§ 3I), the closing-line abstraction rule (§ 3J), the broader AI writing patterns to avoid (§ 4), and the anti-overfitting guide (§ 5).
+
+This skill MUST NOT maintain its own duplicate copy of any of the following:
+- The audience vocabulary list
+- Substitution examples (including the elasticity worked example — that lives in § 3I and only § 3I)
+- Banned words
+- Voice patterns
+- AI-tells checklists
+
+If a vocabulary or substitution decision is needed mid-task, resolve it by referring to the canonical file at runtime, not by relying on a copy embedded in this spec. Any short examples cited here are illustrative only — the canonical file is authoritative.
+
+**Fallback when the canonical file is missing.** If `workspace/core/anti-ai-writing-style.md` is not present in the current project, this skill must:
+1. Flag explicitly to the user — "no voice file found at workspace/core/anti-ai-writing-style.md; skipping voice calibration."
+2. Skip all voice-related work — no vocabulary substitution, no AI-tells audit, no closing-line plain-language check, no vocabulary cliff audit.
+3. NOT apply generic vocabulary heuristics from training data — those risk shipping wrong substitutions (the elasticity-bug failure mode).
+4. Continue with non-voice work this skill can still do: still produce format-correct Notes (Compressed Frame, Footnote, Cross-Domain Connection, etc. — see the format table below), still apply the Marcus tests, still respect the formats-banned list and the CDC symmetry check; skip the line-level voice checks and flag that gap. Better to do less than to do harm with stale or generic guidance.
+
+**Future-work hook — adjacency-aware calibration.** The canonical file's § 1 notes the always-gloss-on-first-use rule is conservative; a future enhancement would vary gloss aggressiveness by which adjacent cohort each piece targets (monetary-policy pieces gloss crypto terms more heavily; DePIN pieces gloss monetary terms; cross-cutting pieces gloss everything). NOT IN SCOPE this pass. When implemented, the format-selection step would consume an adjacency signal to tune which references the Note can assume.
+
+---
+
 ## Why Notes Needs Its Own Skill (Not tcn-post)
 
 **Different reader surface.** Notes-feed readers are already on Substack. Conversion is one click closer than from X. The bar for "you've earned the click" is correspondingly higher.
@@ -152,21 +175,15 @@ Run all five before presenting any Note.
 
 ## Line-Level Quality Checks
 
-Run these after the Marcus Tests pass. They catch failure modes that survive a conceptual filter: sentences that *feel* fluent but ship a broken claim, parallels that *sound* symmetric but aren't, jargon that bounces casual readers off otherwise-strong Notes.
+Run these after the Marcus Tests pass. They catch failure modes that survive a conceptual filter: parallels that *sound* symmetric but aren't, claims that float above ground in the closing line, and jargon that bounces casual readers off otherwise-strong Notes.
 
 ### Closing-line plain-language check (all formats)
 
-Scan the closing line for category labels standing in for actors-doing-things. The closing line is where abstract noun clusters do the most damage. It's the line the reader carries away. If it floats above ground, it floats away from them.
-
-**Bad (caught in real use):** "Two layers of the AI supply chain are simultaneously asking who has pricing authority over the windfall." Four abstractions in one sentence (*layers*, *simultaneously*, *pricing authority*, *windfall*).
-
-**Good rewrite:** "Same boom. The workers want a piece of what it brings in. The customers are paying for what it costs." Named actors (workers, customers), active verbs (wanting, paying).
-
-**Rule:** in the closing line of any Note, prefer named actors + active verbs over category labels + abstract noun clusters. If you reach for an abstract noun phrase, rewrite it to name the people and what they're doing.
-
-**Litmus:** could I point at a specific person doing this thing? If no, rewrite.
+Apply the closing-line abstraction rule from `workspace/core/anti-ai-writing-style.md` § 3J to every Note's last line. Prefer named actors + active verbs over category labels + abstract noun clusters. The litmus, worked examples, and full rule live in § 3J — do not reproduce them here.
 
 ### Cross-Domain Connection symmetry check (CDC format only)
+
+This check is Notes-specific and lives in this skill spec — the canonical voice file does not cover format-level symmetry.
 
 When connecting two stories from different beats, verify the underlying mechanism is genuinely shared, not just rhetorically similar.
 
@@ -178,22 +195,9 @@ When connecting two stories from different beats, verify the underlying mechanis
 
 ### Vocabulary cliff audit (all formats)
 
-Scan for industry acronyms and insider terms that haven't been introduced inline. Common offenders observed in TCN drafts: *HBM, CoWoS, accelerator, fab, foundry, interconnect, layer* (when used as a supply-chain handle), *elasticity* (when used as economics jargon).
+Apply the vocabulary cliff rules from `workspace/core/anti-ai-writing-style.md` § 3I to every Note. The canonical rule covers: detection (capitalized acronyms and specialist jargon scanned for inline gloss), the gloss-or-substitute fix, the meaning-preservation sub-principle, the elasticity-bug worked example, and the two-part litmus test. Do not reproduce those here.
 
-For each unintroduced term: either define inline on first use ("HBM, the fast memory every AI chip needs to work") OR replace with a plainer word ("fab" → "factory", "accelerator" → "AI chip", "layer" → "part of the supply chain").
-
-**Critical sub-principle: when the jargon term is doing analytical work, the substitute must preserve the term's meaning, not invert it.** A plain-language swap that contradicts what the original term was claiming is worse than the jargon. It ships a broken argument under a fluent surface.
-
-**Real failure caught in deployment:** "elasticity" → "bends differently when squeezed" was applied to the sentence "Each has different elasticity. Memory is the tightest right now." The substitute inverted the meaning. *Elasticity* describes how readily supply expands when prices rise (high elasticity = quick to scale, low or inelastic = slow to scale). *Bends when squeezed* suggests flexibility, but the next sentence ("tightest") only makes sense if the prior set up rigidity. The two sentences contradicted each other, and the broken argument shipped through a plain-language audit because the swap *felt* fluent.
-
-**Better fix when the term is doing analytical work:** rewrite the sentence to name the actual constraint directly. The replacement that worked in deployment: "Some parts of the supply chain can be ramped up fast; others take years. Memory is the slowest right now."
-
-**Two-part litmus test:**
-
-1. Would the audience persona (Marcus the systems-thinker, not a chip engineer) know this term without Googling?
-2. Does the substitute preserve the analytical claim the original sentence was making?
-
-If either answer is no, swap or rewrite the sentence.
+Notes-specific calibration: Marcus is a systems-thinker, not a chip engineer or a derivatives trader. Use that persona as the "audience knows it without Googling" input to the litmus.
 
 ### Why these checks exist
 
@@ -201,29 +205,28 @@ A closer that said "same money, two fights" sounded analytical but was factually
 
 Acronym-heavy prose makes readers feel they're missing prerequisites and bounces them off otherwise-strong posts.
 
-Most subtly: a confident-feeling plain-language substitute can quietly invert the analytical claim if the swap isn't checked against the surrounding sentences. Single-axis vocabulary audits (audience comprehension only) miss this. The two-part litmus closes the gap.
+Most subtly: a confident-feeling plain-language substitute can quietly invert the analytical claim if the swap isn't checked against the surrounding sentences. Single-axis vocabulary audits (audience comprehension only) miss this — the canonical two-part litmus in § 3I closes the gap.
 
 ---
 
 ## Voice Non-Negotiables
 
-Full voice DNA is in `references/anti-ai-writing-style.md`. Load it if a Note feels off and you can't tell why. The TCN voice spans both the tcn-post and tcn-substack-notes skills, so the rules below mirror tcn-post.
+The canonical voice DNA — banned vocabulary, negative parallelisms, dismissal labels, vocabulary cliff, closing-line abstraction, crypto-tribal markers, engagement bait, hype language — is in `workspace/core/anti-ai-writing-style.md`. Load it before drafting. The TCN voice spans both the tcn-post and tcn-substack-notes skills; both resolve voice decisions through the canonical file.
 
-**Always:**
+This section captures only the Notes-specific overlay — rules that are about the Notes form, not about the voice itself.
+
+**Always (Notes-form rules):**
 - Contractions. "I" and "you." Active voice. Specific numbers and names.
 - Vary sentence length. Three medium sentences in a row reads as AI.
 - Land it and stop. No summary line restating what was just said.
 - Build the closer with a tonal drop + micro-reframe (analytical setup, casual closer that smuggles a small new idea).
 
-**Never:**
-- Em dashes. Use commas, periods, colons, parens.
-- Negative parallelisms or reframe constructions ("This isn't X. It's Y." "Not X. Y." "It's not about X, it's about Y."). Fatal. The single most reliable AI tell.
-- The "[X] without [Y] is a press release" formula — same species as negative parallelism. Performs insight, delivers nothing.
-- Banned vocabulary: delve, realm, harness, leverage, paradigm, landscape, intricate, tapestry, showcase, underscore, highlight (verb), elevate, robust, streamline, transformative, cutting-edge, game-changer, revolutionize, etc. (Full list in voice DNA.)
-- Crypto-tribal markers: WAGMI, GM, LFG, "the space," "money printer go brrr," "Web3" as self-tag.
-- Engagement bait: "read that again," "let that sink in," "this changes everything."
+**Never (Notes-form rules):**
+- Em dashes inside Note prose. Use commas, periods, colons, parens.
 - "Subscribe to my newsletter" CTAs inside a Note.
 - Three-item lists by default. Break to two or four.
+
+For the full list of banned vocabulary, banned phrase patterns, negative parallelisms, the "[X] without [Y] is a press release" formula, crypto-tribal markers, and engagement bait — resolve at runtime from `workspace/core/anti-ai-writing-style.md` § 3A–§ 3J. Do not duplicate that list here.
 
 **Profanity:** One use per Note maximum. Scarce resource. Only when it lands harder than anything else.
 
@@ -323,6 +326,6 @@ Default: 14 to 21 Notes (2 to 3/day for 7 days). Distribute across morning/midda
 
 ## Reference Files
 
-- `references/anti-ai-writing-style.md`. Justin's full voice DNA: banned vocabulary, banned phrase patterns, AI-writing tells. Load when a Note feels off and you can't tell why.
+- `workspace/core/anti-ai-writing-style.md` (project-relative, canonical). Justin's full voice DNA: banned vocabulary, banned phrase patterns, AI-writing tells, vocabulary cliff rules, closing-line abstraction. Load before drafting. This is the same canonical file referenced in the "Voice & vocabulary canonical source" section near the top.
 
 For full voice depth and the viral hook structures (Borrowed Frame, Premise + Implication, Compressed Narrative), see the sibling skill `tcn-post` and its references at `references/voice-rules.md` and `references/viral-process.md`. The voice is shared across both skills.

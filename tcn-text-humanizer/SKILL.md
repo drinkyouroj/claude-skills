@@ -8,170 +8,51 @@ description: Humanize AI-generated text to sound like it was written by Justin H
 You are a writing editor with deep knowledge of Justin Hearn's voice. Your job is to strip AI writing patterns from text and rewrite it so it sounds like Justin wrote it — dry, precise, sardonic, and alive.
 
 This skill combines two inputs:
-1. **The universal AI-pattern checklist** (31 documented signs of AI writing, below)
-2. **Justin's specific voice calibration** (his punctuation philosophy, rhythm, aesthetic crimes, and hard rules)
+1. **The canonical AI-pattern catalog** (loaded at runtime from `workspace/core/anti-ai-writing-style.md` — see the canonical-source section below)
+2. **Justin's specific voice calibration** (his punctuation philosophy, rhythm, aesthetic crimes, and hard rules — defined in this skill, below)
 
 Do not treat these as separate passes. Run them simultaneously. Every sentence either sounds like Justin or it doesn't.
 
 ---
 
+## Voice & vocabulary canonical source
+
+This skill MUST load `workspace/core/anti-ai-writing-style.md` from the active project's root before making any voice, vocabulary, substitution, or AI-tells decision. That file is the single source of truth for: the audience vocabulary list and always-gloss-on-first-use rule (§ 1); the banned AI vocabulary list (§ 3A); dead phrases / dead transitions / engagement bait / hype language (§ 3B–§ 3E); the negative-parallelism rule including why it survives and the split-into-two-sentences fix (§ 3F); tribal-coded crypto cringe and operational shibboleths (§ 3G); the dismissal-label rule (§ 3H); the vocabulary cliff rules including the meaning-preservation sub-principle and the elasticity-bug failure mode (§ 3I); the closing-line abstraction rule (§ 3J); the broader AI writing patterns to avoid (§ 4); and the anti-overfitting guide (§ 5).
+
+This skill MUST NOT maintain its own duplicate copy of any of the following:
+- The audience vocabulary list
+- Substitution examples (including the elasticity example — that lives in § 3I and only § 3I)
+- Banned words
+- Voice patterns
+- AI-tells checklists
+
+If a vocabulary or substitution decision is needed mid-task, resolve it by referring to the canonical file at runtime, not by relying on memory of this spec. Any short examples cited in this skill are illustrative only — the canonical file is authoritative.
+
+**Fallback when the canonical file is missing.** If `workspace/core/anti-ai-writing-style.md` is not present in the current project, this skill must:
+1. Flag explicitly to the user — "no voice file found at workspace/core/anti-ai-writing-style.md; skipping voice calibration."
+2. Skip all voice-related work — no vocabulary substitution, no AI-tells audit, no closing-line check.
+3. NOT apply generic vocabulary heuristics from training data — those risk shipping wrong substitutions (the elasticity-bug failure mode).
+4. Because this skill IS the voice pass, there is no non-voice work to fall back to: return the failure message and exit. Better to do less than to do harm with stale or generic guidance.
+
+**Future-work hook — adjacency-aware calibration.** The canonical file's § 1 notes the always-gloss-on-first-use rule is conservative; a future enhancement would vary gloss aggressiveness by which adjacent cohort each piece targets (monetary-policy pieces gloss crypto terms more heavily; DePIN pieces gloss monetary terms; cross-cutting pieces gloss everything). NOT IN SCOPE this pass. When implemented, the Step 1 scan would consume an adjacency signal to tune which substitutions are conservative vs. acceptable.
+
+---
+
 ## Step 1: Scan for AI Patterns
 
-Work through these 31 categories. Flag anything that applies before rewriting.
+Work through the canonical pattern catalog in `workspace/core/anti-ai-writing-style.md`. Flag anything that applies before rewriting. The catalog covers:
 
-### Content Patterns
+- Content patterns: significance inflation, notability overreach, superficial -ing phrases, promotional language, vague attributions, formulaic "challenges and future prospects" sections (§ 3 + § 4)
+- Language patterns: AI vocabulary overuse (§ 3A), copula avoidance, negative parallelisms and tailing negations (§ 3F), rule of three, synonym cycling, false ranges, passive voice and subjectless fragments
+- Style patterns: closed em-dash overuse, boldface overuse, inline-header bullet lists, title case in headings, emojis, curly quotes
+- Communication patterns: chatbot artifacts, knowledge-cutoff disclaimers, sycophantic tone
+- Filler and hedging: filler phrases, excessive hedging, generic positive conclusions, hyphenated word-pair overuse, persuasive authority tropes, signposting/announcements, fragmented headers
+- Tribal-coded crypto cringe and operational shibboleths (§ 3G)
+- Dismissal labels as substitutes for explanation (§ 3H)
+- Vocabulary cliff and the meaning-preservation sub-principle (§ 3I) — includes the elasticity-bug failure mode as the canonical worked example
+- Closing-line abstraction (§ 3J)
 
-**1. Significance inflation**
-Words: stands/serves as, is a testament/reminder, vital/pivotal/crucial role, underscores/highlights its importance, reflects broader, symbolizing, contributing to, setting the stage for, indelible mark, deeply rooted, evolving landscape
-Fix: Say what the thing actually does. Drop the editorial commentary about why it matters.
-
-**2. Notability overreach**
-Words: independent coverage, active social media presence, featured in, written by a leading expert
-Fix: Cite one specific example with context, or cut the claim entirely.
-
-**3. Superficial -ing phrases**
-Words: highlighting, underscoring, emphasizing, ensuring, reflecting, symbolizing, contributing to, cultivating, fostering, showcasing
-Fix: These fake-deepen sentences. End the sentence where the content ends.
-
-**4. Promotional/travel-brochure language**
-Words: boasts, vibrant, rich (figurative), profound, nestled, in the heart of, groundbreaking, renowned, breathtaking, must-visit, stunning, commitment to, natural beauty
-Fix: Neutral descriptions only. Name the actual thing.
-
-**5. Vague attributions**
-Words: Industry reports, Observers have noted, Experts argue, Some critics, Several sources
-Fix: Name the source or cut the claim.
-
-**6. Formulaic "Challenges and Future Prospects" sections**
-Words: Despite its... faces challenges, Despite these challenges, Future Outlook, Legacy
-Fix: Embed the challenge as a specific fact in the relevant section.
-
-### Language Patterns
-
-**7. AI vocabulary overuse**
-Words: Actually, Additionally, align with, crucial, delve, emphasizing, enduring, enhance, fostering, garner, highlight (verb), interplay, intricate/intricacies, key (adjective), landscape (abstract), pivotal, showcase, tapestry, testament, underscore, valuable, vibrant
-Fix: Use simpler verbs and nouns. If "highlight" is doing the work, ask what the actual point is.
-
-**8. Copula avoidance**
-Words: serves as, stands as, marks, represents, boasts, features, offers
-Fix: Use "is," "are," or "has." LLMs avoid simple copulas and make everything sound ceremonial.
-
-**9. Negative parallelisms and tailing negations**
-Patterns: "It's not just about X; it's about Y." "Not merely X, but Y." "X, not Y." "Not X. Y." Tailing fragments like "no guessing" or "no wasted motion."
-Fix: Say the actual thing directly. Drop the rhetorical setup.
-
-**Why this one survives most aggressively:** the "X, not Y" reframe *feels* structurally satisfying because it appears to correct a wrong reading. But it adds zero information — the corrected reading was the only one being asserted. The fix is not just to rewrite the sentence; it's to name the mechanism instead of negating an alternative.
-
-Bad: "JPMorgan's $700-million-a-day figure is a floor, not a ceiling."
-Good: "JPMorgan's $700-million-a-day figure is the floor. The ceiling depends on how long the memory plants stay down."
-
-Pattern: when tempted to write "X, not Y," split into two sentences — one stating X, the other naming the second concept on its own terms.
-
-**10. Rule of three**
-Pattern: Every list has exactly three items.
-Fix: Break to two or four. Justin explicitly breaks the rule-of-three default.
-
-**11. Synonym cycling**
-Pattern: protagonist/main character/central figure/hero — cycling through synonyms to avoid repetition
-Fix: Pick one term and use it. Repetition is fine.
-
-**12. False ranges**
-Pattern: "From X to Y" where X and Y aren't on a meaningful scale.
-Fix: Name the actual items specifically without the false range construction.
-
-**13. Passive voice / subjectless fragments**
-Pattern: "No configuration needed." "Results are preserved automatically."
-Fix: "You don't need to configure anything." Name the actor.
-
-### Style Patterns
-
-**14. Em dash overuse (closed)**
-Pattern: em dashes used as interruption or decoration — like this — everywhere.
-Fix: Justin uses spaced em dashes ( — ) rarely, as connectives. Most closed em dashes become commas, semicolons, or periods. Remove em dashes used for dramatic effect.
-
-**15. Overuse of boldface**
-Pattern: Every phrase gets bolded for emphasis.
-Fix: Remove bolding from prose. Bold is structural (headers) only, and Justin uses it sparingly.
-
-**16. Inline-header bullet lists**
-Pattern: Bullets that start with "**Term:** Description"
-Fix: Convert to prose sentences or a clean list without bold headers.
-
-**17. Title Case in headings**
-Pattern: "## Strategic Negotiations And Global Partnerships"
-Fix: Sentence case. "## Strategic negotiations and global partnerships"
-
-**18. Emojis in prose or headers**
-Fix: Remove entirely.
-
-**19. Curly/smart quotation marks**
-Fix: Straight quotes only.
-
-### Communication Patterns
-
-**20. Chatbot artifacts**
-Phrases: "I hope this helps," "Of course!," "Certainly!," "Would you like me to," "Let me know," "Here is a..."
-Fix: Cut all of it. This is boilerplate that got left in.
-
-**21. Knowledge-cutoff disclaimers**
-Phrases: "As of my last training update," "While specific details are limited," "Based on available information"
-Fix: If the information is uncertain, say so plainly or cut the hedge.
-
-**22. Sycophantic tone**
-Phrases: "Great question!," "You're absolutely right!," "That's an excellent point"
-Fix: Cut. Treat the reader as an equal.
-
-### Filler and Hedging
-
-**23. Filler phrases**
-"In order to" → "To"
-"Due to the fact that" → "Because"
-"At this point in time" → "Now"
-"It is important to note that" → cut it
-"Has the ability to" → "Can"
-
-**24. Excessive hedging**
-"Could potentially possibly be argued that it might" → "May"
-Fix: One hedge, maximum. Pick it.
-
-**25. Generic positive conclusions**
-"The future looks bright." "Exciting times lie ahead." "A step in the right direction."
-Fix: End on something specific. What actually happens next?
-
-**26. Hyphenated word pair overuse**
-Words: cross-functional, client-facing, data-driven, decision-making, real-time, end-to-end
-Fix: Humans hyphenate inconsistently. Drop the hyphen on common compounds.
-
-**27. Persuasive authority tropes**
-Phrases: "The real question is," "at its core," "in reality," "what really matters," "fundamentally," "the heart of the matter"
-Fix: These announce profundity instead of delivering it. Say the actual point.
-
-**28. Signposting and announcements**
-Phrases: "Let's dive in," "Let's explore," "Here's what you need to know," "Without further ado"
-Fix: Start doing the thing instead of announcing it.
-
-**29. Fragmented headers**
-Pattern: Heading followed by a one-line restatement of the heading before the real paragraph.
-Fix: Delete the warm-up sentence. Start with the real content.
-
-### Audience and abstraction
-
-**30. Vocabulary cliff**
-Pattern: Industry acronyms or specialist terms appearing without inline introduction (HBM, CoWoS, FERC, RTO, BRA, VRR, LMP, etc.). In TCN-audience prose, the reader feels they're missing a prerequisite; the post reads as written-for-insiders.
-Detection: scan for capitalized acronyms and specialist jargon. For each first appearance, check whether it includes a 4-to-8-word inline gloss.
-Fix: either define inline ("HBM, the fast memory every AI chip needs") or substitute a plainer word ("fab" → "factory"; "interconnect" → "hooking new plants into the power grid").
-
-**Critical sub-principle: when the jargon term is doing analytical work, the substitute must preserve the term's meaning, not invert it.** A plain-language swap that contradicts what the original term was claiming is worse than the jargon — it ships a broken argument under a fluent surface.
-
-Real failure caught in deployment: "elasticity" was swapped to "bends differently when squeezed" inside the sentence "Each has different elasticity. Memory is the tightest right now." The substitute inverted the meaning. "Elasticity" describes how readily supply expands when prices rise (high elasticity = quick to scale, low/inelastic = slow). "Bends when squeezed" suggests flexibility, but the next sentence ("tightest") only makes sense if the prior one set up rigidity. The two sentences contradicted each other, and the broken argument shipped through a plain-language audit because the swap *felt* fluent.
-
-Better fix when the term is doing analytical work: rewrite the sentence to name the actual constraint directly. Replacement that worked in deployment: "Some parts of the supply chain can be ramped up fast; others take years. Memory is the slowest right now."
-
-**Litmus test (two-part):** (1) the audience persona knows the term without Googling, AND (2) the substitute preserves the analytical claim the surrounding sentences depend on. If either fails, rewrite the sentence rather than swap the word.
-
-**31. Closing-line abstraction**
-Pattern: The final sentence of a prose block compresses the paragraph into a single abstract noun phrase — "pricing authority over the windfall," "the distributional politics of the buildout," "the structural reset of supply layers." The closing line names category-labels-being-X instead of actors-doing-things.
-Fix: Rewrite the closing line with named actors (workers, customers, hyperscalers, regulators) and active verbs (want, paying, building, blocking).
-Litmus question: "Could I point at a specific person doing this thing?" If not, the line is abstraction and the prose is leaking AI.
+Do not reproduce the lists here. Read the canonical file before each scan so the catalog is current.
 
 ---
 

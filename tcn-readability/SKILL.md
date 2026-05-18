@@ -32,6 +32,31 @@ The goal is to *help the user revise*, not to auto-produce a fully rewritten dra
 
 ---
 
+## Voice & vocabulary canonical source
+
+This skill MUST load `workspace/core/anti-ai-writing-style.md` from the active project's root before making any voice, vocabulary, substitution, or AI-tells decision. That file is the single source of truth for the audience vocabulary list and always-gloss-on-first-use rule (§ 1), the banned-words list (§ 3A), dead phrases / transitions / engagement bait / hype language (§ 3B–§ 3E), the negative-parallelism rule (§ 3F), tribal-coded crypto cringe and operational shibboleths (§ 3G), the dismissal-label rule (§ 3H), the vocabulary cliff rules including the meaning-preservation sub-principle (§ 3I), the closing-line abstraction rule (§ 3J), the broader AI writing patterns to avoid (§ 4), and the anti-overfitting guide (§ 5).
+
+This skill MUST NOT maintain its own duplicate copy of any of the following:
+- The audience vocabulary list
+- Substitution examples
+- Banned words
+- Voice patterns
+- AI-tells checklists
+
+If a vocabulary or substitution decision is needed mid-task, resolve it by referring to the canonical file at runtime, not by relying on a copy embedded in this spec. Any short examples cited here are illustrative only — the canonical file is authoritative.
+
+Note: this skill's primary audit dimension is *structural density*, not lexical voice. The vocabulary cliff (§ 3I) and closing-line abstraction (§ 3J) overlap the readability surface, so this skill consults the canonical file for those specifically when a flagged passage might be a vocab-cliff or closing-line issue rather than a pure density issue.
+
+**Fallback when the canonical file is missing.** If `workspace/core/anti-ai-writing-style.md` is not present in the current project, this skill must:
+1. Flag explicitly to the user — "no voice file found at workspace/core/anti-ai-writing-style.md; skipping voice calibration."
+2. Skip the vocabulary cliff cross-check and the closing-line plain-language cross-check (those depend on canonical § 3I and § 3J definitions).
+3. NOT apply generic vocabulary heuristics from training data — those risk shipping wrong substitutions (the elasticity-bug failure mode).
+4. Continue with non-voice work this skill can still do: still produce the full structural density report (Audit 1 paragraph length, Audit 2 ungrounded abstraction, Audit 3 naked statistics, Audit 4 flat rhythm, Audit 5 sentence-level drag) with quoted excerpts, severity ranking, and the top 3–5 rewrites. The lexical AI-tell audit is owned by `tcn-text-humanizer` anyway. Better to do less than to do harm with stale or generic guidance.
+
+**Future-work hook — adjacency-aware calibration.** The canonical file's § 1 notes the always-gloss-on-first-use rule is conservative; a future enhancement would vary gloss aggressiveness by which adjacent cohort each piece targets (monetary-policy pieces gloss crypto terms more heavily; DePIN pieces gloss monetary terms; cross-cutting pieces gloss everything). NOT IN SCOPE this pass. When implemented, the Step 1 "apparent reader load" assessment would consume an adjacency signal — pieces targeting a wider cohort tolerate less density and require more grounding moves; pieces targeting a denser cohort can carry more.
+
+---
+
 ## Workflow Position and Source of Truth
 
 `tcn-readability` is the audit-time half of TCN's accessibility work. The generation-time half lives in `tcn-draft` under "Drafting for Accessibility" and in `tcn-draft/references/voice-rules.md` under "Paragraph Rhythm and Grounding Cadence." **Those documents are the source of truth for the principles being audited.** This skill audits against the same five principles rather than restating them — if the principles change there, this skill picks up the new bar automatically.
