@@ -291,7 +291,8 @@ The "Cold-open candidate," "Refrain candidate," and "Cuts from the article" fiel
 6. **Detect a refrain candidate** (optional) — if the article repeats or implies a single load-bearing sentence, mark it as a refrain candidate and place it across 2-3 middle slides.
 7. **Draft the script slide-by-slide** — apply voice calibration (§6) and spoken-word adaptations. Mark candidate refrain lines.
 8. **Compose the Script Notes footer** — word count, runtime estimate, pacing cues, refrain markers, cold-open candidate, refrain candidate, cuts-from-article list.
-9. **Present to user with the standard gate prompt** (§4).
+9. **Detect dispatch number and compose title block.** The skill scans the user's dispatch-narration archive (default: `workspace/dispatch-narration/` relative to the active project root; configurable via steering input) for existing files matching `dispatch-NNN-*.md` and parses out the dispatch numbers. It suggests the next sequential integer (e.g., if `dispatch-002`, `dispatch-003`, `dispatch-004` exist, suggest `005`). If detection succeeds with high confidence, it surfaces the suggestion to the user with a one-line confirmation ("Suggesting Dispatch №005 — confirm or override"). If detection fails (no existing files, ambiguous numbering, gap in sequence) or the user is re-doing an existing dispatch (the Friday-2026-05-22 re-record of dispatch-004 is the canonical example), the skill asks the user explicitly which dispatch number to use. The number is then written into the title block as `Dispatch №[NNN]` (zero-padded to three digits).
+10. **Present to user with the standard gate prompt** (§4).
 
 ---
 
@@ -344,6 +345,7 @@ The skill is working correctly when:
 7. **The End slide uses the canonical close verbatim** — same close every video.
 8. **No em-dashes appear in narration prose.** (Em-dashes inside *primary-source quoted material* on a Verbatim slide are acceptable if the reader can naturally pause on them.) No subordinate-clause stacks in narration prose. Sentences average under 16 words.
 9. **The skill halts gracefully** when voice file is missing, article is missing, or fact-check has unresolved items.
+10. **Dispatch number is correctly detected** from existing `dispatch-NNN-*.md` files in the configured archive, or correctly prompted from the user when detection is ambiguous (no past files, gap in sequence, or re-recording an existing dispatch).
 
 ---
 
