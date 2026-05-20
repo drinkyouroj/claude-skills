@@ -249,7 +249,7 @@ The "Cold-open candidate," "Refrain candidate," and "Cuts from the article" fiel
 
 ### 1. Voice file check
 
-Verify `workspace/core/anti-ai-writing-style.md` exists. If missing, halt with the standard TCN fallback message (see Voice & vocabulary canonical source section above). Do not fall back to generic vocabulary heuristics.
+Verify `workspace/core/anti-ai-writing-style.md` exists. If missing, apply the degraded-mode fallback from the Voice & vocabulary canonical source section above — flag to the user, skip voice-aware work, but continue with the structural work this skill can still do (zone selection, slide picking, dispatch numbering, Script Notes scaffold). Do NOT fall back to generic vocabulary heuristics from training data — that risks shipping wrong substitutions.
 
 ### 2. Read the article draft
 
@@ -297,7 +297,7 @@ Use the gate prompt from the Inputs and Outputs section. Wait for approval or re
 ## Failure Modes
 
 - **Article draft missing or unreadable** — surface the failure, ask for a valid path, halt.
-- **Voice canonical file missing** — halt with the standard fallback message used by `tcn-headline`. Do not fall back to generic register (per the elasticity-bug failure mode).
+- **Voice canonical file missing** — apply the degraded-mode fallback used by `tcn-headline`: flag explicitly to the user, skip voice-aware work (no AI-tells cross-check, no banned-vocabulary substitutions), but continue with the structural work this skill can still do. Do NOT fall back to generic register (per the elasticity-bug failure mode documented in `tcn-headline`).
 - **Article too short for a 5-7 min trailer** (less than ~800 words article-side) — surface to user: "this piece is short enough that the video would cover most of it. Confirm you want a trailer (with curiosity-gap funnel) or a near-full read-through?" Let user override.
 - **No obvious hook angle** (rare) — present 2-3 candidate cold-open frames and ask the user to pick.
 - **Fact-check report has flagged unresolved items** — surface those before drafting. A trailer can't safely include claims the fact-check skill flagged. Override only if the user explicitly accepts the editorial risk.
