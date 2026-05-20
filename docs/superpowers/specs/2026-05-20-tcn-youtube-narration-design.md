@@ -109,7 +109,7 @@ Final article draft  ───────────────────�
 
 Three zones, 7-9 slides total, 700-1,050 words at ~140 wpm.
 
-### 5.1 Locked Open (always 2 slides, 45-60 sec)
+### 5.1 Cold Open (always 2 slides, 45-60 sec)
 
 **Slide 1 — Hook.** Cold open. A relatable analogy, surprising number, or "wait, what?" moment. **No setup. No TCN-specific jargon.** Earns the next 30 seconds of attention.
 
@@ -119,14 +119,17 @@ Example (Helium piece, calibrated to register 7):
 **[SLIDE 01 — HOOK]**
 
 Buying a McDonald's franchise comes with a 200-page disclosure document.
-Federal law requires it — pricing terms, exit clauses, what happens if
+Federal law requires it. The pricing. The exit terms. What happens if
 McDonald's changes the menu and your numbers stop working.
 
 Three hundred eighty-five thousand people bought a Helium hotspot.
-The franchise disclosure equivalent? It didn't exist yet.
+
+The franchise disclosure equivalent? They didn't get one.
 
 Vibes.
 ```
+
+*Note: this example is the floor for register-7 catchiness, not the ceiling. The skill should aim higher when the article supports it. Rhetorical questions, one-word landings, and unexpected analogies are the moves; this example uses one of each.*
 
 **Slide 2 — Thesis.** What the piece argues, distilled to one or two sentences. Often a verbatim or near-verbatim line from the article. The promise the video is making.
 
@@ -139,7 +142,7 @@ They thought they were buying a business. They bought a franchise.
 The hardware is theirs. The pricing authority is not.
 ```
 
-### 5.2 Flexible Middle (3-5 slides, 3-4 min)
+### 5.2 Body (3-5 slides, 3-4 min)
 
 The skill picks from this menu by reading the article and asking *which of these does this article most strongly support?*
 
@@ -152,7 +155,7 @@ The skill picks from this menu by reading the article and asking *which of these
 
 If the article has a refrain candidate (a single sentence the article repeats or implies repeatedly), the skill places it across 2-3 middle slides and marks each occurrence as `[REFRAIN]` in the Script Notes footer.
 
-### 5.3 Locked Close (always 2 slides, 30-45 sec)
+### 5.3 Outro (always 2 slides, 30-45 sec)
 
 **Slide N-1 — Tease.** Open loops. Explicitly name what the video did NOT cover. This is the funnel mechanism that converts viewers into readers.
 
@@ -332,7 +335,7 @@ The "Cold-open candidate," "Refrain candidate," and "Cuts from the article" fiel
 
 The skill is working correctly when:
 
-1. **Runs end-to-end on the Friday article** and produces a `youtube-narration.md` with the correct structure (Locked Open + Flex Middle + Locked Close), the right word count (700-1,050), and a complete Script Notes footer.
+1. **Runs end-to-end on the Friday article** and produces a `youtube-narration.md` with the correct structure (Cold Open + Flex Middle + Outro), the right word count (700-1,050), and a complete Script Notes footer.
 2. **The cold-open passes the Hank-Vox test** — at least one tester (the user) reads it aloud and confirms Hank could deliver it without a wince.
 3. **The cold-open passes the Marcus-smirk test** — Marcus (the TCN-reader persona) would smirk, not wince.
 4. **Refrain markers are correctly placed** if a refrain candidate was detected.
