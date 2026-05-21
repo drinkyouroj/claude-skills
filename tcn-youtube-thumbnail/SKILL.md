@@ -26,11 +26,11 @@ tcn-youtube-narration  [Step 1]
     ↓
 tcn-youtube-slideshow  [Step 2]
     ↓
-┌─── RECORDING ───┐    [Step 3]
+┌─── RECORDING ───┐
     ↓
-tcn-youtube-title         [Step 4 — planned]
-tcn-youtube-description   [Step 5 — planned]
-tcn-youtube-thumbnail     [Step 6 — this skill]
+tcn-youtube-title         [Step 3 — planned]
+tcn-youtube-description   [Step 4 — planned]
+tcn-youtube-thumbnail     [Step 5 — this skill]
 ```
 
 Recording is the cleavage point between upstream skills (which consume article prose) and downstream packaging skills (which consume the recorded transcript). This skill is the only packaging skill that can also **run pre-record**, against the narration's cold-open candidate, for early concepting. Recommended production order: run pre-record for ideation, re-run post-record with the actual transcript for the final thumbnail.

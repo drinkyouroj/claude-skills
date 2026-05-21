@@ -30,7 +30,7 @@ tcn-youtube-narration  [Step 1]
     ↓
 tcn-youtube-slideshow  [Step 2]
     ↓
-┌─── RECORDING ───┐    [Step 3]
+┌─── RECORDING ───┐
     ↓
 tcn-youtube-title         [Step 3 — planned]
 tcn-youtube-description   [Step 4 — planned]
