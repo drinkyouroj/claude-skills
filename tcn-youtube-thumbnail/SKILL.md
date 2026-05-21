@@ -28,7 +28,7 @@ tcn-youtube-slideshow  [Step 2]
     ↓
 ┌─── RECORDING ───┐
     ↓
-tcn-youtube-title         [Step 3 — planned]
+tcn-youtube-title         [Step 3 — produces complementary two-part-stop titles]
 tcn-youtube-description   [Step 4 — planned]
 tcn-youtube-thumbnail     [Step 5 — this skill]
 ```
@@ -313,8 +313,10 @@ Full overlay-spec template (sizing curves, edge cases, mark sizing rules) lives 
 - `tcn-youtube-narration` — produces the narration file the skill reads pre-record.
 - Recording → transcript — produces the transcript the skill prefers post-record.
 
+**Sibling (built):**
+- `tcn-youtube-title` — produces 3 complementary two-part-stop YouTube title candidates ("Specific Anchor. Twist." pattern, ≤55 chars first half for mobile-feed truncation safety). Reads this skill's `youtube-thumbnail.md` artifact to extract the chosen in-image headline and run a complementarity check, so the title carries different specific content than the thumbnail headline rather than restating it. The two surfaces compose into one rhetorical move on the YouTube feed.
+
 **Sibling (planned, not built today):**
-- `tcn-youtube-title` — title generation, consumes the recorded transcript.
 - `tcn-youtube-description` — description body, tags, chapter timestamps.
 
 **Explicit invocation dependency:**
