@@ -272,3 +272,137 @@ Skill writes this verbatim. User-supplied Substack and Bluesky overrides replace
 | [9] Link block | ~150 chars constant | Boilerplate |
 | [11] Hashtags | ~100 chars | 5-7 tags |
 | **Total** | **1,500-2,500 chars target** | YouTube cap is 5,000 |
+
+---
+
+## The Process
+
+### 1. Auto-detect source
+
+In the supplied dispatch directory, look for:
+
+- `.srt` file (any name) — preferred transcript form
+- `.txt` file (any name with "transcript" in filename) — fallback transcript form
+- `youtube-narration.md` — narration source
+
+**Transcript wins if both transcript and narration present.** If neither exists, halt with example path: `expected workspace/drafts/<slug>/youtube-narration.md or a .srt/.txt transcript in the same directory.`
+
+### 2. Read paired artifacts
+
+In the same dispatch directory, look for:
+
+- `youtube-title.md` — extract the picked title from the `## Picked title` section and the mechanism name from the `**Pattern:**` field.
+- `youtube-thumbnail.md` — extract the `Chosen headline:` field and the chosen variant's mechanism.
+
+If either missing or malformed (missing expected fields): log soft warning ("orthogonal-mechanism enforcement degraded"), proceed without orthogonality enforcement, note in artifact metadata.
+
+### 3. Derive article URL
+
+1. Extract the slug from the supplied directory name (e.g., `you-own-the-hotspot-nova-labs-owns-what-it-earns`).
+2. Construct candidate URL: `https://drinkyouroj.substack.com/p/<slug>`.
+3. Surface to user: `Detected article URL: <candidate URL>. Confirm or paste an override:`
+4. If user confirms (empty response, "confirm", "yes"), use the candidate.
+5. If user pastes a URL, use the override. Record in artifact metadata.
+6. If slug fails sanity checks (>80 chars, contains `_`, contains uppercase, contains chars outside `[a-z0-9-]`), surface with a flag: `Derived URL doesn't match Substack slug conventions. Paste the correct URL:` and require an explicit override.
+
+### 4. Mine anchors
+
+From the narration body (or transcript body, post-record) and the article draft (if present):
+
+- Numbers and dollar amounts.
+- Proper nouns (companies, people, technologies, votes, places).
+- Years and dates.
+- Quoted phrases (highest-confidence anchors).
+
+Anchor pool feeds the summary (block 3) and hashtag selection (block 11). The above-fold hook uses anchors only when they fit the mechanism naturally.
+
+### 5. Draft the above-fold hook (block 1)
+
+Inputs:
+
+- The dispatch concept (extracted from narration title block + thesis slide post-record, or from the transcript's thesis-equivalent passage if the cold-open analogy was abandoned during recording). Explicitly NOT from the narration's cold-open or the transcript's first 30 seconds.
+- The paired title mechanism (from `youtube-title.md` metadata).
+- The paired thumbnail mechanism (from `youtube-thumbnail.md`).
+- The anchor pool from step 4.
+- Steering text from the user, if any.
+
+Drafting:
+
+1. Pick a mechanism from the taxonomy that is NOT used by the paired title or thumbnail.
+2. Compose 2-3 short lines using the picked mechanism.
+3. Validate:
+   - Total length (with line breaks) ≤200 chars.
+   - No banned content per `../tcn-youtube-thumbnail/references/thumbnail-headline-patterns.md`.
+   - No em-dashes. No exclamation points. Sentence case.
+   - Not a verbatim restatement of the picked title or the thumbnail headline.
+4. If validation fails: redraft up to 2 additional times. If still failing after 3 attempts total, surface the best-effort candidate with a one-line note about which criterion couldn't be satisfied.
+
+### 6. Draft the dispatch summary (block 3)
+
+Inputs:
+
+- The narration body (or transcript body).
+- The narration's *Cuts from the article* field.
+- The anchor pool from step 4.
+
+Drafting:
+
+1. Compose 3-5 sentences.
+2. Front-load anchors and proper nouns (helps viewer scanning and YouTube search indexing).
+3. Reference what the video did NOT cover — that's the funnel mechanic.
+4. End on a phrase that motivates clicking through to the article.
+5. Validate: length 400-700 chars, anti-AI-tells pass, no em-dashes, no banned content.
+
+### 7. Build the chapter list (block 7)
+
+Run the timestamp computation (post-record from transcript or pre-record from narration WPM math, per the Description Anatomy section's Block 7 spec).
+
+For each chapter, draft a viewer-facing label:
+
+1. Read the narration slide's actual content (or the transcript segment for that timestamp).
+2. Distill the segment's main idea into a 4-8 word noun phrase.
+3. Calibrate to 8/10 register.
+4. Validate: no banned content, no em-dashes, no exclamation points, sentence case.
+
+Compose the chapter block as YouTube auto-detect format: `MM:SS  Label` per line, first chapter `0:00`, last chapter is the End-slide CTA.
+
+### 8. Assemble the channel link block (block 9)
+
+Write the constant boilerplate. Substitute user-supplied Bluesky and Substack overrides if provided; otherwise use the defaults from `references/description-anatomy.md`.
+
+### 9. Generate hashtags (block 11)
+
+1. From the anchor pool, pick 3-5 proper-noun hashtags. Prefer specific (`#HIP143`) over generic (`#Crypto`).
+2. Append the 2 channel-evergreen tags: `#TheCivicNode #drinkYourOJ`.
+3. Validate count is 5-7; sentence-case enforced.
+4. Compose as a single line, space-separated, dispatch-specific tags first.
+
+### 10. Final gate
+
+Present:
+
+```
+YouTube description draft complete (NNNN chars, above-fold prefix NNN chars).
+
+[full paste-ready description]
+
+Approve, redirect (e.g., 'punchier above-fold', 'swap the hook mechanism', 'more chapter granularity', 'add the August 2025 halving in summary', 'replace #DePIN with #Web3'), or cancel?
+```
+
+Wait for response. If override description was supplied at invocation, skip drafting steps 5-9 and go straight to validation + final gate.
+
+Redirect handling:
+
+- **Global steering** ("redo punchier", "more declarative throughout") → re-draft all blocks.
+- **Block-targeted steering** ("swap the hook", "rewrite chapter 4 label", "drop #DePIN") → re-draft only affected block(s).
+- **URL override** ("use this URL instead") → swap the article URL block, regenerate metadata, no other changes.
+
+### 11. Write the artifact
+
+Write `workspace/drafts/<slug>/youtube-description.md` with:
+
+- Metadata block (source, article URL, paired artifacts and mechanisms, hook mechanism).
+- The paste-ready description under `## Paste this into YouTube`.
+- The block-level breakdown for reference.
+
+Surface a one-line confirmation: `Wrote youtube-description.md. Paste into YouTube Studio description field.`
