@@ -177,7 +177,7 @@ Both at 1280×720, generated via fal MCP (`mcp__fal-ai__run_model`) against a Fl
 
    Wait for response. If the user provided an override vibe at invocation, skip this gate entirely.
 
-6. **Draft 3 thumbnail headline candidates.** Distill from the cold-open and article concept. Each candidate is 3–6 words, scroll-stopping, declarative or curiosity-gap-shaped. Show all three with one-line rationales.
+6. **Draft 3 thumbnail headline candidates.** Distill from the cold-open and article concept. See §9 for the full drafting process — drafting inputs (§9.1), acceptance criteria each candidate must pass (§9.2), pattern library reference (§9.3), retry behavior (§9.4), and Gate 2 display format (§9.5). Each candidate is 3–6 words and must pass §9.2 before being surfaced.
 
 7. **GATE 2 — Headline pick.** Present:
 
@@ -257,7 +257,77 @@ Full overlay-spec template (with all sizing curves and edge cases) lives in `ref
 
 ---
 
-## 9. TCN identity markers (the brand anchors)
+## 9. Thumbnail headline distillation
+
+Thumbnail headlines are a distinct content genre from article headlines, social hooks, or the cold-open candidate. 3–6 words has to set up a curiosity gap, anchor a concrete specific, and carry TCN voice in a fraction of a second of scrolling. This section defines the drafting process, acceptance criteria, and retry behavior — first-class design substance, not a "we'll see" note.
+
+### 9.1 Drafting inputs
+
+When the skill drafts candidates (process step 6, §6), it has:
+
+- The cold-open candidate (or recorded cold open) — the dispatch's most punchable line.
+- The dispatch concept — the broader article subject, extracted from the narration's structure.
+- The dispatch number, slug, and any user-supplied steering.
+- The full contents of `references/thumbnail-headline-patterns.md` (loaded into context at drafting time as the source of truth for voice and structural patterns).
+
+### 9.2 Acceptance criteria (every candidate must pass)
+
+A candidate is rejected silently and re-drafted (§9.4) if it fails any of:
+
+- **Word count.** 3–6 words inclusive. Hyphenated compounds count as one word. Contractions count as one word. Numbers count as one word regardless of digit count.
+- **No all-caps words.** Sentence case only. Genuine acronyms (FCC, ATC, FAA, DAO) are exceptions.
+- **No exclamation points.** Question marks allowed sparingly, only when load-bearing for a curiosity gap.
+- **No banned hype adjectives.** Explicit banned list in the patterns reference file. Initial set: SHOCKING, AMAZING, INSANE, EXPOSED, REVEALED, UNBELIEVABLE, MASSIVE, ULTIMATE, EPIC, INCREDIBLE, MIND-BLOWING, GAME-CHANGING. Case-insensitive match.
+- **No banned clickbait templates.** "This One Trick…", "What They Don't Want…", "You Won't Believe…", "Here's Why…", "The Truth About…", and other generic-YouTube structures.
+- **Concrete specific when supported.** If the cold-open contains a number, place name, dollar amount, year, or proper noun, at least one of the three candidates must use it. (Not all three — variety is good.)
+- **Anti-AI-tell scan.** Reject candidates containing em-dashes, "delve", "tapestry", "navigate the landscape", or any token from the `tcn-text-humanizer` skill's tell list (referenced, not duplicated, in the patterns file).
+
+The banned-word/template lists are deliberately maintained in `references/thumbnail-headline-patterns.md`, not in this spec, so they can be extended without spec churn after real dispatches surface new failure modes.
+
+### 9.3 Pattern library (in `references/thumbnail-headline-patterns.md`)
+
+The patterns reference file is the substantive guidance the skill reads at drafting time. Categories the file covers:
+
+- **Proven structural patterns**, each with worked examples drawn from real or plausible TCN dispatches:
+  - *Concrete Anchor + Twist* — "You Own the Hotspot"
+  - *Implied Stakes* — "Nova Labs Owns It"
+  - *Direct Address* — "Why You're Funding This"
+  - *Specific Contradiction* — "$499 to Mine WiFi"
+  - *Bare-Noun Provocation* — "The Hotspot Tax"
+- **Voice anchors** — sentence-case, declarative-or-curiosity-gap, sardonic register, never-screaming, never-clickbait-shaped. Inherits from TCN's anti-AI-writing-style corpus and the `justin-hearn-voice-profile.md`.
+- **Worked example walkthroughs** — for at least 2 real dispatches: cold-open → 3 drafted candidates → which one was picked and why.
+- **Anti-pattern gallery** — failed candidates and the specific criterion they violated. Educational, not exhaustive.
+
+### 9.4 Retry behavior
+
+If any of the 3 initially drafted candidates fails the §9.2 acceptance criteria, the skill internally re-drafts the failing slot(s) up to 2 additional attempts before surfacing. If after 3 total attempts a slot still fails, the skill surfaces the best-effort candidate with a one-line note ("could not satisfy [criterion]; consider redirecting"). The user never sees a hard error — they always see 3 candidates.
+
+Re-drafts are silent — the user doesn't see rejected attempts. Surfacing only passing candidates keeps the Gate 2 cognitive load low.
+
+### 9.5 What the user sees at Gate 2
+
+After successful drafting, the user sees:
+
+```
+Pick a thumbnail headline:
+
+1. <Candidate 1>
+   — <one-line rationale: pattern used, anchor, curiosity-gap mechanism>
+
+2. <Candidate 2>
+   — <rationale>
+
+3. <Candidate 3>
+   — <rationale>
+
+Or 'try again' for new options. Or paste your own.
+```
+
+Rationales surface the *why* of each candidate, not just the words — they help the user pick on intent, not just gut feel.
+
+---
+
+## 10. TCN identity markers (the brand anchors)
 
 Every thumbnail this skill produces carries these constant markers, regardless of vibe or mode:
 
@@ -270,7 +340,7 @@ The illustrated scene is *not* constrained to TCN brand palette — that's a del
 
 ---
 
-## 10. Failure modes
+## 11. Failure modes
 
 - **No narration and no transcript found** → halt with an explicit message and an example path. Do not attempt to compose from nothing.
 
@@ -296,9 +366,11 @@ The illustrated scene is *not* constrained to TCN brand palette — that's a del
 
 ---
 
-## 11. Reference files (to be authored alongside the skill)
+## 12. Reference files (to be authored alongside the skill)
 
 - **`references/vibe-query-templates.md`** — how to compose the TCN-flavored library query from a dispatch concept. Query patterns that work, query patterns to avoid, example transformations of cold-open → library query.
+
+- **`references/thumbnail-headline-patterns.md`** — pattern library for the §9 candidate drafting. Voice rules, banned-word lists, banned clickbait template list, structural patterns with worked examples, anti-pattern gallery. The source of truth for headline drafting — the skill reads this file at drafting time. Maintained as a living document.
 
 - **`references/text-overlay-spec.md`** — full typography/layout/color spec for the overlay. Courier Prime sizing curves at 1280×720 and at common Figma frame sizes. Safe-zone math (the center-80% rule explained). Mark sizing rules. Color tokens pulled from `colors_and_type.css`.
 
@@ -308,7 +380,7 @@ The illustrated scene is *not* constrained to TCN brand palette — that's a del
 
 ---
 
-## 12. What this skill is NOT
+## 13. What this skill is NOT
 
 - Not a LoRA trainer. LoRA training is a one-time user task via fal MCP (or any Flux LoRA training service). The skill assumes the URL is provided.
 
@@ -326,7 +398,7 @@ The illustrated scene is *not* constrained to TCN brand palette — that's a del
 
 ---
 
-## 13. Companion skills and dependencies
+## 14. Companion skills and dependencies
 
 **Upstream:**
 - `tcn-youtube-narration` — produces the narration file the skill can read pre-record.
@@ -347,11 +419,13 @@ The illustrated scene is *not* constrained to TCN brand palette — that's a del
 
 ---
 
-## 14. Open questions / future work
+## 15. Open questions / future work
 
 - **LoRA training helper.** A potential sibling skill could wrap fal MCP's Flux LoRA training endpoint with TCN-specific defaults (step count, learning rate, reference-image count guidance). Deferred until after Friday recording proves the skill's value.
 
-- **Headline-to-thumbnail-headline distillation quality.** The skill drafts 3 candidates from the cold-open + article concept. The quality of this distillation may need iteration after a few real dispatches. Track informally: if 'try again' fires more often than not after the first few dispatches, the candidate-drafting prompt template inside the skill needs sharpening.
+- **Pattern library iteration.** The §9 acceptance criteria and the patterns reference file are v1. After a few real dispatches we may discover (a) the banned-word or banned-template lists need extension, (b) new structural patterns emerge worth promoting, or (c) certain initially-banned constructions turn out to work for TCN's audience and should be allowed. Maintain by editing `references/thumbnail-headline-patterns.md` directly — no skill-code changes required.
+
+- **Calibration via past dispatches (deferred from v1).** Initial brainstorm considered scanning sibling `youtube-thumbnail.md` files and seeding the drafting prompt with the last 3–5 chosen headlines as in-context voice examples — a feedback loop that learns from production runs. Deferred — single-dispatch quality first via §9's explicit criteria, calibration loop added if voice drift becomes a real problem.
 
 - **A/B test winner feedback loop.** YouTube exposes A/B thumbnail performance data. A future iteration could feed that back into the vibe-query templates to learn which compositions/headline shapes win for TCN. Deferred until at least 5 dispatches have run.
 
