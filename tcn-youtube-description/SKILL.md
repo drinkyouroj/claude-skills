@@ -128,3 +128,147 @@ The skill ships dual-input. Same output shape in both modes — only the timesta
 | Hook drafting | Drafted from narration thesis + paired title/thumbnail mechanisms | Drafted from transcript thesis-equivalent passage + paired mechanisms |
 | Anchor mining | Narration body + article draft (if present) | Transcript body + article draft (if present) |
 | Workflow position | Run alongside Step 3 (title) and Step 5 (thumbnail) for paired pre-record concepting | Re-run for final chapter accuracy |
+
+---
+
+## Description Anatomy
+
+### Block ordering (top to bottom)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ABOVE THE FOLD (~200 chars — visible before "show more")   │
+└─────────────────────────────────────────────────────────────┘
+
+[1] HOOK PUNCH (2-3 short lines, 8/10 register)
+
+┌─────────────────────────────────────────────────────────────┐
+│  BELOW THE FOLD                                             │
+└─────────────────────────────────────────────────────────────┘
+
+[2] BLANK LINE
+
+[3] DISPATCH SUMMARY (3-5 sentences, 8/10 register)
+
+[4] BLANK LINE
+
+[5] ARTICLE CTA (single sentence + bare URL on next line)
+
+[6] BLANK LINE
+
+[7] CHAPTERS HEADER + LIST
+    -- CHAPTERS --
+    0:00  <viewer-rewritten chapter label>
+    ...
+
+[8] BLANK LINE
+
+[9] CHANNEL LINK BLOCK
+    -- THE CIVIC NODE --
+    Weekly. No hype.
+
+    Substack:  https://drinkyouroj.substack.com
+    Bluesky:   https://bsky.app/profile/thecivicnode.bsky.social
+
+[10] BLANK LINE
+
+[11] HASHTAGS (3-5 dispatch-specific + 2 channel-evergreen, single line, space-separated)
+```
+
+### Block 1 — Hook punch (above the fold)
+
+- **2-3 short lines.** Total length ≤200 chars including line breaks (mobile above-fold budget).
+- **8/10 register** — punchier than the narration's 7/10. Sentence case. No em-dashes. No exclamation points. Period stops as default landing.
+- **Rewritten fresh from the dispatch concept** — NOT a verbatim restatement of the narration's cold-open or the transcript's first 30 seconds. The viewer who clicks because of this hook should get a different first 15 seconds than what they expected.
+- **Mechanism orthogonality** — runs a different mechanism than the picked title and the chosen thumbnail headline. Mechanism taxonomy inherited from `../tcn-youtube-title/references/title-patterns.md`:
+  - Authority-Asymmetry
+  - Specific Contradiction
+  - Hidden Revenue / Hidden Move
+  - Personal-Implication
+  - **Audit-Standard** (description-only mechanism — see `references/description-anatomy.md`)
+  - Completion-Pairing is **banned** for description hook (description is not a visual surface; cannot completion-pair with the thumbnail).
+- **Anti-AI-tells enforced** — banned word list inherited from `../tcn-youtube-thumbnail/references/thumbnail-headline-patterns.md`. Same banned-content gate as titles and thumbnails.
+
+### Block 3 — Dispatch summary
+
+- **3-5 sentences.** Target 400-700 chars. Below the fold.
+- **8/10 register.** Voice file enforced.
+- **Mines the narration's *Cuts from the article* field as raw material** — names what the video did NOT cover. This is the funnel mechanic that converts viewers to readers.
+- **Numerals, not words.** Description copy is scanned visually; "385,000 hotspots" reads faster than "three hundred eighty-five thousand hotspots." (Opposite of the spoken-word rule in the narration skill.)
+- **Proper-noun density** — name 3-5 indexable nouns (companies, people, votes, places, technologies) for SEO. TCN voice already does this naturally; the skill should not strain to add them.
+- Anti-AI-tells enforced.
+
+### Block 5 — Article CTA
+
+- **Single sentence** introducing the article URL, followed by the bare URL on the next line.
+- Example: `→ Read the full piece on Substack:` \n `https://drinkyouroj.substack.com/p/<slug>`
+- The `→` arrow is acceptable (Unicode arrow, not em-dash, not asterisk-marketing-bait). `>` or `>>` are also acceptable; the skill picks one and stays consistent across dispatches.
+- **Bare URLs only.** YouTube descriptions do not render markdown; `[text](url)` is shown literally.
+
+### Block 7 — Chapters
+
+- **Format:** YouTube auto-detect format — `MM:SS  Label` per line, single newlines between chapters.
+- **First chapter ALWAYS `0:00`** — YouTube refuses to auto-detect chapters otherwise.
+- **At least 3 chapters total** — YouTube's auto-detect minimum.
+- **Maximum 10 chapters.** Beyond that the chapter ribbon becomes unscannable.
+- **One chapter per narration slide by default.** Combined narration slides (e.g., "THE FRAME + STAKES, Author's Debug") produce ONE chapter with a single rewritten label.
+- **Viewer-rewritten labels** — producer-facing narration labels rewritten into noun phrases. Distill each slide's actual content into a 4-8 word noun phrase at 8/10 register.
+- **End slide always included as final chapter** — gives skipping viewers a direct route to the channel CTA.
+- **Spacing:** two spaces between timestamp and label for human readability. YouTube collapses to single-space at render time.
+
+### Chapter timestamp computation
+
+**Post-record (transcript present):**
+
+1. Parse the `.srt` or `.txt` transcript.
+2. For each narration slide, find the timestamp of the first sentence of that slide's content in the transcript via fuzzy match on the first 4-6 words of each slide's opener.
+3. Use the matched timestamp, rounded down to whole seconds.
+4. If a slide cannot be located (likely cause: heavy improv during recording), surface a one-line warning in metadata and fall back to estimated-from-narration timestamp for that slide only.
+
+**Pre-record (narration only):**
+
+1. Count words per narration slide.
+2. Use 140 wpm as the TCN-natural pace (matches the narration skill's standard).
+3. Accumulate runtime slide-by-slide; emit `MM:SS` per slide start.
+4. Mark the artifact metadata block's `**Source:**` field as `narration (timestamps estimated)`.
+
+### Block 9 — Channel link block
+
+Constant boilerplate across every dispatch:
+
+```
+-- THE CIVIC NODE --
+Weekly. No hype.
+
+Substack:  https://drinkyouroj.substack.com
+Bluesky:   https://bsky.app/profile/thecivicnode.bsky.social
+```
+
+Skill writes this verbatim. User-supplied Substack and Bluesky overrides replace the defaults.
+
+### Block 11 — Hashtags
+
+- **3-5 dispatch-specific** mined from the narration + article: prefer proper-noun anchors (companies, technologies, votes, places, named events) over abstract categories.
+- **2 channel-evergreen** constant across every dispatch: `#TheCivicNode #drinkYourOJ`.
+- **Sentence case enforced** — `#NovaLabs`, `#HIP143`, not `#NOVALABS` or `#novalabs`. PascalCase / camelCase for multi-word, no spaces, no punctuation (YouTube hashtags only honor `[A-Za-z0-9_]`).
+- **Single line, space-separated.** YouTube shows only the first 3 in description order as clickable category tags above the title; put the strongest dispatch-specific tag first.
+- **Total count 5-7** — beyond ~7 YouTube treats as spam-coded.
+- Skill silently re-rolls if count falls outside 5-7.
+
+### Dividers
+
+- All section dividers use double-hyphen wrappers: `-- CHAPTERS --`, `-- THE CIVIC NODE --`.
+- Em-dashes are banned (anti-AI-tell, inherited rule).
+- Hyphenated form scans clean in YouTube's monospace-adjacent description renderer.
+
+### Length budgets (paste-ready output only — excludes metadata block)
+
+| Block | Char budget | Notes |
+|---|---|---|
+| [1] Hook punch | ≤200 chars (incl. line breaks) | Mobile above-fold |
+| [3] Summary | 400-700 chars | 3-5 sentences |
+| [5] Article CTA | ~100 chars + URL | One sentence + bare URL line |
+| [7] Chapter list | varies (~200-500 chars depending on 5-10 chapters) | One line per chapter |
+| [9] Link block | ~150 chars constant | Boilerplate |
+| [11] Hashtags | ~100 chars | 5-7 tags |
+| **Total** | **1,500-2,500 chars target** | YouTube cap is 5,000 |
