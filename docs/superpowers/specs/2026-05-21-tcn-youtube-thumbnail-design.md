@@ -11,7 +11,7 @@
 
 The Civic Node publishes a flagship Substack article each week, plus a companion 5–7 minute YouTube trailer-format video. The YouTube video's job is to drive click-through to Substack, which makes the thumbnail one of the highest-leverage assets in the funnel: it's the gating image between every YouTube impression and any further engagement.
 
-Two upstream skills exist (`tcn-youtube-narration`, `tcn-youtube-slideshow`) and recording happens between Step 3 and Step 4. After recording, three downstream packaging skills are planned: `tcn-youtube-title`, `tcn-youtube-description`, and this one — `tcn-youtube-thumbnail`.
+Two upstream skills exist (`tcn-youtube-narration`, `tcn-youtube-slideshow`) and recording happens between Step 2 and Step 3. After recording, three downstream packaging skills are planned: `tcn-youtube-title`, `tcn-youtube-description`, and this one — `tcn-youtube-thumbnail`.
 
 Today, Justin's thumbnail process is ad-hoc: open an image-gen tool, hand-prompt a scene, hand-overlay text in Figma. The result is inconsistent in character (different faces across dispatches), inconsistent in typography, and slow to produce.
 
@@ -32,9 +32,9 @@ tcn-youtube-slideshow  [Step 2]
     ↓
 ┌─── RECORDING ───┐    [Step 3]
     ↓
-tcn-youtube-title         [Step 4 — planned]
-tcn-youtube-description   [Step 5 — planned]
-tcn-youtube-thumbnail     [Step 6 — this skill]
+tcn-youtube-title         [Step 3 — planned]
+tcn-youtube-description   [Step 4 — planned]
+tcn-youtube-thumbnail     [Step 5 — this skill]
 ```
 
 Recording is the cleavage point between upstream skills (which consume article prose) and downstream packaging skills (which consume the recorded transcript).
