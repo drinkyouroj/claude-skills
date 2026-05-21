@@ -406,3 +406,60 @@ Write `workspace/drafts/<slug>/youtube-description.md` with:
 - The block-level breakdown for reference.
 
 Surface a one-line confirmation: `Wrote youtube-description.md. Paste into YouTube Studio description field.`
+
+---
+
+## Failure Modes
+
+- **No narration and no transcript found** — halt with explicit message and example path. Do not attempt to compose from nothing.
+- **Narration malformed** (missing title block, missing Script Notes footer, missing *Cuts from the article* field) — halt for missing title block (can't get dispatch number); soft-warn for missing *Cuts from the article* and proceed with degraded summary quality.
+- **Slug doesn't match Substack conventions** (>80 chars, underscores, uppercase, chars outside `[a-z0-9-]`) — surface the constructed URL with a flag and require explicit override.
+- **`youtube-title.md` missing or malformed** — soft warn ("orthogonal-mechanism enforcement degraded"); proceed without the orthogonality rule for the hook.
+- **`youtube-thumbnail.md` missing or malformed** — same soft warn, same degraded path.
+- **Transcript present but `.srt` timestamps malformed** — fall back to narration-estimate mode for chapters and note in artifact metadata.
+- **Transcript present but slide content can't be located via fuzzy match** — for that slide only, fall back to narration-estimate timestamp and surface a one-line warning in metadata.
+- **Above-fold hook exceeds 200-char budget after 3 redraft attempts** — surface the best-effort candidate with a one-line note in metadata.
+- **Hashtag count drifts outside 5-7 range** — silently re-roll selection; never surface a count-violating draft.
+- **Article URL confirmation rejected by user, override empty** — surface again with the original candidate; do not assume empty response means accept.
+- **User pastes a description at invocation** — skip drafting; run validation pass; surface warnings; gate as override-accepted.
+- **User redirects at final gate** — apply steering and re-draft only affected block(s) unless redirect is global.
+
+---
+
+## What This Skill Is NOT
+
+- Not a title generator. That's `tcn-youtube-title`.
+- Not a thumbnail prompt generator. That's `tcn-youtube-thumbnail`.
+- Not a slideshow prompt generator. That's `tcn-youtube-slideshow`.
+- Not a narration script generator. That's `tcn-youtube-narration`.
+- Not an article generator. That's the `tcn-article-builder` ecosystem.
+- Not a YouTube uploader / YouTube Studio API client. User pastes the artifact manually.
+- Not a YouTube tags-field generator. The separate metadata "tags" field is deprecated for search ranking; the skill leans on description-body hashtags + proper-noun density instead.
+- Not a transcript cleaner. If the `.srt` is garbled, the skill notes degraded quality and falls back where possible; it does not attempt to fix the source.
+- Not an article URL HTTP validator. Auto-derivation + user confirmation is the gate.
+- Not a multi-language translator. English-only output.
+
+---
+
+## Companion Skills
+
+**Upstream (this skill reads from):**
+- `tcn-youtube-narration` — produces the `youtube-narration.md` with the Script Notes footer and *Cuts from the article* field.
+- Recording → transcript — `.srt` or `.txt` preferred post-record.
+- `tcn-youtube-title` — paired artifact, picked title + mechanism (for orthogonal-hook enforcement).
+- `tcn-youtube-thumbnail` — paired artifact, chosen headline + mechanism (for orthogonal-hook enforcement).
+- Final article draft (`10-final.md`) — optional, mined for SEO anchors.
+
+**Sibling (do not consume directly):**
+- `tcn-youtube-slideshow` — produces the slide deck for the video. No direct interaction with this skill.
+
+**Shared canonical sources (read at runtime, not duplicated):**
+- `workspace/core/anti-ai-writing-style.md` — voice file.
+- `../tcn-youtube-thumbnail/references/thumbnail-headline-patterns.md` — banned content + anti-AI-tells.
+- `../tcn-youtube-title/references/title-patterns.md` — mechanism taxonomy.
+
+---
+
+## Reference Files
+
+- `references/description-anatomy.md` — block-by-block specs (above-fold char budget math, chapter format rules, hashtag selection logic, link block boilerplate, divider conventions, the Audit-Standard description-only mechanism definition, one full Dispatch 004 worked example walking from narration to final description). The source of truth for draft-time decisions. Read at every draft, not duplicated in this SKILL.md. Living document.
