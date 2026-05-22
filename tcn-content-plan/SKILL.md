@@ -391,12 +391,33 @@ Structure the month around the chosen flagship pieces. For each flagship:
 
 Map all 30 days as a numbered list. Each entry:
 ```
-**Item [N] — [Date] ([Day of week])**: [Platform] | [Content type] | [Format] | CTA: yes/no | [Brief note: what this seeds or establishes]
+**Item [N] — [Date] ([Day of week])**: [Platforms] | [Note formats] | FB: [Purpose] | CTA: yes/no | [Brief note: what this seeds or establishes]
 ```
+
+**FB purpose assignment:** Assign each day's `FB:` cell using the weekday rotation default (see `tcn-facebook-post/references/purpose-table.md` § Weekday rotation). The default mapping is:
+
+- Mon, Wed, Sat → Awareness
+- Tue → Engagement
+- Thu, Sun → Soft funnel
+- Fri → Flagship CTA
+
+After auto-assigning, ask the user: `"Any weeks where the FB rotation should shift? E.g., a week with two flagships might need a second hard-funnel day, or a quiet news week might lean more on Engagement posts."` Adjust specific cells based on the answer.
+
+For Soft funnel days, also assign the older Substack article URL that will be linked. The URL belongs in the `Brief note` cell.
 
 ### Step 4: Write the file
 
 Save to `workspace/plans/tcn-notes-30-day-map.md`. Include a "Source Hooks" section at the end listing the insight-sweep hooks that informed the flagship selections, with wiki page citations.
+
+If any FB purposes were assigned non-default values, append an **FB Cadence Note** section after Source Hooks explaining the reasoning. Example:
+
+```markdown
+## FB Cadence Note
+
+Week 2 (Days 8-14) has two flagships (Tue + Fri). Tue's typical Engagement is shifted to Soft funnel to tease Tuesday's flagship, then back to standard rotation Wed onward. Week 3 reverts to default.
+```
+
+If all FB purposes are default, omit the section.
 
 ---
 
