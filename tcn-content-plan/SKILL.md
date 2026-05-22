@@ -242,6 +242,7 @@ formats:
   - "Format 1"
   - "Format 2"
   - "Format 3"
+facebook_purpose: "Awareness"  # one of: Awareness, Engagement, Soft funnel, Flagship CTA
 status: draft
 live_news:
   - "First live news item. Colons, apostrophes, em dashes all safe inside the quotes."
@@ -293,12 +294,32 @@ Place this section directly under the YAML frontmatter, before any other content
 
 The block is short on purpose. If it grows past ~10 lines you're rewriting the plan instead of indexing it; cut back to the safe/hold split.
 
+**FB rows in the Status block:** FB options labeled `Safe` go in the Safe-to-post table alongside X and Notes. FB options labeled `News-dependent` go in the Hold list with the trigger phrase. Same scanning surface, no new columns.
+
+**Facebook section template** — place this section after `## LinkedIn` (if present, on flagship days) and before `## Engagement`:
+
+```markdown
+## Facebook
+
+[paste the markdown block returned by tcn-facebook-post verbatim]
+```
+
+The block already contains the `**Purpose:**` / `**Shape:**` / `**Posting time:**` header, the option subsections (`### Option A` etc.), the image guidance, and the recommendation. Do not reformat.
+
 **Schedule summary table** — end every plan with this table. The **Depends on** column is the key scanning surface: each row states the specific news condition the recommended option requires, so the user can map a slot to a postability decision in one glance.
 
 ```
 | Time | Platform | Content | Depends on |
 |------|----------|---------|------------|
 ```
+
+The FB row uses the same 4-column structure with purpose inline in the Content cell:
+
+```
+| 09:00 ET | Facebook | Caption (Awareness): [option A summary] | Safe |
+```
+
+For Flagship CTA days, the time is post-publish (e.g., `11:30 ET`).
 
 `Depends on` cell phrasing — match the option's shelf-life label:
 - Frame-forward → `no trigger needed (frame survives any outcome)`
