@@ -61,12 +61,14 @@ Pick one. Affects what kind of library candidate the search surfaces.
 
 ### Dispatch-004 (Helium / Nova Labs)
 
-Cold open: "I bought a $499 hotspot to mine WiFi tokens. Nova Labs owns what it earns."
+Cold open: McDonald's franchise FDD (200-page disclosure document, federally required) vs 385,000 Helium hotspot operators who got "Vibes" instead. The visual handle is the contrast: thick legal binder vs single hotspot device.
 
 Composed query:
 ```
-illustrated editorial YouTube thumbnail, hotspot earnings dispute, dramatic, investigative, mid-shot, character-driven, magazine style
+illustrated editorial YouTube thumbnail, franchise disclosure gap, investigative, archival, split-screen comparison, character-driven, magazine style
 ```
+
+Note: `split-screen comparison` is the composition hint that proved most productive here — the dispatch's rhetorical structure is literally a comparison between two things (what McDonald's franchisees get vs what Helium operators got). When the dispatch concept centers on a contrast between two named entities or two states-of-the-world, prefer `split-screen comparison` over `mid-shot`. The library returns more relevant candidates and the downstream Variant A composition has a stronger compositional anchor.
 
 ### Hypothetical dispatch on FAA + drone airspace
 

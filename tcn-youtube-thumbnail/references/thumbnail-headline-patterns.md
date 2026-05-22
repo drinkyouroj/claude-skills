@@ -17,6 +17,7 @@ Thumbnail headlines extend TCN's existing voice corpus:
 ## Word-count discipline
 
 - 3–6 words inclusive. Hyphenated compounds count as one word. Contractions count as one word. Numbers count as one word regardless of digit count.
+- **Symbols functioning as words count as one word each.** Load-bearing symbols (≠, +, ÷, ×, >, <, =, →) that stand in for a verb or relational operator count toward the word total. Purely decorative symbols (·, —, …) do not count, but are generally discouraged in thumbnail headlines and require the symbol to be doing actual rhetorical work to justify inclusion. See "Symbol headlines" below for which symbols survive thumbnail compression.
 - 3 words: punchy, works when you have a strong anchor noun.
 - 4–5 words: the sweet spot for most dispatches.
 - 6 words: only when every word earns its place.
@@ -115,6 +116,48 @@ One or two nouns. Pure provocation through the noun choice.
 - "The Helium Receipt"
 - "The Quiet Default"
 
+## Symbol headlines
+
+Math and logic symbols can substitute for words to compress headlines further and signal "this is analysis." TCN's identity is "we read the receipts" — symbol notation is brand-coherent shorthand for that posture. Used carefully, a symbol in a headline doubles as a visual stop-element: the eye notices it before it reads it.
+
+### When to use
+
+- The symbol carries actual rhetorical weight (states a relationship, replaces a verb, anchors a comparison).
+- Compressing to a symbol saves at least one word while preserving meaning.
+- The dispatch's argument structure is a relationship between two named things (X is/isn't Y, X versus Y, X above/below Y).
+
+### When not to use
+
+- The symbol is decorative — it could be removed and the headline would still read the same.
+- The headline already uses a number-as-word; adding a symbol on top reads as overloaded math.
+- The dispatch is alarm-bell or emotional rather than analytical — symbols read as cold and dry, which can fight the wrong register.
+
+### Symbols that survive thumbnail compression
+
+These have weight-bearing strokes that hold up at YouTube mobile-feed scale (~240 px wide):
+
+- `≠` — "is not / does not equal." Composite-time caveat: the diagonal slash must be 2× the cross-bar weight or it blurs into `=` and inverts the meaning. Spec the slash weight explicitly in the overlay spec.
+- `+` — "and / plus / combined with." Survives compression cleanly.
+- `÷` — "per / divided by." Slightly fragile but workable.
+- `×` — "times / by." Reads cleanly at small sizes.
+- `>` / `<` — "greater than / less than." Strong silhouettes.
+- `→` — "leads to / becomes." Works as a directional connector.
+- `=` — "equals / is." Works alone; pairs naturally with `≠` for series-style A/B thumbnails.
+
+### Symbols to avoid
+
+Thin or meaning-bearing strokes that blur out under compression:
+
+- `≈` — the wavy lines lose definition; reads as `=` or noise.
+- `≤` / `≥` — the underbar is too thin to survive thumbnail scale.
+- `±` — the small vertical stroke disappears at compression.
+- Any superscript or subscript (² ³ ₁ ₂) — too small to read.
+- Any compound symbol made of three or more thin strokes.
+
+### Worked example
+
+Dispatch-004 used `≠` in the headline "Vibes ≠ Disclosure." The symbol replaces the word "aren't" (3 words → 3 words inclusive, but with maximum visual compression and a brand-coherent "we do math here" register). The composite-time directive specifies a heavy slash weight to survive mobile feed compression.
+
 ## Anti-pattern gallery
 
 Examples of candidates that violate criteria, with the reason. Educational, not exhaustive.
@@ -128,19 +171,19 @@ Examples of candidates that violate criteria, with the reason. Educational, not 
 
 ## Worked example walkthroughs
 
-### Dispatch-004 — "You Own the Hotspot"
+### Dispatch-004 — "You Own the Hotspot. Nova Labs Owns What It Earns."
 
-**Cold-open candidate:** "I bought a $499 hotspot to mine WiFi tokens. Nova Labs owns what it earns."
+**Cold-open** (from the narration's HOOK slide): McDonald's franchise FDD (200-page disclosure document, federally required) versus 385,000 Helium hotspot operators who got no equivalent disclosure. Punchline word: "Vibes."
 
 **3 drafted candidates with rationales:**
 
-1. *"You Own the Hotspot"* — Direct Address + Concrete Anchor + Twist. Anchors "you" + the hardware noun. The "but…" hangs implied.
-2. *"$499 to Mine WiFi"* — Specific Contradiction. Anchors dollar amount. Tension: spending money to mine something that should be free.
-3. *"Nova Labs Owns It"* — Implied Stakes + named entity. The "it" is load-bearing — viewer has to click to find out what.
+1. *"Vibes ≠ Disclosure"* — Concrete Anchor + Twist + symbol headline. Anchors the cold-open's landing punchline ("Vibes") and contrasts it with the regulatory frame ("Disclosure") via the `≠` glyph. Sardonic understatement. 3 word-equivalents (≠ counts as one per the Symbol headlines section). The math notation signals "we read the receipts" — brand-coherent register before the viewer reads a word.
+2. *"McDonald's Has a Receipt"* — Implied Stakes + Concrete Anchor. McDonald's is the cold-open's recognizable opening, universally legible. Twist: who *doesn't* have one? Curiosity-gap is the inversion. 4 words.
+3. *"385,000 Bought Vibes"* — Concrete Anchor + Bare-Noun Provocation. Anchors the operator count from the narration's HOOK slide. The word "Vibes" does the rhetorical work. Maximally compressed at 3 words (the comma-separated number counts as one).
 
-**Picked:** Candidate 1 — strongest curiosity gap, direct-address pulls viewer in, the implied twist is the gap.
+**Picked:** Candidate 1 — strongest visual stop-power, maximum compression, math notation as brand identity glyph. Composite-time caveat: the `≠` slash must be weighted heavily enough to survive mobile-feed compression (see Symbol headlines section).
 
-(Add a second worked example after the second dispatch is produced. Until then, the dispatch-004 walkthrough alone is sufficient.)
+(Add a second worked example after the second dispatch is produced.)
 
 ## How the skill uses this file
 

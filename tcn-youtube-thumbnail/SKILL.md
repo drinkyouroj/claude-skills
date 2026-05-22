@@ -52,7 +52,13 @@ Recording is the cleavage point between upstream skills (which consume article p
 
   Absence of all three triggers reference-image mode.
 
-- **Illustrated-Justin reference image path.** Default `~/Documents/illustrated-justin-ref.png`. Used only in reference-image mode. If missing, the produced prompts contain a `{{CHARACTER_REFERENCE_IMAGE}}` placeholder and a one-line setup note.
+- **Illustrated-Justin reference image directory.** Used only in reference-image mode. The directory holds the named-by-purpose reference image library (`headshot-neutral-forward.png`, `headshot-smirk.png`, `headshot-concerned.png`, `fullbody-standing-neutral.png`, `fullbody-pointing-right.png`, `fullbody-shrug-open-arms.png`, etc.). Lookup order, first hit wins:
+  1. Explicit invocation argument (e.g., `--refs-dir <path>` or natural-language equivalent)
+  2. `~/.config/tcn/illustrated-justin-refs.path` (one-line file containing the directory path)
+  3. `TCN_ILLUSTRATED_JUSTIN_REFS_DIR` environment variable
+  4. Default `~/Pictures/tcn-justin-references/`
+
+  Per-variant ref selection from this directory is driven by dispatch tone and concept — full mapping table lives in `references/reference-image-prompt-template.md`. If the directory is missing entirely, or `headshot-neutral-forward.png` is missing inside it, halt with a setup note (where to place files, suggested filename vocabulary, link to the template's mapping table). If a specific tone-mapped ref is missing, fall back silently to `headshot-neutral-forward.png` (Variant B) or `fullbody-standing-neutral.png` (Variant A) and note the substitution in the artifact header.
 - **Steering** — free-text guidance like "more daytime", "wide shot, not close-up", "lean apocalyptic-tech vibe", "no faces in this one".
 - **Override vibe** — user names a library prompt slug or category to skip Gate 1.
 - **Override headline** — user supplies the thumbnail headline directly to skip Gate 2.
@@ -102,7 +108,7 @@ The skill ships dual-mode. Same artifact shape in both modes — only the prompt
 | Concern | Reference-image mode | LoRA mode |
 |---|---|---|
 | Activation | No LoRA URL found in any of the three sources | LoRA URL found in any source |
-| Character source in prompt | Inline reference to `illustrated-justin-ref.png` path | Inline LoRA URL parameter |
+| Character source in prompt | Inline reference to a tone-mapped file from the refs directory (e.g., `headshot-smirk.png` for Variant B, `fullbody-pointing-right.png` for Variant A) | Inline LoRA URL parameter |
 | Prompt format | Model-agnostic — "use the attached reference image as character reference, match facial features and styling" | Flux-specific — formatted for fal MCP's `run_model` schema with Flux.1 [dev] endpoint |
 | Render assist | None — user pastes prompt into their image-gen tool of choice | Opt-in: skill offers to call fal MCP and save PNGs |
 | Output file header | `**Mode:** reference-image` | `**Mode:** lora` |
@@ -284,7 +290,9 @@ Full overlay-spec template (sizing curves, edge cases, mark sizing rules) lives 
 - **Library lookup returns nothing usable** — skip Gate 1 silently; compose without a vibe reference. Note this in the artifact file header.
 - **fal MCP not installed but user has a LoRA URL** — produce the artifact in LoRA mode normally; suppress the render gate with a one-line note ("fal MCP not detected — skipping render gate; run prompts manually").
 - **fal render fails** (timeout, credit exhausted, model unavailable) — keep the prompt artifact intact; surface the error message; suggest manual render via the prompt as-is.
-- **Reference image missing in reference-image mode** — produce the artifact with `{{CHARACTER_REFERENCE_IMAGE}}` placeholder and a setup note (where to place the file, suggested filename, suggested specs).
+- **Refs directory missing entirely in reference-image mode** — halt with a setup note listing the lookup order, the suggested default path (`~/Pictures/tcn-justin-references/`), and pointer to the template's filename vocabulary.
+- **Anchor ref (`headshot-neutral-forward.png`) missing inside the refs directory** — halt with the same setup note. The anchor is required because the fallback chain depends on it.
+- **Tone-mapped ref missing inside the refs directory** (e.g., dispatch tone maps to `headshot-smirk.png` but file is absent) — fall back silently to `headshot-neutral-forward.png` (Variant B) or `fullbody-standing-neutral.png` (Variant A); note the substitution in the artifact's header.
 - **Dispatch number missing from narration title block and not derivable from the slug** — halt and ask the user to confirm. Do not guess.
 - **Combined / non-standard narration zones** — tolerate. The thumbnail only needs the cold-open and the overall dispatch concept, not the full slide structure.
 - **User redirects at the final gate** — re-enter only the affected gate(s):
@@ -298,7 +306,7 @@ Full overlay-spec template (sizing curves, edge cases, mark sizing rules) lives 
 ## What This Skill Is NOT
 
 - Not a LoRA trainer. LoRA training is a one-time user task via fal MCP (or any Flux LoRA training service). The skill assumes the URL is provided.
-- Not a reference-image generator. The canonical `illustrated-justin-ref.png` is a one-time Freepik (or equivalent) session.
+- Not a reference-image generator. The canonical reference library (`~/Pictures/tcn-justin-references/` by default) is built once via Magnific/Freepik/Nano Banana 2 with a trained character and fixed seed. The skill consumes it; it does not produce it.
 - Not a compositor. The skill writes the overlay spec; Figma/Canva/Photoshop composite the final image.
 - Not a YouTube uploader. The skill produces the artifacts; the user uploads manually (or via a future packaging skill).
 - Not a title or description generator. Those are sibling skills (`tcn-youtube-title`, `tcn-youtube-description`).
@@ -338,4 +346,4 @@ See spec §14.
 - `references/thumbnail-headline-patterns.md` — pattern library for §9 candidate drafting. Voice rules, banned-word list, banned clickbait template list, structural patterns with worked examples, anti-pattern gallery. The source of truth for headline drafting — the skill reads this file at drafting time. Living document.
 - `references/text-overlay-spec.md` — full typography/layout/color spec for the overlay. Courier Prime sizing curves at 1280×720 and at common Figma frame sizes. Safe-zone math (center-80% rule explained). Mark sizing rules. Color tokens pulled from `colors_and_type.css`.
 - `references/flux-prompt-template.md` — Flux prompt structure for LoRA mode. Composition directives for Variant A vs Variant B. Mobile-safe-zone phrasing. Negative prompt patterns. fal MCP `run_model` parameter shape.
-- `references/reference-image-prompt-template.md` — model-agnostic prompt structure for reference-image mode. Phrasing that works across Freepik, Nano Banana Pro, Midjourney `--cref`, Flux Kontext. Notes on each tool's quirks.
+- `references/reference-image-prompt-template.md` — model-agnostic prompt structure for reference-image mode. Holds the **tone-to-ref selection table** (dispatch tone → which `headshot-*.png` for Variant B; dispatch concept → which `fullbody-*.png` for Variant A), the fallback chain when a tone-mapped ref is missing, and tool-specific phrasing quirks (Nano Banana 2 / Gemini, Freepik, Midjourney `--cref`, Flux Kontext). The skill reads this file at composition time, so the mapping can evolve without skill-code edits.
