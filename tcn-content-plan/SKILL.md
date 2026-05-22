@@ -188,6 +188,30 @@ After receiving each draft, add: image/screenshot guidance (needed or not, and w
 
 300–400 words. Professional register — no newsletter voice, no first-person analytical asides. Cite every figure. End with the article link. No CTA language.
 
+### Step 7.5: Draft the Facebook post (delegate to `tcn-facebook-post`)
+
+Invoke the `tcn-facebook-post` skill via the Skill tool. The dispatch depends on the day's `facebook_purpose:` value:
+
+**Funnel/Flagship days** (`Soft funnel` or `Flagship CTA`) — sequential dispatch: wait for Step 5 output (X standalone copy) before invoking. Pass:
+- `purpose` — from frontmatter
+- `source_material` — the X standalone option text from Step 5 + the flagship article URL + the flagship article tagline (if available)
+- `spent_list` — from Step 2
+- `flagship_url` — the article URL (for Flagship CTA, today's article; for Soft funnel, the older referenced piece from the monthly plan)
+- `date` — today's date
+
+**Awareness/Engagement days** (`Awareness` or `Engagement`) — parallel dispatch: invoke alongside Steps 5 and 6 (no upstream dependency). Pass:
+- `purpose` — from frontmatter
+- `source_material` — today's live news (Step 1) + FRESH list (Step 2)
+- `spent_list` — from Step 2
+- `date` — today's date
+- Do NOT pass `flagship_url`
+
+Capture the returned markdown block verbatim under the `## Facebook` section of the plan file (Step 9 covers the file structure).
+
+Do not freehand the FB copy in this skill. `tcn-facebook-post` owns the FB-Explainer voice, the purpose → shape mapping, the image guidance, and the shelf-life labeling.
+
+**Posting time:** the returned `**Posting time:**` line drives the schedule table row in Step 9. If Flagship CTA, the time MUST be after the article publishes — verify before writing the schedule table; if the article isn't yet live at draft time, use a placeholder posting window like `11:00-13:00 ET (after publish)` and surface the dependency in the recommendation.
+
 ### Step 8: Draft engagement notes
 
 Name 4–6 specific writers or publications who are likely posting on today's topic. For each, state what specific angle, data point, or frame from today's content would make the comment worth reading. Don't write generic "add context" notes — be specific about what the reader would learn from the comment that they couldn't get from the original post.
