@@ -64,6 +64,8 @@ The headline should be built around the shareable core, not the topic.
 
 ### 2. Draft 3 Headline Options
 
+**Hard length constraint**: every headline must be **under 60 characters** (including spaces, excluding the subheadline). Substack truncates longer titles in feed cards and email subject lines; over 60 reliably loses the back half of the promise where it matters most. Count characters before presenting any option — if a candidate runs long, tighten or cut before it reaches the user. This is not advisory; it is a pass/fail gate.
+
 Each option should use a different hook structure. Pick 3 from:
 
 **A. Borrowed Frame**
@@ -96,6 +98,7 @@ For each headline, write a subheadline (the Substack deck) that:
 - Earns the click without overpromising or giving away the whole argument
 - Is 1-2 sentences, conversational, specific
 - Doesn't repeat the headline's language or frame
+- **Is under 160 characters** (including spaces). This is a hard constraint — Substack's deck rendering and email preview truncate longer lines, and the second sentence is where the back-half clarification often lives. Count characters before presenting any option; if a candidate runs long, tighten before the user sees it.
 
 The subheadline is where you can name the template's scope:
 
@@ -106,6 +109,8 @@ The subheadline is where you can name the template's scope:
 ### 4. Run the Tests
 
 For each headline + subheadline pair:
+
+**Length check** — Headline must be under 60 characters; subheadline must be under 160 characters. Report the exact count for both in every option so the user can see the budget at a glance. Any option that exceeds either ceiling must be revised before presentation — never present an over-length option and ask the user to choose; that wastes their attention on a candidate the platform will truncate. If a strong hook genuinely cannot fit under the ceiling, flag the constraint as the binding one and offer a tightened variant.
 
 **Signal test** — Does this promise something Marcus couldn't find easily himself? If the headline could appear on three other newsletters, it's not specific enough.
 
@@ -146,28 +151,28 @@ These patterns are specifically wrong for the Substack audience Marcus represent
 
 ### Option A: [Hook Structure Name]
 
-**Headline:** [headline text]
-**Subheadline:** [subheadline text]
+**Headline:** [headline text] *([N] chars / 60)*
+**Subheadline:** [subheadline text] *([N] chars / 160)*
 
-*Signal: [pass/fail + brief note] | Send: [pass/fail + brief note]*
+*Length: [pass/fail] | Signal: [pass/fail + brief note] | Send: [pass/fail + brief note]*
 
 ---
 
 ### Option B: [Hook Structure Name]
 
-**Headline:** [headline text]
-**Subheadline:** [subheadline text]
+**Headline:** [headline text] *([N] chars / 60)*
+**Subheadline:** [subheadline text] *([N] chars / 160)*
 
-*Signal: [pass/fail + brief note] | Send: [pass/fail + brief note]*
+*Length: [pass/fail] | Signal: [pass/fail + brief note] | Send: [pass/fail + brief note]*
 
 ---
 
 ### Option C: [Hook Structure Name]
 
-**Headline:** [headline text]
-**Subheadline:** [subheadline text]
+**Headline:** [headline text] *([N] chars / 60)*
+**Subheadline:** [subheadline text] *([N] chars / 160)*
 
-*Signal: [pass/fail + brief note] | Send: [pass/fail + brief note]*
+*Length: [pass/fail] | Signal: [pass/fail + brief note] | Send: [pass/fail + brief note]*
 
 ---
 
