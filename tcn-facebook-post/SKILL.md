@@ -171,3 +171,29 @@ An FB post option works when:
 - **The "Substack leak" failure** (any day): closed em dashes, "of course," "naturally," copulative avoidance bleeding through from the canonical voice file. Re-check against `voice-register.md` § What relaxes.
 - **The "stock photo abstraction" failure** (caption days): AI image prompts that describe abstract concepts ("inflation visualization") instead of concrete scenes. Concrete scenes with specific anchors (a grocery receipt, a Treasury bond, a Virginia data center) outperform.
 - **The "click-bait CTA" failure** (Flagship CTA days): writing "you won't believe what we found" or "must-read" framings to drive clicks. These read as low-trust and tank reach. Plain-English tagline > engagement bait.
+
+---
+
+## Reference files
+
+Load these when needed:
+
+- `references/purpose-table.md` — canonical purpose × shape × image × voice × CTA matrix; weekday rotation appendix; posting time defaults
+- `references/voice-register.md` — FB-Explainer voice doc (three dials, what survives from canonical voice file, what relaxes, hard rules, Marcus-FB check, length-bounded examples, voice fallback)
+- `references/worked-example.md` — two complete invocations end-to-end (Tue Awareness + Fri Flagship CTA)
+
+## Sister skills (do not freehand the prose; delegate)
+
+- `ai-image-prompts-skill` — invoked for AI-generated image prompts on Awareness and Engagement days. If unavailable, fall back to a stock-photo search-query suggestion and surface the gap.
+
+## Skills this is invoked by
+
+- `tcn-content-plan` Step 7.5 (Mode 2) — primary integration. Receives the markdown block from this skill and inserts it under the daily plan file's `## Facebook` section.
+
+## Voice authority
+
+This skill MUST load `workspace/core/anti-ai-writing-style.md` from the active project's root before making any voice decision. That file is the single source of truth for banned vocabulary (§ 3A), negative parallelisms (§ 3F), dismissal labels (§ 3H), vocabulary cliff and meaning-preservation (§ 3I), and closing-line abstraction (§ 3J).
+
+This skill MUST NOT maintain a duplicate copy of any of the above. `references/voice-register.md` documents which canonical rules **relax** for FB-Explainer; it does not override the hard rules.
+
+If the canonical file is missing, follow the fallback in `references/voice-register.md` § Voice fallback.
