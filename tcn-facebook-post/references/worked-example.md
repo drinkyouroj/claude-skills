@@ -75,21 +75,21 @@ Quick reality check: the federal government now spends more paying interest on t
 **Posting time:** 11:30 ET (after article publishes)
 
 ### Option A — Safe
-The inflation number everyone's talking about is actually the smaller story. The bigger one is buried in the same release: services inflation isn't slowing, and that's where most of your monthly budget lives. Today's piece walks through what that means for the next six months.
+The inflation number everyone's talking about is actually the smaller story. The bigger one is buried in the same release: services inflation, which covers rent, healthcare, and childcare, isn't slowing at all, and that's where most of your monthly budget actually lives. Today's piece walks through what that means for the next six months of household costs and what the Fed can realistically do about it.
 
 Full piece: https://thecivicnode.substack.com/p/services-inflation-q1-2026
 
 **Image:** Use Substack hero from https://thecivicnode.substack.com/p/services-inflation-q1-2026
 
 ### Option B — Safe
-Here's the thing about this week's inflation report: the part that's slowing is goods (TVs, cars, appliances). The part that's NOT slowing is services (rent, healthcare, childcare) — and that's the part you feel every month. Friday's piece pulls that apart.
+Here's the thing about this week's inflation report: the part that's slowing is goods (TVs, cars, appliances dropping in price). The part that's NOT slowing is services (rent, healthcare, childcare, car insurance) — and that's the part you feel every single month at home. Friday's piece pulls that apart and looks at why one keeps falling while the other one doesn't budge.
 
 Full piece: https://thecivicnode.substack.com/p/services-inflation-q1-2026
 
 **Image:** Use Substack hero from https://thecivicnode.substack.com/p/services-inflation-q1-2026
 
 ### Option C — Safe
-The April inflation number looked like good news. Underneath it, the part of inflation most households actually feel (services — rent, healthcare, childcare) is still running well above the Fed's target. Worth understanding why before the next rate decision.
+The April inflation number looked like good news on the surface. Underneath it, the part of inflation most households actually feel — services like rent, healthcare, childcare, and insurance — is still running well above the Fed's target and showing no real sign of slowing. Worth understanding the gap before the next rate decision comes around in mid-June.
 
 Full piece: https://thecivicnode.substack.com/p/services-inflation-q1-2026
 
@@ -101,7 +101,7 @@ Full piece: https://thecivicnode.substack.com/p/services-inflation-q1-2026
 ## Self-checks against the quality bar
 
 For Example 1 (Tuesday Awareness):
-- ✅ All 3 options ≤30 words (A: 26, B: 26, C: 25)
+- ✅ All 3 options ≤30 words (A: 25, B: 27, C: 24)
 - ✅ No closed em dashes (caption length)
 - ✅ Specific anchors (interest payments $881B, defense $880B)
 - ✅ One warmth-marker in B ("honestly"); zero in A and C
@@ -111,9 +111,9 @@ For Example 1 (Tuesday Awareness):
 - ✅ No link (matches Awareness CTA rule)
 
 For Example 2 (Friday Flagship CTA):
-- ✅ All 3 options within 50-80 words (A: 56, B: 55, C: 52)
-- ✅ One closed em dash in B ("services — rent, healthcare, childcare"); zero in A and C — within paragraph allowance
-- ✅ Specific anchors (services inflation, six months, rent/healthcare/childcare)
+- ✅ All 3 options within 50-80 words (A: 66, B: 62, C: 58)
+- ✅ Em dash usage: zero in A, one in B ("services ... — and that's the part"), two in C (opening/closing dashes around "services like rent, healthcare, childcare, and insurance") — all within paragraph allowance
+- ✅ Specific anchors (services inflation, six months, rent/healthcare/childcare/insurance, mid-June rate decision)
 - ✅ Hard link on its own line at end
 - ✅ No banned vocab, no vague placeholder verbs, no "of course/naturally/predictably"
 - ✅ Substack hero image source specified
