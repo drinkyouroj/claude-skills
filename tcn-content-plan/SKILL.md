@@ -334,15 +334,22 @@ Even though `tcn-post` and `tcn-substack-notes` are voice-aware, the assembled o
 
 Pass `tcn-text-humanizer` the prose blocks from the just-written options file at `workspace/notes/YYYY-MM-DD-{lowercase_weekday}-options.md`: the Note option bodies, the X option bodies, the restack addenda, and the engagement comment angles. Do not feed it the YAML frontmatter, schedule table, or section headings — those aren't voice surfaces.
 
+**FB prose is explicitly NOT passed to `tcn-text-humanizer`.** The humanizer is calibrated for Justin's Substack voice (closed em dashes, copulative avoidance, specific rhythm). Running it over FB-Explainer prose would over-correct the plain-English register back into Substack voice. The FB section must be audited separately — see the hard-fail conditions below.
+
 For each block returned, replace the original prose in the file with the humanized version via Edit. Preserve the surrounding scaffolding (option labels like "### Option A", italicized meta-commentary, image guidance lines) — only the prose body changes.
 
-**Hard fail conditions.** After `tcn-text-humanizer`'s pass, audit the assembled file against the canonical catalog in `workspace/core/anti-ai-writing-style.md`:
+**Hard fail conditions.** After `tcn-text-humanizer`'s pass, audit the assembled file against the canonical catalog in `workspace/core/anti-ai-writing-style.md`. This audit covers ALL prose surfaces in the file, including the FB section (which skipped the humanizer):
 - Banned vocabulary — § 3A
 - Negative parallelisms — § 3F
 - Dismissal labels — § 3H
 - Vocabulary cliff and meaning-preservation — § 3I
 - Closing-line abstraction — § 3J
-- Plus per-skill voice non-negotiables from `tcn-text-humanizer` (closed em dashes, copulative-avoidance verbs, sentence-case headers, Justin's TCN-specific hit-list phrases)
+- Plus per-skill voice non-negotiables from `tcn-text-humanizer` (closed em dashes, copulative-avoidance verbs, sentence-case headers, Justin's TCN-specific hit-list phrases) — these apply to X, Notes, restacks, and engagement copy ONLY. They do NOT apply to FB prose, which has its own register (see `tcn-facebook-post/references/voice-register.md`).
+- **FB-specific hard fails (audit the `## Facebook` section against these):**
+  - No vague placeholder verbs ("hit a number," "saw movement," "raised concerns," "made waves," "had a moment")
+  - Caption length ≤30 words; paragraph length 50-80 words (hard fail outside range)
+  - Closed em dashes: zero at caption length; max 1 at paragraph length
+  - Image guidance is concrete (AI prompt text, Substack URL, or screenshot recommendation — never "find an image")
 
 Do not duplicate the lists here. If a check needs to verify a specific term or phrase, read the canonical file. If any item fires, fix immediately even if the skill didn't flag it.
 
