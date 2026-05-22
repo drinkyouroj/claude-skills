@@ -107,8 +107,26 @@ Word target: ~[X] words | Tone: [analytical / sardonic / personal / building]
 Argument job: [one sentence — what does this section add that the previous section didn't establish?]
 ```
 
-The subheadline is proposed but not final. Format: under 12 words, specific, slightly provocative.
-Someone scanning only the headers should get the argument's shape.
+**Section header format — strict rules.** The proposed subheadline is not final, but it must be cast in the canonical format the draft will inherit:
+
+- **Title case on the left of the colon** (the template section name): `The Spark`, `The Source Code`, `The Mechanics`, `My Debug`, `Personal Code`, `The Human Element`. Match the template's section name verbatim — do not invent new section names.
+- **Sentence case on the right of the colon** (the actual headline that previews the section's argument): only the first word capitalized, plus any proper nouns. *Not* title case. `The Source Code: How a non-binding letter became a binding market` — not `How a Non-Binding Letter Became a Binding Market`.
+- **No trailing punctuation** when the right-of-colon is a single sentence or fragment. `The Pattern: Apple bought the supply from a hotel lobby` — no period.
+- **Internal punctuation only when multiple sentences are needed.** When the subheadline runs as two short sentences (or a sentence followed by a punctuated fragment), use sentence-ending punctuation on each. `Other Section: This is the subject. This is, too.` is the canonical two-sentence shape.
+- **Under 12 words on the right of the colon.** Specific. Slightly provocative. Someone scanning only the headers should get the argument's shape.
+
+**How many section headers to produce.** Match the template:
+- Triple Connection, System Audit, Concept Decoder → **4 section headers** (one per section, matching the template's named sections).
+- Pattern Report → **different shape.** Generate the opener subheadline, one subheadline per item (4–7 items, per the template), the personal reflection header, and the close header. The "4 sections" rule does not apply; the listicle's item count drives the header count. Each item header still follows the casing/punctuation rules above, with the item's signal name on the left of the colon and the implication on the right (e.g., `DRAM Floor: Geopolitics is doing the price work demand used to`).
+
+Examples (canonical, drawn from real Civic Node pieces):
+- `The Source Code: How a non-binding letter became a binding market`
+- `The Spark: Five forces are holding the DRAM floor through 2027`
+- `The Mechanics: Why proof of coverage stopped paying coverage`
+- `My Debug: I bought the hotspot. I didn't read the docs.`  *(two sentences — periods retained)*
+- `The Human Element: The pricing authority was never yours`
+
+Someone scanning only the headers should be able to reconstruct the argument's arc. Headers that read as topic labels (`The Mechanics: How it works`) fail the scan test — the right-of-colon must carry the specific claim, not the section's generic purpose.
 
 ---
 
