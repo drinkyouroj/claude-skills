@@ -89,7 +89,7 @@ Full piece: https://thecivicnode.substack.com/p/services-inflation-q1-2026
 **Image:** Use Substack hero from https://thecivicnode.substack.com/p/services-inflation-q1-2026
 
 ### Option C — Safe
-The April inflation number looked like good news on the surface. Underneath it, the part of inflation most households actually feel — services like rent, healthcare, childcare, and insurance — is still running well above the Fed's target and showing no real sign of slowing. Worth understanding the gap before the next rate decision comes around in mid-June.
+The April inflation number looked like good news on the surface. Underneath it, the part of inflation most households actually feel is still running well above the Fed's target — services like rent, healthcare, childcare, and insurance show no sign of slowing. Worth understanding the gap before the next rate decision comes around in mid-June.
 
 Full piece: https://thecivicnode.substack.com/p/services-inflation-q1-2026
 
@@ -111,8 +111,8 @@ For Example 1 (Tuesday Awareness):
 - ✅ No link (matches Awareness CTA rule)
 
 For Example 2 (Friday Flagship CTA):
-- ✅ All 3 options within 50-80 words (A: 66, B: 62, C: 58)
-- ✅ Em dash usage: zero in A, one in B ("services ... — and that's the part"), two in C (opening/closing dashes around "services like rent, healthcare, childcare, and insurance") — all within paragraph allowance
+- ✅ All 3 options within 50-80 words (A: 66, B: 62, C: 55)
+- ✅ Em dash usage: zero in A, one in B ("services ... — and that's the part"), one in C (introducing the services-list elaboration) — all within paragraph allowance (max 1 per post)
 - ✅ Specific anchors (services inflation, six months, rent/healthcare/childcare/insurance, mid-June rate decision)
 - ✅ Hard link on its own line at end
 - ✅ No banned vocab, no vague placeholder verbs, no "of course/naturally/predictably"
