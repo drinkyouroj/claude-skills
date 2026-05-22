@@ -7,6 +7,7 @@
 | Substack Notes | Weekdays: 3–10 PM ET. Weekend: 8–11 PM ET only. |
 | X (Twitter) | Anytime — no window restriction. |
 | LinkedIn | Weekday afternoons preferred. No hard rule. |
+| Facebook | Daily, 09:00-10:00 ET typical (or 19:00-21:00 ET fallback). Flagship days shift to 11:00-13:00 ET (must be after article publishes). |
 | Flagship article | Friday AM — unrestricted. |
 | Paid ("thinking behind the thinking") note | Wednesday, no specific window. |
 
@@ -89,6 +90,21 @@ No post should summarize the piece. The thread fragments the argument so reading
 - Self-contained: ≤50 words, readable without clicking anything
 - 2–3 options per standalone, with a recommendation specifying when to use each option
 - On flagship days, replace the standalone with the 10-post thread
+
+---
+
+## Facebook Rules
+
+- 1 post per day, 7 days a week (no weekend reduction — FB doesn't have Substack's audience-fatigue dynamic).
+- Purpose follows weekday rotation by default (see `tcn-facebook-post/references/purpose-table.md` § Weekday rotation):
+  - Mon, Wed, Sat → Awareness
+  - Tue → Engagement
+  - Thu, Sun → Soft funnel
+  - Fri → Flagship CTA
+- Monthly plan can override via the `FB:` cell in the 30-day map entry.
+- Shape and image source flow from purpose (caption + AI image vs. paragraph + Substack hero); never freehand — delegate to `tcn-facebook-post`.
+- Hard restriction: never post the FB Flagship CTA before the article is live on Fridays. Out-of-order publishing breaks the funnel.
+- Voice: FB-Explainer register (separate from Substack/X/LinkedIn). See `tcn-facebook-post/references/voice-register.md`.
 
 ---
 
