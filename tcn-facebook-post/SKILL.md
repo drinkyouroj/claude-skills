@@ -142,3 +142,32 @@ If all options are News-dependent and the trigger may not fire, the recommendati
 ### Step 6: Assemble and return
 
 Format the output per the Outputs section. Return as a markdown block. The orchestrator handles file insertion.
+
+---
+
+## Quality bar
+
+An FB post option works when:
+
+- **Shape match:** caption ≤30 words OR paragraph 50-80 words. Outside range = hard fail.
+- **Image guidance is concrete:** an actual AI prompt, a specific URL, or a specific screenshot recommendation. "Find an image" = hard fail.
+- **Shelf-life label present:** Safe or News-dependent, with a specific dependency phrase if News-dependent.
+- **No vague placeholder verbs:** "hit a number," "saw movement," "raised concerns," "made waves," "had a moment" = hard fail. See `references/voice-register.md` § Hard rule.
+- **No banned vocabulary** from `workspace/core/anti-ai-writing-style.md` § 3A (when the file is present).
+- **No negative parallelisms** ("not X, but Y" constructions).
+- **Vocabulary cliff fully glossed:** every term requiring beat-specific context is glossed inline. No unglossed acronyms.
+- **No closing-line abstraction:** end on a fact or question, not a Big Truth.
+- **Closed em dashes per length:** zero at caption length; max one at paragraph length.
+- **Voice-marker discipline:** captions allow one warmth-marker ("honestly," / "look," / "the thing is") max. Paragraphs allow zero.
+- **Specific anchor present:** a number, name, date, or direct quote. Posts without one tend to read as AI-filler.
+- **CTA matches purpose:** Awareness/Engagement = no link; Soft funnel = inline soft link; Flagship CTA = hard link on its own line at end.
+- **Two or three options provided, not one.** Single-option output is a quality-bar failure.
+- **Recommendation names conditional logic explicitly** if any option is News-dependent.
+
+## Failure modes to watch for
+
+- **The "translation tax" failure** (Funnel/Flagship days): rewriting the X post into plain English by just substituting simpler words. Real FB rewrite drops the analytical compression entirely and writes from scratch for a different reader.
+- **The "wikipedia voice" failure** (Awareness days): writing flat factual statements with no warmth. FB-Explainer is plain but not dry. One warmth-marker per caption fixes this.
+- **The "Substack leak" failure** (any day): closed em dashes, "of course," "naturally," copulative avoidance bleeding through from the canonical voice file. Re-check against `voice-register.md` § What relaxes.
+- **The "stock photo abstraction" failure** (caption days): AI image prompts that describe abstract concepts ("inflation visualization") instead of concrete scenes. Concrete scenes with specific anchors (a grocery receipt, a Treasury bond, a Virginia data center) outperform.
+- **The "click-bait CTA" failure** (Flagship CTA days): writing "you won't believe what we found" or "must-read" framings to drive clicks. These read as low-trust and tank reach. Plain-English tagline > engagement bait.
