@@ -96,15 +96,33 @@ Read all note files in `workspace/notes/` from the past 14 days (or all files fo
 
 Build the SPENT list — everything that appeared in any prior Note and must not be repeated today. Then identify what's FRESH: new data from live news, new sources not yet cited, new analytical moves not yet made. This audit is the single most important quality control step. Repeating content from prior days is the most common failure mode.
 
-### Step 3: Look up format assignments
+### Step 3: Look up format assignments and FB purpose
 
-Read `workspace/plans/tcn-notes-30-day-map.md` and find the entry for the target date to get that day's assigned formats. If the monthly plan doesn't exist or doesn't specify formats:
+**Note formats:** Read `workspace/plans/tcn-notes-30-day-map.md` and find the entry for the target date to get that day's assigned formats. If the monthly plan doesn't exist or doesn't specify formats:
 - Don't repeat the same format combination used in the prior 2 days
 - Include at least one Primary Source Drop per 3-day window
 - Reserve Article Tease for flagship publish days (typically Fridays when an article goes live)
 - Reserve Cross-Domain Connection for days when two genuinely parallel stories exist in different domains
 
 Load `references/note-formats.md` for format definitions before drafting.
+
+**Facebook purpose:** From the same monthly plan entry, read the `FB:` cell. If present, use its value (one of: `Awareness`, `Engagement`, `Soft funnel`, `Flagship CTA`). If absent or the monthly plan doesn't exist, fall back to the weekday rotation:
+
+| Day | Default purpose |
+|---|---|
+| Monday | Awareness |
+| Tuesday | Engagement |
+| Wednesday | Awareness |
+| Thursday | Soft funnel |
+| Friday | Flagship CTA |
+| Saturday | Awareness |
+| Sunday | Soft funnel |
+
+(Canonical table with rationale lives in `tcn-facebook-post/references/purpose-table.md` § Weekday rotation.)
+
+Set `facebook_purpose:` in the daily plan frontmatter to the determined value.
+
+**Override prompt:** If the weekday rotation says Awareness or Engagement but the live news from Step 1 strongly suggests funnel opportunity (a flagship-relevant story breaking), surface to the user: `"Today's rotation is [Awareness/Engagement], but the live news pulls toward funnel. Override to Soft funnel? (y/n)"`. If yes, set `facebook_purpose: "Soft funnel"`.
 
 ### Step 4: Determine week, cadence, and flagship status
 
