@@ -448,3 +448,10 @@ A daily plan works when:
 - **The schedule summary table has a populated `Depends on` column** — every row states the specific trigger or "no trigger needed"
 - **An empty Status update block exists at the top of the file**, ready to be filled in at the first re-check
 - The `tcn-text-humanizer` check ran and the file's `status:` is `voice-checked` — no closed em dashes, no banned vocab, no negative parallelisms, no "AI hit list" phrases in the drafted prose
+- **FB copy was drafted by `tcn-facebook-post`, not freehanded in this skill**
+- **The FB option matches the day's purpose-table.md shape** (caption ≤30 words OR paragraph 50-80 words; outside range = hard fail)
+- **The FB image guidance is concrete:** an AI prompt, a specific Substack URL for the hero, or a screenshot recommendation — never "find an image"
+- **The FB option carries a Safe or News-dependent label** and appears in the schedule table + Status block
+- **No vague placeholder verbs** ("hit a number," "saw movement," etc.) — hard fail
+- **Vocabulary cliff fully glossed:** every FB post is glossable to a reader with zero context on the beat
+- **Flagship CTA posts include the actual article URL**, not a placeholder (or, if URL pending, the recommendation flags the gap prominently)
