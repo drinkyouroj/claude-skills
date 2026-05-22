@@ -70,7 +70,9 @@ If either file has been read earlier in the conversation, do not re-read — rel
 3. **File exists** → read it. Then check the **Status update** block at the top of the file (template defined in Step 9):
    - **Block absent, empty, or timestamped more than ~2 hours ago** → prompt the user: "What's happened since [last timestamp or 'drafting time']? Any triggers fired or fizzled?" Use the answer plus the shelf-life labels on each option to fill in (or refresh) the block — mark every Frame-forward option as safe to post, mark every Data-forward / Conditional option as safe or hold based on whether its trigger fired, and write the result to the file before summarizing. The block is the answer to "what can I post?" so populate it first; don't make the user re-derive option dependencies from prose.
    - **Block is fresh** → display it directly. That's already the answer.
-   After the status update is fresh, summarize the day's Notes, X standalone recommendation, and schedule table. Ask if anything else needs updating.
+   After the status update is fresh, summarize the day's Notes, X standalone recommendation, **FB post recommendation**, and schedule table. Ask if anything else needs updating.
+
+   **FB-specific check:** if the file lacks a `## Facebook` section (was drafted before this skill shipped), surface: "This plan was drafted before FB support shipped — no FB content for today. Run /create-daily to regenerate, or accept the gap." Do not auto-regenerate; let the user decide.
 4. **File missing** → say "No plan exists for today yet — drafting one now" and proceed to Mode 2 for today's date.
 
 ---
@@ -96,15 +98,33 @@ Read all note files in `workspace/notes/` from the past 14 days (or all files fo
 
 Build the SPENT list — everything that appeared in any prior Note and must not be repeated today. Then identify what's FRESH: new data from live news, new sources not yet cited, new analytical moves not yet made. This audit is the single most important quality control step. Repeating content from prior days is the most common failure mode.
 
-### Step 3: Look up format assignments
+### Step 3: Look up format assignments and FB purpose
 
-Read `workspace/plans/tcn-notes-30-day-map.md` and find the entry for the target date to get that day's assigned formats. If the monthly plan doesn't exist or doesn't specify formats:
+**Note formats:** Read `workspace/plans/tcn-notes-30-day-map.md` and find the entry for the target date to get that day's assigned formats. If the monthly plan doesn't exist or doesn't specify formats:
 - Don't repeat the same format combination used in the prior 2 days
 - Include at least one Primary Source Drop per 3-day window
 - Reserve Article Tease for flagship publish days (typically Fridays when an article goes live)
 - Reserve Cross-Domain Connection for days when two genuinely parallel stories exist in different domains
 
 Load `references/note-formats.md` for format definitions before drafting.
+
+**Facebook purpose:** From the same monthly plan entry, read the `FB:` cell. If present, use its value (one of: `Awareness`, `Engagement`, `Soft funnel`, `Flagship CTA`). If absent or the monthly plan doesn't exist, fall back to the weekday rotation:
+
+| Day | Default purpose |
+|---|---|
+| Monday | Awareness |
+| Tuesday | Engagement |
+| Wednesday | Awareness |
+| Thursday | Soft funnel |
+| Friday | Flagship CTA |
+| Saturday | Awareness |
+| Sunday | Soft funnel |
+
+(Canonical table with rationale lives in `tcn-facebook-post/references/purpose-table.md` § Weekday rotation.)
+
+Set `facebook_purpose:` in the daily plan frontmatter to the determined value.
+
+**Override prompt:** If the weekday rotation says Awareness or Engagement but the live news from Step 1 strongly suggests funnel opportunity (a flagship-relevant story breaking), surface to the user: `"Today's rotation is [Awareness/Engagement], but the live news pulls toward funnel. Override to Soft funnel? (y/n)"`. If yes, set `facebook_purpose: "Soft funnel"`.
 
 ### Step 4: Determine week, cadence, and flagship status
 
@@ -170,6 +190,30 @@ After receiving each draft, add: image/screenshot guidance (needed or not, and w
 
 300–400 words. Professional register — no newsletter voice, no first-person analytical asides. Cite every figure. End with the article link. No CTA language.
 
+### Step 7.5: Draft the Facebook post (delegate to `tcn-facebook-post`)
+
+Invoke the `tcn-facebook-post` skill via the Skill tool. The dispatch depends on the day's `facebook_purpose:` value:
+
+**Funnel/Flagship days** (`Soft funnel` or `Flagship CTA`) — sequential dispatch: wait for Step 5 output (X standalone copy) before invoking. Pass:
+- `purpose` — from frontmatter
+- `source_material` — the X standalone option text from Step 5 + the flagship article URL + the flagship article tagline (if available)
+- `spent_list` — from Step 2
+- `flagship_url` — the article URL (for Flagship CTA, today's article; for Soft funnel, the older referenced piece from the monthly plan)
+- `date` — today's date
+
+**Awareness/Engagement days** (`Awareness` or `Engagement`) — parallel dispatch: invoke alongside Steps 5 and 6 (no upstream dependency). Pass:
+- `purpose` — from frontmatter
+- `source_material` — today's live news (Step 1) + FRESH list (Step 2)
+- `spent_list` — from Step 2
+- `date` — today's date
+- Do NOT pass `flagship_url`
+
+Capture the returned markdown block verbatim under the `## Facebook` section of the plan file (Step 9 covers the file structure).
+
+Do not freehand the FB copy in this skill. `tcn-facebook-post` owns the FB-Explainer voice, the purpose → shape mapping, the image guidance, and the shelf-life labeling.
+
+**Posting time:** the returned `**Posting time:**` line drives the schedule table row in Step 9. If Flagship CTA, the time MUST be after the article publishes — verify before writing the schedule table; if the article isn't yet live at draft time, use a placeholder posting window like `11:00-13:00 ET (after publish)` and surface the dependency in the recommendation.
+
 ### Step 8: Draft engagement notes
 
 Name 4–6 specific writers or publications who are likely posting on today's topic. For each, state what specific angle, data point, or frame from today's content would make the comment worth reading. Don't write generic "add context" notes — be specific about what the reader would learn from the comment that they couldn't get from the original post.
@@ -200,6 +244,7 @@ formats:
   - "Format 1"
   - "Format 2"
   - "Format 3"
+facebook_purpose: "Awareness"  # one of: Awareness, Engagement, Soft funnel, Flagship CTA
 status: draft
 live_news:
   - "First live news item. Colons, apostrophes, em dashes all safe inside the quotes."
@@ -251,12 +296,32 @@ Place this section directly under the YAML frontmatter, before any other content
 
 The block is short on purpose. If it grows past ~10 lines you're rewriting the plan instead of indexing it; cut back to the safe/hold split.
 
+**FB rows in the Status block:** FB options labeled `Safe` go in the Safe-to-post table alongside X and Notes. FB options labeled `News-dependent` go in the Hold list with the trigger phrase. Same scanning surface, no new columns.
+
+**Facebook section template** — place this section after `## LinkedIn` (if present, on flagship days) and before `## Engagement`:
+
+```markdown
+## Facebook
+
+[paste the markdown block returned by tcn-facebook-post verbatim]
+```
+
+The block already contains the `**Purpose:**` / `**Shape:**` / `**Posting time:**` header, the option subsections (`### Option A` etc.), the image guidance, and the recommendation. Do not reformat.
+
 **Schedule summary table** — end every plan with this table. The **Depends on** column is the key scanning surface: each row states the specific news condition the recommended option requires, so the user can map a slot to a postability decision in one glance.
 
 ```
 | Time | Platform | Content | Depends on |
 |------|----------|---------|------------|
 ```
+
+The FB row uses the same 4-column structure with purpose inline in the Content cell:
+
+```
+| 09:00 ET | Facebook | Caption (Awareness): [option A summary] | Safe |
+```
+
+For Flagship CTA days, the time is post-publish (e.g., `11:30 ET`).
 
 `Depends on` cell phrasing — match the option's shelf-life label:
 - Frame-forward → `no trigger needed (frame survives any outcome)`
@@ -271,15 +336,22 @@ Even though `tcn-post` and `tcn-substack-notes` are voice-aware, the assembled o
 
 Pass `tcn-text-humanizer` the prose blocks from the just-written options file at `workspace/notes/YYYY-MM-DD-{lowercase_weekday}-options.md`: the Note option bodies, the X option bodies, the restack addenda, and the engagement comment angles. Do not feed it the YAML frontmatter, schedule table, or section headings — those aren't voice surfaces.
 
+**FB prose is explicitly NOT passed to `tcn-text-humanizer`.** The humanizer is calibrated for Justin's Substack voice (closed em dashes, copulative avoidance, specific rhythm). Running it over FB-Explainer prose would over-correct the plain-English register back into Substack voice. The FB section must be audited separately — see the hard-fail conditions below.
+
 For each block returned, replace the original prose in the file with the humanized version via Edit. Preserve the surrounding scaffolding (option labels like "### Option A", italicized meta-commentary, image guidance lines) — only the prose body changes.
 
-**Hard fail conditions.** After `tcn-text-humanizer`'s pass, audit the assembled file against the canonical catalog in `workspace/core/anti-ai-writing-style.md`:
+**Hard fail conditions.** After `tcn-text-humanizer`'s pass, audit the assembled file against the canonical catalog in `workspace/core/anti-ai-writing-style.md`. This audit covers ALL prose surfaces in the file, including the FB section (which skipped the humanizer):
 - Banned vocabulary — § 3A
 - Negative parallelisms — § 3F
 - Dismissal labels — § 3H
 - Vocabulary cliff and meaning-preservation — § 3I
 - Closing-line abstraction — § 3J
-- Plus per-skill voice non-negotiables from `tcn-text-humanizer` (closed em dashes, copulative-avoidance verbs, sentence-case headers, Justin's TCN-specific hit-list phrases)
+- Plus per-skill voice non-negotiables from `tcn-text-humanizer` (closed em dashes, copulative-avoidance verbs, sentence-case headers, Justin's TCN-specific hit-list phrases) — these apply to X, Notes, restacks, and engagement copy ONLY. They do NOT apply to FB prose, which has its own register (see `tcn-facebook-post/references/voice-register.md`).
+- **FB-specific hard fails (audit the `## Facebook` section against these):**
+  - No vague placeholder verbs ("hit a number," "saw movement," "raised concerns," "made waves," "had a moment")
+  - Caption length ≤30 words; paragraph length 50-80 words (hard fail outside range)
+  - Closed em dashes: zero at caption length; max 1 at paragraph length
+  - Image guidance is concrete (AI prompt text, Substack URL, or screenshot recommendation — never "find an image")
 
 Do not duplicate the lists here. If a check needs to verify a specific term or phrase, read the canonical file. If any item fires, fix immediately even if the skill didn't flag it.
 
@@ -319,12 +391,33 @@ Structure the month around the chosen flagship pieces. For each flagship:
 
 Map all 30 days as a numbered list. Each entry:
 ```
-**Item [N] — [Date] ([Day of week])**: [Platform] | [Content type] | [Format] | CTA: yes/no | [Brief note: what this seeds or establishes]
+**Item [N] — [Date] ([Day of week])**: [Platforms] | [Note formats] | FB: [Purpose] | CTA: yes/no | [Brief note: what this seeds or establishes]
 ```
+
+**FB purpose assignment:** Assign each day's `FB:` cell using the weekday rotation default (see `tcn-facebook-post/references/purpose-table.md` § Weekday rotation). The default mapping is:
+
+- Mon, Wed, Sat → Awareness
+- Tue → Engagement
+- Thu, Sun → Soft funnel
+- Fri → Flagship CTA
+
+After auto-assigning, ask the user: `"Any weeks where the FB rotation should shift? E.g., a week with two flagships might need a second hard-funnel day, or a quiet news week might lean more on Engagement posts."` Adjust specific cells based on the answer.
+
+For Soft funnel days, also assign the older Substack article URL that will be linked. The URL belongs in the `Brief note` cell.
 
 ### Step 4: Write the file
 
 Save to `workspace/plans/tcn-notes-30-day-map.md`. Include a "Source Hooks" section at the end listing the insight-sweep hooks that informed the flagship selections, with wiki page citations.
+
+If any FB purposes were assigned non-default values, append an **FB Cadence Note** section after Source Hooks explaining the reasoning. Example:
+
+```markdown
+## FB Cadence Note
+
+Week 2 (Days 8-14) has two flagships (Tue + Fri). Tue's typical Engagement is shifted to Soft funnel to tease Tuesday's flagship, then back to standard rotation Wed onward. Week 3 reverts to default.
+```
+
+If all FB purposes are default, omit the section.
 
 ---
 
@@ -355,3 +448,10 @@ A daily plan works when:
 - **The schedule summary table has a populated `Depends on` column** — every row states the specific trigger or "no trigger needed"
 - **An empty Status update block exists at the top of the file**, ready to be filled in at the first re-check
 - The `tcn-text-humanizer` check ran and the file's `status:` is `voice-checked` — no closed em dashes, no banned vocab, no negative parallelisms, no "AI hit list" phrases in the drafted prose
+- **FB copy was drafted by `tcn-facebook-post`, not freehanded in this skill**
+- **The FB option matches the day's purpose-table.md shape** (caption ≤30 words OR paragraph 50-80 words; outside range = hard fail)
+- **The FB image guidance is concrete:** an AI prompt, a specific Substack URL for the hero, or a screenshot recommendation — never "find an image"
+- **The FB option carries a Safe or News-dependent label** and appears in the schedule table + Status block
+- **No vague placeholder verbs** ("hit a number," "saw movement," etc.) — hard fail
+- **Vocabulary cliff fully glossed:** every FB post is glossable to a reader with zero context on the beat
+- **Flagship CTA posts include the actual article URL**, not a placeholder (or, if URL pending, the recommendation flags the gap prominently)
