@@ -80,3 +80,65 @@ A markdown block in the following structure, returned to the orchestrator for in
 ```
 
 Always produce 2-3 options. Single-option output is a quality-bar failure.
+
+---
+
+## Process
+
+Follow these steps in order. Do not skip the voice loading or the duplication check — those determine what the options can and can't say.
+
+### Step 1: Load voice context
+
+If `workspace/core/anti-ai-writing-style.md` is present in the active project's root, read it once. This is the canonical source for banned vocabulary, negative parallelisms, vocabulary cliff, and closing-line rules. Keep it in working context for the duration of this skill invocation.
+
+If the file is missing, apply the voice fallback per `references/voice-register.md` § Voice fallback. Do NOT proceed with vocabulary-substitution heuristics from training data.
+
+Also read `references/voice-register.md` and `references/purpose-table.md` if not already loaded.
+
+### Step 2: Look up shape, image source, and CTA rule
+
+Use the `purpose` input to look up the row in `references/purpose-table.md`:
+- `shape` — Caption (≤30 words) or Paragraph (50-80 words)
+- `image_source` — AI-generated / Substack hero / fallback
+- `cta_rule` — No link / Soft link / Hard link
+- `voice_notes` — purpose-specific voice notes (e.g., "drop closed em dashes entirely" for Awareness captions)
+
+### Step 3: Derive the angle
+
+Conditional on purpose:
+
+**Funnel/Flagship days** — read the X standalone copy from `source_material`. Identify the single sharpest claim or framing. Restate it in FB-Explainer voice: drop the X compression, drop the analytical fingerprints, expand to a plain-English sentence a non-political-junkie can absorb. The FB post is NOT a copy of the X post; it's a re-voicing of the same anchor claim for a different reader.
+
+**Awareness/Engagement days** — read the live news and FRESH list from `source_material`. Find one specific fact (number, name, date, quote) that's plain-language interesting on its own — something a friend at a barbecue might bring up. The FB post is not a take; it's an observation. For Engagement, frame it as a question or invite a response.
+
+In both cases, audit against the `spent_list`: if the angle echoes what X or Notes already said this week, find a different angle.
+
+### Step 4: Draft 2-3 options
+
+For each option:
+1. Write the prose at the target word count (caption ≤30 words / paragraph 50-80 words). Hard fail outside range.
+2. Apply the voice rules from `voice-register.md`:
+   - Hard rules (banned vocab, negative parallelisms, vocabulary cliff, closing-line, no vague placeholder verbs)
+   - Length-relaxed rules (closed em dashes per length; copulative-avoidance off; sardonic moves off)
+3. Determine the shelf-life label:
+   - **Safe** — postable today regardless of how the news breaks. Default for Awareness, most Engagement, most Soft funnel.
+   - **News-dependent** — depends on a specific event happening before posting time (court ruling, vote outcome, deal announcement). Note the specific dependency inline.
+4. Construct image guidance:
+   - **AI-generated:** invoke `ai-image-prompts-skill` with the option's anchor concept; capture its returned prompt as the image guidance text. If `ai-image-prompts-skill` is unavailable, output a stock-photo search-query suggestion and surface the gap.
+   - **Substack hero (Flagship CTA):** if `flagship_url` is provided, output `Use Substack hero from [flagship_url]`. If URL is `[ARTICLE_URL_PENDING]`, output the same with a hard reminder that the URL must be inserted before posting.
+   - **Substack hero (Soft funnel):** output `Use Substack hero from [older-piece-url]` where the URL comes from the monthly plan's `Brief note` cell. If absent, fall back to AI-generated and surface the gap.
+
+Aim for genuine variation across options — different angles, not different word choices on the same angle.
+
+### Step 5: Write the recommendation
+
+One sentence that names the default option and any conditional logic. Examples:
+
+- All Safe: `"Default to Option A (Frame-forward Soft); B and C are alternates if the framing in A feels off."`
+- Mixed shelf-life: `"Default to Option A (Safe); switch to Option B (News-dependent on ruling at 11am) if the court releases its decision before posting time."`
+
+If all options are News-dependent and the trigger may not fire, the recommendation defaults to: `"Hold the FB post today if no trigger fires before the posting window."`
+
+### Step 6: Assemble and return
+
+Format the output per the Outputs section. Return as a markdown block. The orchestrator handles file insertion.
