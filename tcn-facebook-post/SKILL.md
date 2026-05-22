@@ -134,7 +134,7 @@ Aim for genuine variation across options — different angles, not different wor
 
 One sentence that names the default option and any conditional logic. Examples:
 
-- All Safe: `"Default to Option A (Frame-forward Soft); B and C are alternates if the framing in A feels off."`
+- All Safe: `"Default to Option A (Safe); B and C are alternates if the framing in A feels off."`
 - Mixed shelf-life: `"Default to Option A (Safe); switch to Option B (News-dependent on ruling at 11am) if the court releases its decision before posting time."`
 
 If all options are News-dependent and the trigger may not fire, the recommendation defaults to: `"Hold the FB post today if no trigger fires before the posting window."`
