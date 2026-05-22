@@ -70,7 +70,9 @@ If either file has been read earlier in the conversation, do not re-read — rel
 3. **File exists** → read it. Then check the **Status update** block at the top of the file (template defined in Step 9):
    - **Block absent, empty, or timestamped more than ~2 hours ago** → prompt the user: "What's happened since [last timestamp or 'drafting time']? Any triggers fired or fizzled?" Use the answer plus the shelf-life labels on each option to fill in (or refresh) the block — mark every Frame-forward option as safe to post, mark every Data-forward / Conditional option as safe or hold based on whether its trigger fired, and write the result to the file before summarizing. The block is the answer to "what can I post?" so populate it first; don't make the user re-derive option dependencies from prose.
    - **Block is fresh** → display it directly. That's already the answer.
-   After the status update is fresh, summarize the day's Notes, X standalone recommendation, and schedule table. Ask if anything else needs updating.
+   After the status update is fresh, summarize the day's Notes, X standalone recommendation, **FB post recommendation**, and schedule table. Ask if anything else needs updating.
+
+   **FB-specific check:** if the file lacks a `## Facebook` section (was drafted before this skill shipped), surface: "This plan was drafted before FB support shipped — no FB content for today. Run /create-daily to regenerate, or accept the gap." Do not auto-regenerate; let the user decide.
 4. **File missing** → say "No plan exists for today yet — drafting one now" and proceed to Mode 2 for today's date.
 
 ---
