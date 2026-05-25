@@ -12,6 +12,7 @@
 | Cold Open / Thesis (Slide 2) | `sl-lead` — prose-heavy lead with single h3 + 1-2 paragraph body | `sl-section` if thesis is one declarative phrase |
 | Body / Receipt (data-heavy) | `sl-data` with `ms-numgrid` 3-column number layout | `sl-data` with `sl-chart` SVG if there's a real chart in the article |
 | Body / Frame | `sl-frames` — [01]/[02]/[03] grid | `sl-compare` if it's two-way comparison |
+| Body / Anaphora (paired-statement refrain) | `sl-compare` — two-pair side-by-side, paired statements are the rhetorical move | `sl-frames` if more than two pairs |
 | Body / Stakes | `sl-lead` | — |
 | Body / Twist | `sl-frames` (numbered escalation) | `sl-compare` (before/after) |
 | Body / Historical Echo | `sl-compare` (then/now) | `sl-lead` |
@@ -151,3 +152,68 @@ If more than ~2 slides in a single deck need splitting, halt and surface to the 
 ## 6. Future-option seam
 
 Per the spec's Q8=B path, a future iteration may extend `deck-stage.js` with NEW animation primitives — scroll-triggered number counters (numbers ticking up), text-typewriter effects on quote slides, programmatic chart morphing between data slides, dynamic radial-glow pulses that breathe with the slide. Not built today — the existing primitives, used aggressively, should be enough for the first few decks. When/if needed, the prompt structure can accept new animation directives without restructuring the skill itself — only the §3 animation table and the SKILL.md's Animation Intensification section need updating.
+
+---
+
+## 7. Justoon variant-pick guidance
+
+Activated when `--justoon-refs` is provided to the skill. Read this section at process step 5b ("Pick Justoon variants").
+
+The Justoon role per slide type is locked in the SKILL.md mapping table (Receipt/Stakes → A; Twist → C; others → none). This section is the **interpretive layer** that picks the specific filename inside each role based on the slide's content.
+
+### Role A — Pointing teacher (full-body)
+
+Picked for Receipt and Stakes slides. Available variants:
+
+| File | When to pick |
+|---|---|
+| `justoon-point-right.png` | **Default.** Slide layout has the hero stat / headline on the right; Justoon left points across to it. Receipt slides almost always land here. |
+| `justoon-point-up.png` | Slide layout has the hero stat / headline above Justoon. Less common — use when the narration phrasing implies "look up at this" or when a vertical 9:16 derivative wants Justoon at the bottom pointing up to text above. |
+| `justoon-point-down.png` | Slide layout has the hero stat below Justoon (rare — only when the visual composition really wants Justoon at the top half pointing down). |
+| `justoon-point-open-palm.png` | **Bidirectional fallback.** Soft "here's the thing" presenting gesture. Use when the slide content is more presentational than data-pointed (e.g., a Stakes slide that summarizes rather than naming a specific number). Also use when neither the right-pointing nor up-pointing variants feel right. |
+
+Picking rule:
+- If the slide has a single dominant hero number / hero word in the right half of the safe-zone → `justoon-point-right.png`
+- If the dominant element is above Justoon → `justoon-point-up.png`
+- If the slide is presentational (multiple supporting points, no single hero stat) → `justoon-point-open-palm.png`
+- Default fallback within role A → `justoon-point-right.png`
+
+### Role C — Reaction-as-anchor (bust)
+
+Picked for Twist slides. Available variants:
+
+| File | When to pick |
+|---|---|
+| `justoon-react-deadpan.png` | The dry, flat-stare register. For Twist slides whose narration close is deadpan / "by whom, the company says, can't be known" / "the cause was impossible to determine" / any slide where the rhetorical move is *the absence of expression*. The canonical role C variant. |
+| `justoon-react-raised-eyebrow.png` | The "really?" register. For Twist slides where the absurdity is the move but the figure shouldn't editorialize fully. |
+| `justoon-react-concerned.png` | Furrowed brow, alarm. For Twist slides where the stakes are real and the figure should signal that. |
+| `justoon-react-smirk.png` | The sardonic-amused register. For Twist slides whose narration carries dry wit or "you can't make this up" energy. The TCN signature dial. |
+| `justoon-react-shocked.png` | Open mouth, "they did WHAT". For Twist slides at the highest-arousal register. **Use sparingly** — shock loses force when overused; reserve for genuinely visceral reveals (~1 in 5 Twist slides). |
+
+Picking rule (interpretive — read the slide's narration body, not just the kicker):
+- Default fallback within role C → `justoon-react-deadpan.png` (the canonical TCN-Marcus close)
+- Narration ends with a "you can't make this up" smirk → `justoon-react-smirk.png`
+- Narration carries an "I want to react but I'm restraining myself" beat → `justoon-react-raised-eyebrow.png`
+- Narration signals real-stakes alarm → `justoon-react-concerned.png`
+- Narration is high-arousal incredulity → `justoon-react-shocked.png`
+
+### Anchor / fallback
+
+`justoon-neutral.png` is the required anchor. Used when:
+- A mapped variant is missing from the refs dir (silent substitution; note in artifact header)
+- A future skill consumer needs a stable Justoon image without role context (e.g., a `tcn-youtube-thumbnail` cross-reference)
+
+### Coherence across slides
+
+Don't aggressively vary Justoon variants across a single deck — the figure should feel consistent. A deck with three Twist slides shouldn't pick three different reactions just for variety; pick the variant that fits the dominant register and reuse it unless a specific slide demands a different read.
+
+### Worked example (dispatch-005, bill-of-rights-contractors-door)
+
+The 11-slide deck has 4 slides with Justoon roles active:
+
+- Slide 3 (Receipt · Bend): role A → `justoon-point-right.png` (hero stat "279" is in the right half)
+- Slide 4 (Receipt · Scale): role A → `justoon-point-right.png` (consistency with Slide 3; hero stats "364,000" / "1.6 million" / "4,500" all live in the right half)
+- Slide 8 (Twist): role C → `justoon-react-deadpan.png` (the narration close "By whom, the company says, can't be known." is the canonical deadpan beat)
+- Slide 9 (Stakes): role A → `justoon-point-open-palm.png` (presentational summary of Atlanta's resolution stack, no single hero stat)
+
+The other 7 slides (Hook, Thesis, Frame, Anaphora ×2, Tease, End) stay typography-only.

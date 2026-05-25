@@ -51,8 +51,10 @@ The full ecosystem diagram lives in the design spec at `docs/superpowers/specs/2
 ### Optional inputs
 
 - **Path to the TCN design system bundle.** Defaults to the user's maintained path (Justin's current path: `~/Documents/The Civic Node — Design System.zip`). If not provided, the skill leaves a placeholder in the prompt with an instruction to upload before pasting.
-- **Steering** — free-text guidance like "use sl-compare instead of sl-frames on Slide 4", "make Slide 3's chart larger", or "skip animation intensification on the Tease slide".
+- **`--justoon-refs <path>`** — path to the Justoon slideshow library. Defaults to `~/Pictures/tcn-justin-slideshow/`. Absence triggers "no Justoon" mode: the skill produces typography-only slides exactly as today. Presence triggers per-slide Justoon auto-picks per the slide-type table (Receipt/Stakes → role A pointing pose; Twist → role C reaction). The library's `justoon-neutral.png` is the required anchor / fallback if a mapped variant is missing. Library convention: `~/Pictures/tcn-justin-slideshow/CLAUDE.md`.
+- **Steering** — free-text guidance like "use sl-compare instead of sl-frames on Slide 4", "make Slide 3's chart larger", "skip animation intensification on the Tease slide", or "no Justoon on this dispatch" (forces no-Justoon mode even when `--justoon-refs` resolves).
 - **Override slide type** — for any individual slide, the user can force a specific template (e.g., "Slide 3 must be sl-data with the SVG chart variant").
+- **Override Justoon variant** — for any individual slide, the user can force a specific variant or none (e.g., "Slide 8: use justoon-react-raised-eyebrow instead of deadpan", or "Slide 4: no Justoon").
 
 ### Output artifact
 
@@ -72,20 +74,23 @@ The full ecosystem diagram lives in the design spec at `docs/superpowers/specs/2
 
 Each narration slide maps deterministically to a slide template type from `slides/deck.html`. The mapping is driven by the narration's zone (Cold Open / Body / Outro) and slide sub-label.
 
-| Narration slide | Default template | Fallback / variant |
-|---|---|---|
-| Cold Open / Hook (Slide 1) | `sl-title` | — |
-| Cold Open / Thesis (Slide 2) | `sl-lead` | `sl-section` if thesis is one declarative phrase |
-| Body / Receipt (data-heavy) | `sl-data` with `ms-numgrid` | `sl-data` with `sl-chart` SVG if the article has a chart |
-| Body / Frame | `sl-frames` | `sl-compare` for two-way comparison |
-| Body / Stakes | `sl-lead` | — |
-| Body / Twist | `sl-frames` (numbered escalation) | `sl-compare` (before/after) |
-| Body / Historical Echo | `sl-compare` (then/now) | `sl-lead` |
-| Body / Verbatim | `sl-quote` | — |
-| Outro / Tease (Slide N-1) | `sl-lead` with bullet listing | `sl-section` with `[TEASE]` kicker if shorter |
-| Outro / End (Slide N) | `sl-end` | — |
+| Narration slide | Default template | Fallback / variant | Justoon role |
+|---|---|---|---|
+| Cold Open / Hook (Slide 1) | `sl-title` | — | none |
+| Cold Open / Thesis (Slide 2) | `sl-lead` | `sl-section` if thesis is one declarative phrase | none |
+| Body / Receipt (data-heavy) | `sl-data` with `ms-numgrid` | `sl-data` with `sl-chart` SVG if the article has a chart | **A** (pointing teacher) |
+| Body / Frame | `sl-frames` | `sl-compare` for two-way comparison | none |
+| Body / Anaphora (paired-statement refrain) | `sl-compare` (two-pair side-by-side) | `sl-frames` if more than two pairs | none |
+| Body / Stakes | `sl-lead` | — | **A** (pointing teacher) |
+| Body / Twist | `sl-frames` (numbered escalation) | `sl-compare` (before/after) | **C** (reaction-as-anchor) |
+| Body / Historical Echo | `sl-compare` (then/now) | `sl-lead` | none |
+| Body / Verbatim | `sl-quote` | — | none |
+| Outro / Tease (Slide N-1) | `sl-lead` with bullet listing | `sl-section` with `[TEASE]` kicker if shorter | none |
+| Outro / End (Slide N) | `sl-end` | — | none |
 
-**Combined slide types** (e.g., `THE FRAME + STAKES, Author's Debug` from dispatch-004): pick the first sub-label's template type, adjust the layout (fewer numbered columns, more prose), and note the combination in the prompt. Do not invent new template types.
+**Justoon role column:** activates only when `--justoon-refs` is provided. Role A = full-body pointing teacher, picked from `justoon-point-{right,up,down,open-palm}.png`. Role C = bust reaction-as-anchor, picked from `justoon-react-{deadpan,raised-eyebrow,concerned,smirk,shocked}.png`. Variant selection within a role is interpretive per the slide's specific content — full picker logic lives in `references/template-mapping.md` §7. Slides marked `none` stay typography-only even with `--justoon-refs` active. Anchor / fallback for any missing variant: `justoon-neutral.png`.
+
+**Combined slide types** (e.g., `THE FRAME + STAKES, Author's Debug` from dispatch-004): pick the first sub-label's template type, adjust the layout (fewer numbered columns, more prose), and note the combination in the prompt. Do not invent new template types. For Justoon role, also use the first sub-label's role.
 
 The full mapping table with fallback rules, combined-type handling, and worked examples lives in `references/template-mapping.md`.
 
@@ -144,26 +149,33 @@ The prompt restates the guardrails verbatim so Claude Design does not drift towa
 
 The deck must be **readable at thumbnail size** (a phone watching a YouTube card, ~240px wide playback) and must play correctly at **16:9, 9:16, and 1:1 from a single HTML source**. This is non-negotiable. The prompt encodes the rules explicitly so Claude Design enforces them at render time.
 
-### Single-source multi-aspect: letterbox into a safe zone
+### 1:1 is the primary canvas; other aspects are derivative
 
-One HTML file. The same deck plays at any aspect ratio. The user resizes the recording window to the target aspect (1920×1080 for 16:9, 1080×1920 for 9:16, 1080×1080 for 1:1) and screen-captures.
+**Recording happens at 1:1 (1080×1080).** The 16:9 and 9:16 outputs are derived from the same HTML by changing the recording window's aspect — the slide content does not reflow. This was confirmed by the 2026-05-25 hand-test (see `docs/superpowers/reference-renders/2026-05-25-justoon-slideshow-layout.html` in the Substack Research project for the proven layout).
 
-- **Safe zone:** all critical content (kicker, headline, body, hero numbers, source attributions, CTA, disclosure) lives inside a centered square of `min(85vw, 85vh)`. This square is the *intersection* of all three target aspect ratios with a small margin.
-- **Decorative extension:** the brand mark, `sl-hairline` rules, `sl-glow` radial, and slide background may extend to the full viewport. They make 16:9 not feel hollow and let 9:16 feel anchored.
-- **No reflow per aspect.** No container queries, no `@media (aspect-ratio: ...)` rules. The layout is identical at every aspect — only the viewport's *empty margin* changes.
+The mechanism that makes one HTML work at three aspects: the **safe zone is always a square** (`min(85cqw, 85cqh)`), so designing slide content inside the safe zone means it renders identically at any aspect — only the empty viewport margin differs. Critical insight: think of the slide-design problem as "what fits inside a square," not "what fits inside a 16:9 rectangle."
 
-### Type scale (vmin-based; same physical size at any aspect)
+- Each `.slide` element uses `container-type: size` so cq-units scale to the slide, not the viewport. This decouples slide layout from page layout — necessary if multiple slides ever share a page.
+- Define `--safe-zone: min(85cqw, 85cqh)` per slide. Every slide's critical-content container is exactly this size, centered.
+- Critical content (kicker, headline, body, hero numbers, source attributions, CTA, disclosure, any Justoon image) lives ONLY inside the safe zone.
+- Decorative elements (brand mark, `sl-hairline` rules, `sl-glow` radial, slide background fill) may extend to slide edges.
+- No fixed-pixel widths on layout containers. No media queries based on aspect ratio. Layout is identical at every aspect; only the empty margin differs.
 
-Using `vmin` (1% of the smaller viewport dimension) means a 1080-tall viewport and a 1080-wide viewport produce identical type — exactly what multi-aspect requires.
+### Type scale (cqmin-based; tuned for 1:1 primary canvas)
+
+Using `cqmin` (1% of the slide container's smaller dimension) means a 1080-tall slide and a 1080-wide slide produce identical type — exactly what multi-aspect requires. The clamps below are tuned for 1:1 as the primary recording aspect, with floors gentle enough that derivative aspects (16:9 / 9:16) stay legible without overweighting them.
 
 | Role | Size | Why this floor |
 |---|---|---|
-| **Hero number / hero word** (the slide's thumbnail anchor) | `clamp(180px, 24vmin, 360px)` | Readable at 240px playback. Occupies ~25% of safe-zone height. |
-| **Headline (h1/h2)** | `clamp(60px, 9vmin, 144px)` | Comfortably readable at 480px playback. |
-| **Body / supporting text (h3, p, bullet)** | `clamp(30px, 5vmin, 72px)` | Above the thumbnail floor; readable at half-screen on mobile. |
-| **Kicker, foot row, disclosure copy** | `clamp(18px, 2.5vmin, 36px)` | Decorative / contextual. Not load-bearing for thumbnail readability. |
+| **Hero number / hero word** (the slide's thumbnail anchor) | `clamp(80px, 24cqmin, 360px)` | Readable at 240px playback. Occupies ~25% of safe-zone height. Floor lowered from 180px (vmin era) because cqmin scales per slide, not viewport. |
+| **Headline (h1, used for primary heading slides)** | `clamp(28px, 9cqmin, 144px)` | Comfortably readable at full size; legible at thumbnail. |
+| **Headline mid (h2-mid, used for body slides where the headline isn't the anchor)** | `clamp(22px, 6.5cqmin, 96px)` | New role added during the 2026-05-25 hand-test for slides where Justoon is the anchor and the headline is supporting (role C twist slides especially). |
+| **Body / supporting text (h3, p, bullet)** | `clamp(14px, 5cqmin, 72px)` | Floor lowered from 30px (vmin era) so body text stays clean at thumbnail without forcing the headline floor up. |
+| **Kicker, foot row, disclosure copy** | `clamp(10px, 2.5cqmin, 36px)` | Decorative / contextual. Floor lowered from 18px so thumbnail kicker reads as texture, not legible content. |
 
-No exceptions. No `font-size: 14px` anywhere in the deck.
+No exceptions. No `font-size: 14px` (or other ad-hoc values) anywhere in the deck.
+
+**Text-wrap directive:** every headline and caption uses `text-wrap: balance` to distribute lines visually rather than greedy-fill ragged-right. This was added during the hand-test after the 9:16 portrait view produced 2-character-wide ragged lines without it.
 
 ### Thumbnail-anchor rule (one per slide)
 
@@ -252,47 +264,111 @@ the narration as audio.
 
 This deck must render correctly at 16:9, 9:16, and 1:1 from this single
 HTML file, and must be readable at thumbnail playback (~240px wide on a
-phone). The author records by resizing the browser to the target aspect
-and screen-capturing; the HTML does not branch per aspect.
+phone). **The primary recording aspect is 1:1 (1080×1080).** The 16:9
+and 9:16 outputs are derived from the same HTML by changing the
+recording window's aspect — slide content does not reflow.
 
-- Define `--safe-zone: min(85vw, 85vh)` at `:root`. Every slide's
+The mechanism: the safe zone is always a square (`min(85cqw, 85cqh)`).
+Design slide content inside the safe zone and it renders identically at
+any aspect — only the empty viewport margin differs.
+
+- Each `.slide` element uses `container-type: size` so cq-units scale
+  to the slide, not the viewport. This decouples slide layout from
+  page layout.
+- Define `--safe-zone: min(85cqw, 85cqh)` per slide. Every slide's
   critical-content container is exactly this size, centered.
 - Critical content (kicker, headline, body, hero numbers, source
-  attributions, CTA, disclosure) lives ONLY inside the safe zone.
+  attributions, CTA, disclosure, Justoon image when present) lives
+  ONLY inside the safe zone.
 - Decorative elements (brand mark, `sl-hairline` rules, `sl-glow`
-  radial, slide background fill) may extend to viewport edges.
+  radial, slide background fill) may extend to slide edges.
 - No fixed-pixel widths on layout containers. No media queries based on
-  aspect ratio. No container queries. Layout is identical at every
-  aspect; only the empty viewport margin differs.
+  aspect ratio. Layout is identical at every aspect; only the empty
+  margin differs.
 
-**Type scale (apply globally, not per slide):**
+**Type scale (apply per slide via container-query units):**
 
 ```css
-:root {
-  --type-hero:    clamp(180px, 24vmin, 360px);
-  --type-h1:      clamp(60px,  9vmin,  144px);
-  --type-h2:      clamp(60px,  9vmin,  144px);
-  --type-body:    clamp(30px,  5vmin,  72px);
-  --type-kicker:  clamp(18px,  2.5vmin, 36px);
-  --safe-zone:    min(85vw, 85vh);
+.slide {
+  container-type: size;
+  --type-hero:    clamp(80px, 24cqmin, 360px);
+  --type-h1:      clamp(28px,  9cqmin, 144px);
+  --type-h2-mid:  clamp(22px,  6.5cqmin, 96px);
+  --type-body:    clamp(14px,  5cqmin,  72px);
+  --type-kicker:  clamp(10px,  2.5cqmin, 36px);
+  --safe-zone:    min(85cqw, 85cqh);
 }
 ```
 
-No element renders below `--type-kicker`. The hero/h1/h2/body/kicker
-roles are the only sizes used on the deck.
+No element renders below `--type-kicker`. The hero/h1/h2-mid/body/kicker
+roles are the only sizes used on the deck. Use `--type-h2-mid` (not
+`--type-h1`) on body slides where Justoon is the anchor and the headline
+is supporting (role C twist slides specifically).
+
+**Text-wrap directive:** every `.headline` and `.caption` element uses
+`text-wrap: balance` to distribute lines visually.
+
+**Slide zone modifier class.** Each `.slide` element gets a zone modifier class derived from the narration's zone label: `slide-hook`, `slide-thesis`, `slide-receipt`, `slide-frame`, `slide-stakes`, `slide-twist`, `slide-historical-echo`, `slide-verbatim`, `slide-tease`, `slide-end`. The class enables the Justoon CSS rules below and supports any future zone-specific styling without changing the markup pattern. Example: `<div class="slide slide-twist">…</div>`.
+
+**Justoon CSS rules** (apply when any slide includes a `.justoon` image):
+
+```css
+/* Role A — full-body pointing teacher (Receipt + Stakes slides) */
+.slide-receipt .justoon, .slide-stakes .justoon {
+  position: absolute;
+  left: 0;
+  bottom: calc(var(--type-kicker) + 1.5cqh);
+  height: 88cqh;
+  width: auto;
+  max-width: 32%;
+  object-fit: contain;
+  object-position: left bottom;
+}
+
+/* Role C — bust reaction-as-anchor (Twist slides) */
+.slide-twist .justoon {
+  position: absolute;
+  right: 0;
+  bottom: calc(var(--type-kicker) + 1.5cqh);
+  height: 75cqh;
+  width: auto;
+  max-width: 55%;
+  object-fit: contain;
+  object-position: right bottom;
+}
+```
+
+DO NOT use CSS grid with `align-items: center` for Justoon placement;
+grid's row auto-sizing with image children makes `height: 100%` resolve
+to the image's natural pixel height (a 2048×2048 PNG renders at 2048px,
+breaking the layout). Always use absolute positioning with explicit
+`cqh` max-heights. (See the reference layout at
+`docs/superpowers/reference-renders/2026-05-25-justoon-slideshow-layout.html`
+for the proven implementation.)
 
 **Thumbnail-anchor rule:** every slide has exactly one element at
-`--type-hero` (or `--type-h1` for slides without a numeric anchor).
-That element must occupy ≥20% of the safe-zone height.
+`--type-hero` (or `--type-h1` for slides without a numeric anchor; or
+the Justoon image itself for role C reaction-as-anchor slides). That
+element must occupy ≥20% of the safe-zone height.
 
 **Visible-text budget:** ≤25 visible words per slide across all on-
 screen elements, OR one hero number + ≤15 supporting words. Speaker
-notes are not counted. Where a slide is marked as panel-a / panel-b
-below, render both panels and use the `data-advance-at` attribute on
-panel-a to auto-advance to panel-b at the specified mid-narration
-timestamp.
+notes and Justoon images are not counted against this budget. Where a
+slide is marked as panel-a / panel-b below, render both panels and use
+the `data-advance-at` attribute on panel-a to auto-advance to panel-b
+at the specified mid-narration timestamp.
 
 ## Slide-by-slide specification
+
+**Per-slide directive shape.** Each slide directive lists: kicker, anchor element, supporting content, visible-text budget, animation directive, AND — when Justoon is in play on this slide — a Justoon block of the form:
+
+```
+Justoon role: A | C
+Justoon variant: <filename from ~/Pictures/tcn-justin-slideshow/>
+Justoon placement: per the role's CSS rule (above)
+```
+
+Slides without Justoon omit the Justoon block entirely. When `--justoon-refs` is not provided, NO slide gets a Justoon block.
 
 ### Slide 1 — sl-title
 Kicker: `DISPATCH №[NNN] · HOOK`
@@ -302,6 +378,7 @@ Foot row (`--type-kicker`): `The Civic Node` / `[YYYY·MM·DD] · [N] MIN`
 Visible-text budget: ~12 words. Headline ≤8 words.
 Animation: sl-mark-pulse on the mark; sl-reveal cascade 1→2→3 on
   headline → tag → foot row. Hold for ~2s after the pulse settles.
+Justoon: none.
 
 ### Slide 2 — sl-lead
 Kicker: `DISPATCH №[NNN] · THESIS`
@@ -389,9 +466,23 @@ From the Script Notes footer, read the "Cold-open candidate" to inform the Title
 
 Apply the §5 mapping table. Apply user steering or overrides if provided. For combined slide types (e.g., `FRAME + STAKES`), pick the first sub-label's template type and note the combination in the prompt.
 
+### 5b. Pick Justoon variants (only when `--justoon-refs` is provided)
+
+Resolve `--justoon-refs` (invocation argument, or default `~/Pictures/tcn-justin-slideshow/`). If the path doesn't exist, log "no Justoon" mode and skip this step entirely.
+
+For each slide whose template-type row in the mapping table specifies a Justoon role (A or C):
+
+1. Apply the role's variant-pick rule from `references/template-mapping.md` §7 (interpretive — based on the slide's specific content, not a rigid table).
+2. Verify the picked file exists in `--justoon-refs`. If missing, fall back to `justoon-neutral.png` and note the substitution in the artifact header.
+3. Honor any per-slide override from user steering ("Slide 8: use raised-eyebrow instead of deadpan" / "Slide 4: no Justoon").
+
+Slides whose role is `none` get no Justoon. Slides that would have been Justoon-active but where the user steered "no Justoon on this dispatch" get no Justoon.
+
+If `justoon-neutral.png` itself is missing from the refs dir, halt and surface to the user: the anchor / fallback is required.
+
 ### 6. Generate per-slide directives
 
-For each slide, compose: kicker text (per §6), headline, body, animation specifications (per §7).
+For each slide, compose: kicker text (per §6), headline, body, animation specifications (per §7), AND — when Justoon is in play on this slide — the Justoon block (role + variant filename) per the Output Format spec.
 
 ### 7. Compose the speaker-notes JSON block
 
@@ -419,7 +510,11 @@ Write the complete prompt to `workspace/drafts/<slug>/youtube-slideshow.md`. Pre
 - **Design system bundle path not provided** — leave a placeholder in the prompt with a note ("upload your design system files to the Claude Design project before running this prompt") and continue.
 - **More than 18 narration slides** — halt with a warning. Trailer-format decks target 9-12 narration slides (small-screen pacing); >18 is a signal the upstream narration drifted from the format. Visual panel-splits do NOT count against this threshold — only narration-slide count does.
 - **Panel-splitting fires on more than ~2 slides** — surface to user before writing the prompt. If half the deck needs splitting, the narration drifted long and the right fix is upstream re-pacing, not silent visual splitting.
-- **Combined slide type encountered** (e.g., `FRAME + STAKES`) — pick the first sub-label's template type, adjust the layout (fewer numbered columns, more prose), note the combination in the prompt's slide-by-slide block.
+- **Combined slide type encountered** (e.g., `FRAME + STAKES`) — pick the first sub-label's template type, adjust the layout (fewer numbered columns, more prose), note the combination in the prompt's slide-by-slide block. Justoon role also uses the first sub-label's role.
+- **`--justoon-refs` path provided but directory missing** — halt with a setup note (where to place files, link to `~/Pictures/tcn-justin-slideshow/CLAUDE.md` convention).
+- **`justoon-neutral.png` missing from the refs dir** — halt with the same setup note. The anchor / fallback is required; without it, missing-variant substitution can't fall back safely.
+- **Mapped Justoon variant missing from the refs dir** — fall back silently to `justoon-neutral.png` and note the substitution in the artifact's header (e.g., `**Justoon substitution:** intended justoon-react-deadpan.png on Slide 8, used justoon-neutral.png (file not found).`).
+- **No `--justoon-refs` flag and no config file** — produce today's typography-only output unchanged. Not a failure; the absence is the explicit opt-out.
 - **User redirects** — re-invoke the affected step. Common redirects:
   - "use sl-compare instead of sl-frames on Slide 4" → re-generate that slide's directive with the override
   - "lower animation intensity" → re-write all animation directives at one level lower (sl-reveal-3 max, no chained pulses)
@@ -427,6 +522,9 @@ Write the complete prompt to `workspace/drafts/<slug>/youtube-slideshow.md`. Pre
   - "merge the panel-split on slide N" → re-render slide N as a single panel; the visible-text budget is overridden for this slide only (user accepts thumbnail-readability tradeoff)
   - "split slide N for readability" → force a panel-split even if the slide is under budget (user wants slower visual pacing here)
   - "rebuild from scratch with steering X" → re-run the full process with steering applied
+  - "swap Slide N Justoon to <variant>" → re-pick that slide's Justoon variant and regenerate the Justoon block in the prompt only
+  - "drop Justoon from Slide N" → set Slide N's Justoon to none; regenerate that slide's directive without the Justoon block
+  - "no Justoon on this dispatch" → re-run with Justoon mode forced off; produce typography-only output even though refs are present
 
 ---
 
@@ -458,4 +556,6 @@ Write the complete prompt to `workspace/drafts/<slug>/youtube-slideshow.md`. Pre
 
 ## Reference Files
 
-- `references/template-mapping.md` — full narration-zone → slide-template mapping table with fallback rules, combined-type handling, kicker convention details, and animation directive tables.
+- `references/template-mapping.md` — full narration-zone → slide-template mapping table with fallback rules, combined-type handling, kicker convention details, animation directive tables, AND (as of 2026-05-25) the §7 Justoon variant-pick guidance for role A and role C slides.
+- **Justoon layout reference (in the Substack Research project repo, not in this skill dir):** `docs/superpowers/reference-renders/2026-05-25-justoon-slideshow-layout.html` — the proven CSS layout from the 2026-05-25 hand-test. Open this in a browser to see the target output the Claude Design prompt should produce. Both role A (pointing teacher) and role C (reaction-as-anchor) are demonstrated at 1:1, 16:9, 9:16, and 1:1 thumbnail (240×240) aspects.
+- **Justoon library convention:** `~/Pictures/tcn-justin-slideshow/CLAUDE.md` — naming, format spec, inventory, regeneration workflow. The skill reads its `--justoon-refs` from here by default.
