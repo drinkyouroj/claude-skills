@@ -13,7 +13,7 @@ The skill reads this file at process step 8 (compose the two prompt variants). I
 
 The skill expects a directory of tone-mapped illustrated-Justin reference images, sourced one-time via a trained character + fixed seed in Magnific/Freepik/Nano Banana 2. The directory location comes from SKILL.md "Optional inputs" lookup chain (default `~/Pictures/tcn-justin-references/`).
 
-All files share the same illustrated-portrait style, fixed seed, trained character, and wardrobe (plaid bucket cap with red brand patch, olive-grey t-shirt, dark jeans, grey sneakers, blue square-frame glasses, red beard).
+All files share the same illustrated-portrait style, fixed seed, trained character, and wardrobe (plaid bucket cap with red brand patch, olive-grey t-shirt, dark jeans, grey sneakers, blue square-frame glasses, salt-and-pepper brown beard).
 
 **Naming convention:** `[framing]-[expression-or-gesture].png`. The skill reads filenames semantically — anything matching `headshot-*` or `bust-*` is a Variant B (close-up) candidate; anything matching `fullbody-*` is a Variant A (wide editorial) candidate. New files can be added to the library at any time; the skill picks them up without code changes as long as their names follow the convention and the selection guidance below is updated.
 
@@ -140,7 +140,7 @@ Every reference-image prompt the skill emits **must** include language that pins
 
 Include in every prompt:
 
-> Match the reference image's character: red beard, blue square-frame glasses, plaid bucket cap with red DICKIES brand patch (preserve this patch exactly — NO Supreme or other brand substitutions), olive-grey t-shirt, dark jeans, grey sneakers. Match the illustrated-portrait style — soft semi-realistic shading, illustrated editorial register, not photoreal, not flat-vector. Keep facial features and proportions consistent with the reference.
+> Match the reference image's character: salt-and-pepper brown beard, blue square-frame glasses, plaid bucket cap with red DICKIES brand patch (preserve this patch exactly — NO Supreme or other brand substitutions), olive-grey t-shirt, dark jeans, grey sneakers. Match the illustrated-portrait style — soft semi-realistic shading, illustrated editorial register, not photoreal, not flat-vector. Keep facial features and proportions consistent with the reference.
 
 This language is **non-negotiable** — every emitted prompt includes it. Adjust only the wardrobe enumeration if you ever add wardrobe variants to the library. The DICKIES brand-patch preservation language was added after the dispatch-004 test run, where Nano Banana 2 hallucinated a "Supreme"-style patch when the prompt left brand identity to model discretion. Explicit preservation language closes that hallucination path.
 
