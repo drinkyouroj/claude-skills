@@ -7,7 +7,7 @@ description: "Step 2 of the Civic Node YouTube production workflow: converts an 
 
 ## What This Skill Does
 
-Converts a finished YouTube narration script into a single, self-contained Claude Design prompt that yields a complete slide deck as one bundled HTML file. The prompt maps each narration slide to a TCN design system slide template, restates the brand guardrails, prescribes intensified-but-on-brand animation directives, and embeds the narration verbatim as speaker notes. The output is a markdown file (`youtube-slideshow.md`) ready to paste into a new Claude Design project at `claude.ai/design`.
+Converts a finished YouTube narration script into a single, self-contained Claude Design prompt that yields a complete slide deck as one bundled HTML file. The prompt maps each narration slide to a TCN design system slide template, restates the brand guardrails, prescribes intensified-but-on-brand animation directives, enforces small-screen / thumbnail readability and multi-aspect (16:9 / 9:16 / 1:1) layout from a single source, and embeds the narration verbatim as speaker notes. The output is a markdown file (`youtube-slideshow.md`) ready to paste into a new Claude Design project at `claude.ai/design`.
 
 This skill is a **prompt-builder, not a slideshow generator.** It does not render HTML, ship CSS, or extend the kinetic engine. It assembles a precise context handoff to Claude Design, which does the rendering against the TCN design system.
 
@@ -62,7 +62,7 @@ The full ecosystem diagram lives in the design spec at `docs/superpowers/specs/2
 
 ### Gate prompt presented to user
 
-> Claude Design prompt complete (~[N] lines). Open `youtube-slideshow.md`, copy its contents, paste into a new Claude Design project at `claude.ai/design`, upload the design system files, and ask Claude Design to build the deck. Approve, redirect (e.g., 'swap slide 4 to sl-compare', 'lower animation intensity'), or cancel?
+> Claude Design prompt complete (~[N] lines, [K] narration slides, [P] visual panel-splits, multi-aspect 16:9 / 9:16 / 1:1). Open `youtube-slideshow.md`, copy its contents, paste into a new Claude Design project at `claude.ai/design`, upload the design system files, and ask Claude Design to build the deck. After build, verify by resizing the browser to each target aspect and checking thumbnail-size legibility at ~240px wide. Approve, redirect (e.g., 'swap slide 4 to sl-compare', 'lower animation intensity', 'merge the panel-split on slide 6'), or cancel?
 
 **Stop after presenting the prompt.** Wait for user approval or redirect before doing anything else.
 
@@ -136,6 +136,82 @@ The skill instructs Claude Design to use **existing primitives more aggressively
 
 The prompt restates the guardrails verbatim so Claude Design does not drift toward exotic motion. Full directive tables and worked examples live in `references/template-mapping.md`.
 
+**Small-screen interaction:** animation intensification respects the safe zone (next section). Hairline draws, `sl-glow`, and `sl-mark-pulse` may extend to the viewport edges — they are decorative. `sl-reveal` cascades and `sl-chart-draw` apply to safe-zone content only, so they remain visible at thumbnail playback.
+
+---
+
+## Small-Screen Readability and Multi-Aspect Layout
+
+The deck must be **readable at thumbnail size** (a phone watching a YouTube card, ~240px wide playback) and must play correctly at **16:9, 9:16, and 1:1 from a single HTML source**. This is non-negotiable. The prompt encodes the rules explicitly so Claude Design enforces them at render time.
+
+### Single-source multi-aspect: letterbox into a safe zone
+
+One HTML file. The same deck plays at any aspect ratio. The user resizes the recording window to the target aspect (1920×1080 for 16:9, 1080×1920 for 9:16, 1080×1080 for 1:1) and screen-captures.
+
+- **Safe zone:** all critical content (kicker, headline, body, hero numbers, source attributions, CTA, disclosure) lives inside a centered square of `min(85vw, 85vh)`. This square is the *intersection* of all three target aspect ratios with a small margin.
+- **Decorative extension:** the brand mark, `sl-hairline` rules, `sl-glow` radial, and slide background may extend to the full viewport. They make 16:9 not feel hollow and let 9:16 feel anchored.
+- **No reflow per aspect.** No container queries, no `@media (aspect-ratio: ...)` rules. The layout is identical at every aspect — only the viewport's *empty margin* changes.
+
+### Type scale (vmin-based; same physical size at any aspect)
+
+Using `vmin` (1% of the smaller viewport dimension) means a 1080-tall viewport and a 1080-wide viewport produce identical type — exactly what multi-aspect requires.
+
+| Role | Size | Why this floor |
+|---|---|---|
+| **Hero number / hero word** (the slide's thumbnail anchor) | `clamp(180px, 24vmin, 360px)` | Readable at 240px playback. Occupies ~25% of safe-zone height. |
+| **Headline (h1/h2)** | `clamp(60px, 9vmin, 144px)` | Comfortably readable at 480px playback. |
+| **Body / supporting text (h3, p, bullet)** | `clamp(30px, 5vmin, 72px)` | Above the thumbnail floor; readable at half-screen on mobile. |
+| **Kicker, foot row, disclosure copy** | `clamp(18px, 2.5vmin, 36px)` | Decorative / contextual. Not load-bearing for thumbnail readability. |
+
+No exceptions. No `font-size: 14px` anywhere in the deck.
+
+### Thumbnail-anchor rule (one per slide)
+
+**Every slide must have exactly one element ≥20% of the safe-zone height.** That element is the slide's *thumbnail anchor* — what a phone viewer sees when the video appears as a 240px card.
+
+| Template | Thumbnail anchor |
+|---|---|
+| `sl-title` | The dispatch title (h1) |
+| `sl-lead` | The lead heading (h2) |
+| `sl-section` | The section label (h2) |
+| `sl-data` | The single dominant number (`ms-numgrid`'s lead figure, OR the highest bar in the chart) |
+| `sl-frames` | The current frame's label (rendered large; supporting numbers stay small) |
+| `sl-compare` | The compared term currently on screen (rotates if both shown) |
+| `sl-quote` | The quote's first short clause (rendered large; rest of quote in body size) |
+| `sl-end` | "The Civic Node" wordmark or the Substack URL |
+
+If a slide cannot identify a single anchor, the slide is too dense — split it (see below).
+
+### Visible-text budget (per slide)
+
+Each slide displays **≤25 visible words** across all elements (kicker + headline + body + foot row + attribution), OR **one hero number + ≤15 supporting words**. Speaker notes are separate; this budget is for what *renders on screen.*
+
+| Template | Typical budget |
+|---|---|
+| `sl-title` | ~12 words (kicker + headline + tag + foot row) |
+| `sl-lead` | ~22 words (kicker + heading + 1-2 short body sentences) |
+| `sl-section` | ~10 words (kicker + section label) |
+| `sl-data` | one hero number + ≤15 words of labels/units/supporting text |
+| `sl-frames` | ~20 words across [01]/[02]/[03] combined (~6-7 per frame) |
+| `sl-compare` | ~18 words across both columns (~8-9 per side) |
+| `sl-quote` | ≤25 words of quote + ≤10 words of attribution |
+| `sl-end` | ≤25 words (URL + tagline + disclosure) |
+
+### Slide-splitting rule
+
+If a narration slide's mapped content exceeds the visible-text budget for its template, **split the visual into two panels with a shared kicker**:
+
+- The narration stays one slide (one entry in `speaker-notes` JSON, with the full narration verbatim).
+- The visual becomes Slide N-a and Slide N-b in the rendered deck.
+- Both panels share the same kicker (e.g., `DISPATCH №004 · THE RECEIPT · HIP-143`).
+- The narration plays continuously across both panels; the second panel auto-advances mid-narration via a `data-advance-at` timestamp on the slide element (`deck-stage.js` already supports timed advance — no engine extension needed).
+
+Splitting is a last resort. The narration skill (`tcn-youtube-narration`) targets 9-12 slides specifically so most content arrives pre-paced for small-screen consumption and splitting is rare. If splitting fires on more than ~2 slides in a deck, surface that to the user as a signal the narration drifted long; do not silently split half the deck.
+
+### What this means for Claude Design
+
+The prompt produced by this skill includes (a) a `--safe-zone` CSS variable with the `min(85vw, 85vh)` formula, (b) the full type-scale table as concrete CSS rules, (c) explicit per-slide visible-text budgets in each slide's directive, (d) the thumbnail-anchor rule called out per slide, and (e) explicit panel-split markup wherever the skill split a slide. Claude Design renders these as written; it does not re-decide layout.
+
 ---
 
 ## Output Format
@@ -172,30 +248,82 @@ the narration as audio.
 - No bounce, no spring, no rainbow gradients.
 - Kickers: mono, wide-tracked (0.18em), all-caps, slate-400.
 
+## Small-screen / multi-aspect requirements (non-negotiable)
+
+This deck must render correctly at 16:9, 9:16, and 1:1 from this single
+HTML file, and must be readable at thumbnail playback (~240px wide on a
+phone). The author records by resizing the browser to the target aspect
+and screen-capturing; the HTML does not branch per aspect.
+
+- Define `--safe-zone: min(85vw, 85vh)` at `:root`. Every slide's
+  critical-content container is exactly this size, centered.
+- Critical content (kicker, headline, body, hero numbers, source
+  attributions, CTA, disclosure) lives ONLY inside the safe zone.
+- Decorative elements (brand mark, `sl-hairline` rules, `sl-glow`
+  radial, slide background fill) may extend to viewport edges.
+- No fixed-pixel widths on layout containers. No media queries based on
+  aspect ratio. No container queries. Layout is identical at every
+  aspect; only the empty viewport margin differs.
+
+**Type scale (apply globally, not per slide):**
+
+```css
+:root {
+  --type-hero:    clamp(180px, 24vmin, 360px);
+  --type-h1:      clamp(60px,  9vmin,  144px);
+  --type-h2:      clamp(60px,  9vmin,  144px);
+  --type-body:    clamp(30px,  5vmin,  72px);
+  --type-kicker:  clamp(18px,  2.5vmin, 36px);
+  --safe-zone:    min(85vw, 85vh);
+}
+```
+
+No element renders below `--type-kicker`. The hero/h1/h2/body/kicker
+roles are the only sizes used on the deck.
+
+**Thumbnail-anchor rule:** every slide has exactly one element at
+`--type-hero` (or `--type-h1` for slides without a numeric anchor).
+That element must occupy ≥20% of the safe-zone height.
+
+**Visible-text budget:** ≤25 visible words per slide across all on-
+screen elements, OR one hero number + ≤15 supporting words. Speaker
+notes are not counted. Where a slide is marked as panel-a / panel-b
+below, render both panels and use the `data-advance-at` attribute on
+panel-a to auto-advance to panel-b at the specified mid-narration
+timestamp.
+
 ## Slide-by-slide specification
 
 ### Slide 1 — sl-title
 Kicker: `DISPATCH №[NNN] · HOOK`
-Headline: [from narration Slide 1]
-Tag (sub-line): [from narration cold-open candidate or steering]
-Foot row: `The Civic Node` / `[YYYY·MM·DD] · [N] MIN`
+Headline (anchor, `--type-h1`): [from narration Slide 1]
+Tag (sub-line, `--type-body`): [from narration cold-open candidate or steering]
+Foot row (`--type-kicker`): `The Civic Node` / `[YYYY·MM·DD] · [N] MIN`
+Visible-text budget: ~12 words. Headline ≤8 words.
 Animation: sl-mark-pulse on the mark; sl-reveal cascade 1→2→3 on
   headline → tag → foot row. Hold for ~2s after the pulse settles.
 
 ### Slide 2 — sl-lead
 Kicker: `DISPATCH №[NNN] · THESIS`
-Heading: [from narration Slide 2, declarative]
-Body: [1-2 paragraphs from narration Slide 2]
+Heading (anchor, `--type-h2`): [from narration Slide 2, declarative]
+Body (`--type-body`): [1-2 short sentences from narration Slide 2]
+Visible-text budget: ~22 words total. If narration Slide 2 exceeds
+  this, split into Slide 2-a / Slide 2-b with shared kicker.
 Animation: sl-reveal cascade 1→2 on heading → body. sl-hairline draws
   left-to-right on entry, 360ms.
 
-[... continues for each narration slide, following the §5 mapping table ...]
+[... continues for each narration slide, following the §5 mapping
+table. Every slide includes: kicker, anchor element at --type-h1 or
+--type-hero, supporting content, visible-text budget, animation
+directive. Slides marked panel-a / panel-b include data-advance-at
+timestamps on panel-a. ...]
 
 ### Slide N — sl-end
 Kicker: `DISPATCH №[NNN] · END`
-Heading: `The Civic Node`
-Body: Substack URL CTA + disclosure block (verbatim from narration
-  Outro / End slide)
+Heading (anchor, `--type-h1`): `The Civic Node`
+Body (`--type-body`): Substack URL CTA + disclosure block (verbatim
+  from narration Outro / End slide)
+Visible-text budget: ≤25 words.
 Animation: sl-mark-pulse on the mark at 44px; sl-glow radial slate
   behind the mark; sl-reveal cascade on the disclosure block.
 
@@ -222,6 +350,17 @@ One entry per slide. Each entry is the narration text verbatim from
 - Self-contained: opens in any browser, plays the full deck via
   `deck-stage.js`.
 - No external CDN calls. No remote fonts. No analytics.
+- Renders correctly at 16:9 (1920×1080), 9:16 (1080×1920), and 1:1
+  (1080×1080) from this same file. Test by resizing the browser window
+  to each target aspect before recording — type sizes and safe-zone
+  content stay identical; only the empty viewport margin changes.
+- Every slide passes the thumbnail test: scale the browser window to
+  240px wide and confirm the slide's anchor element is legible.
+- Every slide passes the visible-text budget (≤25 visible words OR one
+  hero number + ≤15 supporting words). Speaker notes excluded.
+- Panel-split slides render both panels and auto-advance via
+  `data-advance-at` on panel-a; speaker-notes JSON has ONE entry per
+  narration slide, not per visual panel.
 ```
 
 The skill fills every bracketed placeholder with article-specific content. The prompt is comprehensive enough that Claude Design produces the bundle deterministically without further clarification.
@@ -278,12 +417,15 @@ Write the complete prompt to `workspace/drafts/<slug>/youtube-slideshow.md`. Pre
 - **Narration slides don't match expected structure** (no slide markers, no Script Notes footer, no zone labels) — surface to user; ask whether to proceed with best-effort parsing or halt. Default to halt if structure is severely malformed.
 - **Dispatch number missing from title block** — halt and ask the user to confirm. Do not guess.
 - **Design system bundle path not provided** — leave a placeholder in the prompt with a note ("upload your design system files to the Claude Design project before running this prompt") and continue.
-- **More than 12 narration slides** — halt with a warning. Trailer-format decks target 7-9 slides; >12 is a signal the upstream narration drifted from the format.
+- **More than 18 narration slides** — halt with a warning. Trailer-format decks target 9-12 narration slides (small-screen pacing); >18 is a signal the upstream narration drifted from the format. Visual panel-splits do NOT count against this threshold — only narration-slide count does.
+- **Panel-splitting fires on more than ~2 slides** — surface to user before writing the prompt. If half the deck needs splitting, the narration drifted long and the right fix is upstream re-pacing, not silent visual splitting.
 - **Combined slide type encountered** (e.g., `FRAME + STAKES`) — pick the first sub-label's template type, adjust the layout (fewer numbered columns, more prose), note the combination in the prompt's slide-by-slide block.
 - **User redirects** — re-invoke the affected step. Common redirects:
   - "use sl-compare instead of sl-frames on Slide 4" → re-generate that slide's directive with the override
   - "lower animation intensity" → re-write all animation directives at one level lower (sl-reveal-3 max, no chained pulses)
   - "swap a slide" → re-map the affected slide and regenerate
+  - "merge the panel-split on slide N" → re-render slide N as a single panel; the visible-text budget is overridden for this slide only (user accepts thumbnail-readability tradeoff)
+  - "split slide N for readability" → force a panel-split even if the slide is under budget (user wants slower visual pacing here)
   - "rebuild from scratch with steering X" → re-run the full process with steering applied
 
 ---

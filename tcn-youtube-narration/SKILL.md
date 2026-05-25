@@ -9,6 +9,8 @@ description: Step 1 of the Civic Node YouTube production workflow — converts a
 
 Converts a finished Civic Node article draft into a 5-7 minute trailer-format YouTube narration script (700-1,050 words at ~140 wpm) with standardized slide markers and a Script Notes footer. The output is structured as a trailer-funnel: it teases the article's strongest hook, names what the video deliberately does not cover, and routes viewers to read the full piece on Substack. The register sits at a 6-7 on a 1-10 dial — recognizably TCN-Marcus, but sharper, more colloquial, and tuned for a broader YouTube audience than the Substack reader base.
 
+**Slide pacing target: 9-12 slides total**, calibrated for small-screen / phone-thumbnail consumption of the downstream slideshow (see `tcn-youtube-slideshow`). Same 5-7 min runtime as before; the slide budget is finer-grained so each slide carries less on-screen content and the visual cadence matches mobile viewing. Going under 9 slides usually means the piece is too compressed for video; going over 12 means the upstream article needs a tighter cold-open angle.
+
 ---
 
 ## Voice & vocabulary canonical source
@@ -78,7 +80,7 @@ The full ecosystem diagram lives in the design spec at `docs/superpowers/specs/2
 ### Output artifact
 
 - **File:** `workspace/drafts/<slug>/youtube-narration.md`
-- **Contents:** Title block (article title + dispatch number + slide count + format tag), 7-9 slide blocks in standardized markup, Script Notes footer.
+- **Contents:** Title block (article title + dispatch number + slide count + format tag), 9-12 slide blocks in standardized markup (each within the ≤25-visible-words/slide budget), Script Notes footer.
 - **Does NOT contain:** title options, YouTube description, chapter timestamps, tags, thumbnail prompt — those come from separate skills.
 
 ### Gate prompt presented to user
@@ -91,7 +93,7 @@ The full ecosystem diagram lives in the design spec at `docs/superpowers/specs/2
 
 ## The Narration Structure
 
-Three zones, 7-9 slides total, 700-1,050 words at ~140 wpm.
+Three zones, **9-12 slides total**, 700-1,050 words at ~140 wpm. Each slide carries **≤25 visible-text words** that would render on screen (see "Visible-text budget" below) — the spoken narration is longer than what appears on the slide, but the on-screen text per slide stays inside the small-screen budget so the downstream `tcn-youtube-slideshow` doesn't have to split slides visually.
 
 ### Cold Open (always 2 slides, 45-60 sec)
 
@@ -117,11 +119,11 @@ That example is the floor for register-7 catchiness, not the ceiling. Aim higher
 
 **Slide 2 — Thesis.** What the piece argues, distilled to one or two sentences. Often a verbatim or near-verbatim line from the article. The promise the video is making.
 
-### Body (3-5 slides, 3-4 min)
+### Body (5-8 slides, 3-4 min)
 
-Read the article and pick from this menu by asking *which of these does this article most strongly support?*
+Read the article and pick **5-8 from this menu** by asking *which of these does this article most strongly support?* The expanded count (vs. the older 3-5 target) gives each middle slide less work to do, which keeps the per-slide visible-text budget achievable. Repeating a category is fine — `THE RECEIPT · UNIT ECONOMICS` followed by `THE RECEIPT · HIP-143` is two Receipt slides, not one overloaded Receipt slide.
 
-- **The Receipt** — strongest concrete evidence. Numbers, dates, names. The "I can prove it" segment. **Usually mandatory.**
+- **The Receipt** — strongest concrete evidence. Numbers, dates, names. The "I can prove it" segment. **Usually mandatory.** Often appears 2× with distinct sub-labels.
 - **The Frame** — the TCN lens. The way of looking at it that re-orders everything. Where refrains often live. **Usually mandatory** (one of Frame or Twist is always present).
 - **The Stakes** — why Marcus and visiting friends should care. The "this affects you because" segment.
 - **The Twist** — the part that genuinely surprised you and will surprise viewers.
@@ -129,6 +131,20 @@ Read the article and pick from this menu by asking *which of these does this art
 - **The Verbatim** — a primary-source quote that lands harder than any paraphrase. Requires the fact-check report to source the quote.
 
 If the article has a refrain candidate (a single sentence the article repeats or implies repeatedly), place it across 2-3 middle slides and mark each occurrence as `[REFRAIN]` in the Script Notes footer.
+
+### Visible-text budget (per slide)
+
+Each slide is a small-screen object first. The downstream `tcn-youtube-slideshow` skill must produce a deck that's readable at thumbnail playback (~240px wide on a phone) and that works across 16:9, 9:16, and 1:1 aspect ratios from one HTML source. To make that possible, the *narration itself* paces around what will be visible on screen.
+
+**The rule:** for each slide, identify what would actually render on the slide visual — the kicker, the headline/hook line, supporting bullets or one big number, source attribution if any. That visible content must stay **≤25 words total**, OR **one hero number plus ≤15 supporting words**. The spoken narration around it can be longer (a slide's spoken portion is typically 60-90 words ≈ 25-40 sec); the budget applies only to what would be lifted onto the slide as visible text.
+
+**Practical effect:**
+
+- A Receipt slide with five numbers becomes two slides (e.g., `THE RECEIPT · UNIT ECONOMICS` and `THE RECEIPT · HIP-143`), each carrying ≤3 numbers visually.
+- A Frame slide with a four-part argument becomes a Frame slide (the framing line) followed by a Stakes or Twist slide (the consequences) — instead of one dense slide that tries to do both.
+- A Verbatim quote longer than ~25 words gets trimmed to its sharpest clause for the visual; the full quote stays in the spoken narration.
+
+If the visible budget can't be met by re-pacing — e.g., a chart that genuinely needs eight labels — flag it in the Script Notes footer under a `**Visual density flags:**` bullet so the slideshow skill knows to plan a panel-split for that slide specifically. Panel-splits at the visual layer are a last resort; re-pacing at narration time is the cleaner fix.
 
 ### Outro (always 2 slides, 30-45 sec)
 
@@ -191,10 +207,10 @@ Full dial worked examples, register-comparison side-by-sides, and the spoken-wor
 ```markdown
 # [Article Title in Spoken-Word Friendly Form]
 ## The Civic Node · Dispatch №[NNN]
-## [N] slides · trailer-format · 5-7 min target
+## [N] slides · trailer-format · small-screen · 5-7 min target
 ```
 
-The dispatch number is detected from existing dispatches in the workspace (see step 9 of the process), or captured from the user. The format tag (`trailer-format`) distinguishes new-format scripts from the legacy `Part One / Part Two` format.
+The dispatch number is detected from existing dispatches in the workspace (see step 9 of the process), or captured from the user. The format tag (`trailer-format · small-screen`) distinguishes the current format (9-12 slides, ≤25-visible-words/slide budget, multi-aspect deck downstream) from the legacy `Part One / Part Two` format and from the older 7-9-slide pre-small-screen-pacing scripts.
 
 ### Slide markup convention
 
@@ -239,9 +255,13 @@ The `---` between slides is intentional. It gives the reader visual separation w
 
 **Cuts from the article** (what we deliberately did not cover, for Tease slide reference):
 - [bulleted list of major article sections not in the video]
+
+**Visual density flags** (for slideshow skill — slides that will need a panel-split):
+- Slide [NN]: [reason, e.g., "chart needs 8 axis labels", "Verbatim quote 47 words"]
+- (none on this pass — narration paced within ≤25 visible-words/slide budget)
 ```
 
-The "Cold-open candidate," "Refrain candidate," and "Cuts from the article" fields are **forward-compat hooks** the slideshow + title + thumbnail skills will read later. They cost nothing to produce now and save work downstream.
+The "Cold-open candidate," "Refrain candidate," "Cuts from the article," and "Visual density flags" fields are **forward-compat hooks** the slideshow + title + thumbnail skills will read later. They cost nothing to produce now and save work downstream. The Visual density flags field is the explicit handoff to `tcn-youtube-slideshow` for slides that should panel-split at the visual layer.
 
 ---
 
@@ -265,7 +285,7 @@ Distill the article's argument to one or two sentences. Often a verbatim or near
 
 ### 5. Pick the middle-slide menu
 
-Read the article's argument structure and select 3-5 from the menu (Receipt / Frame / Stakes / Twist / Historical Echo / Verbatim). The Receipt is almost always picked; one of Frame or Twist is almost always picked.
+Read the article's argument structure and select **5-8 from the menu** (Receipt / Frame / Stakes / Twist / Historical Echo / Verbatim). The Receipt is almost always picked, often twice with distinct sub-labels (e.g., `THE RECEIPT · UNIT ECONOMICS`, `THE RECEIPT · HIP-143`). One of Frame or Twist is almost always picked. The expanded count keeps per-slide visible-text density inside the ≤25-word budget without forcing a panel-split downstream.
 
 ### 6. Detect a refrain candidate (optional)
 
@@ -274,6 +294,8 @@ If the article repeats or implies a single load-bearing sentence, mark it as a r
 ### 7. Draft the script slide-by-slide
 
 Apply voice calibration (dial 6-7, Hank-Vox blend) and spoken-word adaptations (sentence-length cap, no em-dashes, no subordinate-clause stacks, one-word landings, numbers spelled out). Mark candidate refrain lines as `[REFRAIN]`.
+
+For each slide, mentally identify the *visible* subset — the kicker, headline/hook line, supporting bullets or hero number, attribution. Hold that subset to ≤25 words (or one hero number + ≤15 supporting words). If a slide can't meet the budget by re-pacing — e.g., a chart with eight required axis labels, a Verbatim quote that's irreducible — record the slide number under `**Visual density flags**` in the Script Notes footer so the slideshow skill can plan a panel-split. Re-pace at the narration layer first; flag for visual split only as a last resort.
 
 ### 8. Compose the Script Notes footer
 
@@ -299,6 +321,8 @@ Use the gate prompt from the Inputs and Outputs section. Wait for approval or re
 - **Article draft missing or unreadable** — surface the failure, ask for a valid path, halt.
 - **Voice canonical file missing** — apply the degraded-mode fallback used by `tcn-headline`: flag explicitly to the user, skip voice-aware work (no AI-tells cross-check, no banned-vocabulary substitutions), but continue with the structural work this skill can still do. Do NOT fall back to generic register (per the elasticity-bug failure mode documented in `tcn-headline`).
 - **Article too short for a 5-7 min trailer** (less than ~800 words article-side) — surface to user: "this piece is short enough that the video would cover most of it. Confirm you want a trailer (with curiosity-gap funnel) or a near-full read-through?" Let user override.
+- **Cannot pace to 9-12 slides within the visible-text budget** — if even after re-pacing the script lands at <9 slides (too compressed) or >12 slides (too sprawling), surface to user. <9 usually means the article is too thin for video. >12 usually means the cold-open angle isn't narrow enough — too many distinct sub-arguments competing for screen time. Don't silently exceed; ask the user whether to re-pick the hook or to accept the over/under count.
+- **More than ~3 visual density flags** — narration is the wrong place to be visually dense. If 3+ slides need a panel-split flag, the body menu picked too few categories or the chosen sub-labels are too broad. Re-pick before finalizing.
 - **No obvious hook angle** (rare) — present 2-3 candidate cold-open frames and ask the user to pick.
 - **Fact-check report has flagged unresolved items** — surface those before drafting. A trailer can't safely include claims the fact-check skill flagged. Override only if the user explicitly accepts the editorial risk.
 - **User redirects** — re-invoke the relevant step:

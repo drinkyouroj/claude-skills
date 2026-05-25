@@ -2,6 +2,8 @@
 
 Canonical templates for slide markup, the three narration zones (Cold Open / Body / Outro), the Script Notes footer, and the title block. Loaded at runtime when instantiating a slide. Skim, do not memorize.
 
+**Slide-count target:** 9-12 slides total (was 7-9 in the pre-small-screen format). Body zone is 5-8 middle slides. Each slide's *visible* content (kicker + headline + supporting bullets or hero number + attribution) stays ≤25 words OR one hero number + ≤15 supporting words. The spoken narration around the visible content is longer (60-90 words / 25-40 sec per slide is typical).
+
 ---
 
 ## 1. Slide markup format
@@ -77,7 +79,7 @@ The hardware is theirs. The pricing authority is not.
 
 ## 3. Body slide menu
 
-The Body is 3-5 slides, 3-4 min. The skill picks from this menu by asking *which of these does this article most strongly support?*
+The Body is **5-8 slides, 3-4 min**. The skill picks from this menu by asking *which of these does this article most strongly support?* Repeating a category with distinct sub-labels is encouraged when the article supports it (e.g., two Receipts: `THE RECEIPT · UNIT ECONOMICS` and `THE RECEIPT · HIP-143`). Two short slides on the same theme reads better at thumbnail size than one dense slide.
 
 All examples below are **invented hypothetical articles** — they are not drawn from any real TCN dispatch.
 
@@ -162,7 +164,7 @@ From the committee transcript, page 47:
 The vote was 9 to 2. The "after" never came.
 ```
 
-**Closing note on the menu:** the skill picks 3-5 of these per article. The Receipt is almost always chosen. At least one of Frame or Twist is almost always chosen. Stakes, Historical Echo, and Verbatim slot in based on what the article actually supports.
+**Closing note on the menu:** the skill picks **5-8** of these per article (was 3-5 in the pre-small-screen format). The Receipt is almost always chosen, often twice with distinct sub-labels. At least one of Frame or Twist is almost always chosen. Stakes, Historical Echo, and Verbatim slot in based on what the article actually supports. Two short same-category slides are preferred over one dense slide that breaks the visible-text budget.
 
 ---
 
@@ -236,13 +238,18 @@ Always present at the end of the script. Verbatim from spec §7.3:
 
 **Cuts from the article** (what we deliberately did not cover, for Tease slide reference):
 - [bulleted list of major article sections not in the video]
+
+**Visual density flags** (for `tcn-youtube-slideshow` — slides that exceed the ≤25-visible-words/slide budget after re-pacing):
+- Slide [NN]: [reason, e.g., "chart needs 8 axis labels", "Verbatim quote 47 words irreducible"]
+- (none on this pass — narration paced within budget)
 ```
 
-**Forward-compat fields.** The last three bulleted fields cost nothing to produce now and save work downstream:
+**Forward-compat fields.** The last four bulleted fields cost nothing to produce now and save work downstream:
 
 - **Cold-open candidate** → consumed by `tcn-youtube-title` (title inspiration) and `tcn-youtube-thumbnail` (visual metaphor).
 - **Refrain candidate** → consumed by `tcn-youtube-slideshow` (slide rhythm planning).
 - **Cuts from the article** → consumed by `tcn-youtube-description` (description content) and reused by the Tease slide itself.
+- **Visual density flags** → consumed by `tcn-youtube-slideshow` to decide which slides to render as a panel-split. Panel-splits keep the narration as one spoken slide but render the visual as two timed panels with a shared kicker.
 
 Populate every field even when the value is "none on this pass." Empty fields read as a bug downstream; explicit "none" reads as a decision.
 
@@ -255,11 +262,11 @@ Verbatim from spec §7.1:
 ```markdown
 # [Article Title in Spoken-Word Friendly Form]
 ## The Civic Node · Dispatch №[NNN]
-## [N] slides · trailer-format · 5-7 min target
+## [N] slides · trailer-format · small-screen · 5-7 min target
 ```
 
 **Notes:**
 
 - **"Spoken-word friendly"** — the title may differ slightly from the article title to be easier to deliver aloud. Drop a colon. Use a shorter version. The article title is the canonical record; the video title is the spoken adaptation.
 - **`Dispatch №[NNN]`** — zero-padded to three digits, populated by the dispatch-number detection step (skill process step 9). The skill scans `workspace/dispatch-narration/` for existing `dispatch-NNN-*.md` files and suggests the next integer.
-- **`trailer-format`** — the format tag distinguishes new-format scripts from the legacy Part-One/Part-Two skeleton. Always present on new scripts.
+- **`trailer-format · small-screen`** — the compound format tag. `trailer-format` distinguishes new-format scripts from the legacy Part-One/Part-Two skeleton. `small-screen` distinguishes the current 9-12-slide / ≤25-visible-words-per-slide pacing from earlier 7-9-slide scripts that predate the multi-aspect / phone-thumbnail readability requirement. Always include both tags on new scripts.
