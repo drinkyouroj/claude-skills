@@ -85,11 +85,57 @@ Search `wiki/sources/` for a page whose `source_url` matches the URL. If found, 
 
 If a wiki page exists for a *different* URL on the same topic (e.g., the draft cites Tom's Hardware, but the wiki has the same data from the original TrendForce report), surface this as a potential source upgrade — Marcus benefits from primary sources.
 
-**2c. Live content fetch (always runs)**
+**2c. Live content fetch (always runs, with escalation chain)**
 
-WebFetch the URL and capture the live page content. This is the source's *current* version of the facts.
+The goal is to retrieve the current live content of the source. Try three methods in order, escalating on failure:
 
-If WebFetch fails (hard paywall, JavaScript-rendered without fallback, blocked domain, 403/404), capture the failure reason and proceed to 2d with `live = unavailable`.
+**2c.1 — WebFetch**
+
+Default path. Fast, cheap, works for static pages and most news sites.
+
+Escalate to 2c.2 if any of these occur:
+- HTTP 403 (often clears with a real browser session)
+- HTTP 404 from a domain known to JS-render content (the "page not found" is the SPA shell)
+- Suspiciously short or stub-shaped HTML (e.g., `<div id="root"></div>` with no body content — likely a JS-rendered SPA that WebFetch can't execute)
+- Timeout or connection refused
+
+**2c.2 — Chrome MCP fallback**
+
+Use the Claude Chrome extension (`mcp__Claude_in_Chrome__*` tools) to retrieve the page in a real browser session. This handles two failure modes WebFetch can't:
+- **JavaScript-rendered pages** — React/Vue/Next/SPA apps render naturally in a real browser
+- **403s on real-browser-only sites** — the Chrome session carries the user's cookies and a real `User-Agent`, which clears most bot-protection 403s
+
+Workflow:
+1. Confirm the Chrome extension is connected (`mcp__Claude_in_Chrome__list_connected_browsers`). If not, ask the user to install/enable it rather than silently dropping to manual.
+2. `mcp__Claude_in_Chrome__navigate` to the URL.
+3. `mcp__Claude_in_Chrome__get_page_text` (or `read_page`) to extract the rendered content.
+4. Treat the extracted text as the live source for verification purposes.
+
+Escalate to 2c.3 if Chrome can't reach the content either:
+- Hard paywall (Stratechery, Bloomberg, WSJ subscriber-only) — page loads but only shows lede + paywall
+- Login wall (the URL requires authentication the user hasn't set up in Chrome)
+- Native PDF that doesn't render as text in the browser
+- Region lock, captcha, or other access barrier
+
+**2c.3 — Manual scrape protocol**
+
+When automated retrieval fails through both prior steps, emit a structured request to the user:
+
+> **Source not auto-retrievable:** `[URL]`
+> **Why:** [paywall / login wall / PDF / region lock / captcha]
+> **To verify the claim(s) sourced to this URL, please:**
+> 1. Open the URL in your browser (logged in if needed)
+> 2. Save the article as either: (a) "Save as PDF" → save to `{wiki-root}/raw/_manual/[meaningful-slug].pdf`, or (b) copy the article text into a new markdown file at the same location with a `.md` extension
+> 3. Reply with the file path
+>
+> The fact-checker will then ingest that file via the llm-wiki Ingest flow and resume verification.
+
+When the user replies with a file path:
+1. Read the file.
+2. Use its contents as the live source for verification.
+3. Hand off the file + metadata to llm-wiki's Ingest flow so a `wiki/sources/{slug}.md` page is created (see "Ingestion delegation" below).
+
+If the user declines or cannot scrape, proceed to 2d with `live = unavailable` and note the failure reason for the Link Health section.
 
 **2d. Reconcile**
 
@@ -103,6 +149,42 @@ For each URL, you now have up to three signals: link health (2a), wiki extract (
 | Missing | Unavailable | **Source inaccessible** — cannot verify. Note failure reason. |
 
 The point: a claim that previously passed silently because the wiki agreed with it will now also be checked against the live page. The new failure mode this catches — **the wiki and the live source disagree** — is what hardens the fact-check against stale ingestion and silent source edits.
+
+---
+
+### Step 2.5: Ingestion delegation
+
+When Step 2c escalates to Chrome (2c.2) or manual scrape (2c.3) for a URL that **isn't yet in the wiki**, the fact-checker should hand off to the [llm-wiki](../llm-wiki/SKILL.md) skill's Ingest flow so the wiki accumulates the work — every escalation makes future fact-checks faster and gives you a permanent record of what the source said.
+
+**When to delegate:**
+
+| Resolution state | Action |
+|---|---|
+| WebFetch succeeded, wiki missing | Optionally suggest ingest (the URL is re-fetchable; not urgent). |
+| Chrome succeeded, wiki missing | **Delegate ingest.** Chrome-only retrieval signals the source is JS-rendered or 403s without a real browser — re-fetch may not work later. |
+| Manual scrape provided, wiki missing | **Delegate ingest, always.** Paywalls and PDFs can't be re-retrieved automatically; the raw file is the only durable record. |
+| Wiki already has this URL | Don't re-ingest. If a divergence was detected, recommend the user re-run ingest manually (`/llm-wiki` with this URL) to refresh the wiki. |
+
+**What to pass to llm-wiki Ingest:**
+
+The fact-checker invokes llm-wiki's Ingest flow with:
+- **URL** (original, as cited in the article)
+- **Canonical URL** if redirects happened (from Step 2a)
+- **Retrieved content** (Chrome-extracted text, or path to the manually scraped file in `raw/_manual/`)
+- **Provenance fields** to populate the source page frontmatter:
+  - `ingest_method`: `chrome` or `manual` (WebFetch ingestions, if you choose to file them, get `webfetch`)
+  - `raw_file`: relative path inside the wiki's `raw/` directory (required for `chrome` and `manual`; absent or null for `webfetch`)
+  - `status`: `ok` | `paywalled` | `partial` (e.g., Chrome got the lede only) | `404`
+  - `notes`: brief one-liner on retrieval context (e.g., "WebFetch returned 403; Chrome succeeded with active Reuters login")
+
+**Snapshot policy** (chosen per the wiki/source divergence design):
+- `webfetch` ingestions: no raw file persisted — URL is the source of truth, re-fetching is reliable
+- `chrome` ingestions: raw file required (the extracted text saved to `raw/`)
+- `manual` ingestions: raw file required (the original PDF/HTML the user saved)
+
+This means that for any wiki source page where `ingest_method ≠ webfetch`, the original artifact is preserved at `raw_file` and you can always re-open it to verify the wiki's summary against the actual source text. For `webfetch` sources, the divergence check itself is the verification — if the URL ever drifts, the next fact-check that touches it will surface it.
+
+See `references/verification-rules.md` → "When the wiki and the live source disagree" for how divergences interact with re-ingest recommendations.
 
 ### Step 3: Verify Each Claim
 

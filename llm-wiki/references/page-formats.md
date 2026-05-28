@@ -18,6 +18,11 @@ author: "{Author Name(s)}"
 published: {YYYY-MM-DD or YYYY}
 source_type: article | paper | transcript | book-chapter | note | report
 url: "{URL or file path}"
+canonical_url: "{post-redirect URL if different from url; omit if same}"
+ingest_method: webfetch | chrome | manual
+raw_file: "{relative path inside raw/, e.g. _manual/reuters-samsung-q4-2026.pdf — required for chrome and manual; omit for webfetch}"
+status: ok | paywalled | partial | inaccessible | 404
+notes: "{one-liner on retrieval context, e.g. 'WebFetch returned 403; Chrome succeeded with active Reuters login'}"
 tags: [tag1, tag2, tag3]
 ---
 

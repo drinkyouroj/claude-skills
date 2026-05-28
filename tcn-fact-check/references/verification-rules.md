@@ -64,16 +64,29 @@ If the article attributes a paraphrase rather than a direct quote:
 - Flag if the paraphrase changes the meaning or emphasis
 - Note if the quote is from a paywalled source (e.g., Stratechery) and attributed via secondary reporting
 
-### Claims sourced to paywalled content
+### Claims sourced to paywalled, JS-rendered, or blocked content
 
-The skill's architecture is **always-live + wiki-corroboration**, so for paywalled sources the live fetch will typically fail. The wiki becomes the verifier of last resort rather than the default verifier.
+The skill's architecture is **always-live + wiki-corroboration**, with a three-step escalation chain in Step 2c: WebFetch → Chrome MCP → manual scrape. Most "inaccessible" sources resolve at one of these tiers; the wiki is only the verifier of last resort when all three escalation steps fail.
 
-1. Run the live fetch anyway — sometimes paywalls return partial content (lede, dek, first paragraphs) which is enough to verify many claims
-2. If the live fetch is blocked or partial, fall back to the wiki source page (this is the "wiki-only mode" resolution state in Step 2d)
-3. If neither yields the claim, check whether a secondary source (news outlet) reported the same data with attribution
-4. If none of those work, flag as "source inaccessible — paywalled" and recommend manual verification or finding an accessible secondary source
+**Walk the escalation chain in order:**
+
+1. **WebFetch** — try it first. Paywalls sometimes return enough lede/dek for verification; JS-rendered pages may return enough static fallback. If WebFetch succeeds with usable content, you're done.
+2. **Chrome MCP** — escalate if WebFetch returns 403, an SPA stub, or times out. This is the right tier for:
+   - JavaScript-rendered news sites and SPAs (rendered in a real browser)
+   - 403s from sites with bot detection (the Chrome session presents real cookies + UA)
+   - Soft paywalls (sometimes a Chrome session with the user's login clears them)
+3. **Manual scrape** — escalate if Chrome can't reach the content either. This is the right tier for:
+   - Hard paywalls (Stratechery, Bloomberg, WSJ subscriber-only)
+   - Login walls without an active browser session
+   - Native PDFs that don't render as extractable text in the browser
+   - Region locks, captchas, other access barriers
+4. **Wiki-only verification** — only if all three tiers fail AND the wiki has an existing page for the URL. Mark medium confidence and add the URL to the Link Health section.
+5. **Secondary source check** — if even the wiki has nothing, check whether a secondary source (news outlet) reported the same data with attribution. Note in the report.
+6. **Flag as inaccessible** — if none of those work, mark "source inaccessible" and recommend the writer find an accessible secondary source or remove the claim.
 
 When the wiki is the only signal available, mark the verification at **medium confidence** and add the URL to the Link Health section noting the live fetch failed — readers clicking the link will hit the same paywall, which is its own credibility issue worth surfacing.
+
+**Manual scrape isn't a punt — it's an investment.** When the user provides a scraped file, the fact-checker hands it to llm-wiki's Ingest flow (see Step 2.5 in SKILL.md). The result: future fact-checks against the same URL skip the manual step entirely because the wiki now has the source. Over time, the wiki absorbs the publication's worth of paywalled/PDF sources and becomes increasingly self-sufficient.
 
 ### When the wiki and the live source disagree
 
