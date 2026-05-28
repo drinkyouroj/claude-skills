@@ -66,10 +66,35 @@ If the article attributes a paraphrase rather than a direct quote:
 
 ### Claims sourced to paywalled content
 
-If the source URL leads to a paywall:
-1. Check if the wiki has a source page with extracted key points
-2. Check if a secondary source (news outlet) reported the same data with attribution
-3. If neither is available, flag as "source inaccessible — paywalled" and recommend manual verification or finding an accessible secondary source
+The skill's architecture is **always-live + wiki-corroboration**, so for paywalled sources the live fetch will typically fail. The wiki becomes the verifier of last resort rather than the default verifier.
+
+1. Run the live fetch anyway — sometimes paywalls return partial content (lede, dek, first paragraphs) which is enough to verify many claims
+2. If the live fetch is blocked or partial, fall back to the wiki source page (this is the "wiki-only mode" resolution state in Step 2d)
+3. If neither yields the claim, check whether a secondary source (news outlet) reported the same data with attribution
+4. If none of those work, flag as "source inaccessible — paywalled" and recommend manual verification or finding an accessible secondary source
+
+When the wiki is the only signal available, mark the verification at **medium confidence** and add the URL to the Link Health section noting the live fetch failed — readers clicking the link will hit the same paywall, which is its own credibility issue worth surfacing.
+
+### When the wiki and the live source disagree
+
+This is the new failure mode the cross-check architecture is designed to catch. Three things can cause it, and they have different fixes:
+
+1. **The source was edited or corrected after wiki ingestion.** News outlets quietly update articles all the time — figures get corrected, paragraphs get added, retractions get appended. The live page is the current truth.
+2. **The source was replaced or retracted.** The URL still resolves but now points to a different article, an editor's note, or a section index. The link is effectively dead even though it returns 200.
+3. **The wiki ingestion was wrong.** The wiki extract captured the wrong figure, misattributed a quote, or summarized the source incorrectly at ingestion time. The live page is what the source actually says.
+
+Distinguishing these matters for the recommendation:
+
+- **Edited/corrected source:** correct the article to match live; wiki should be re-ingested
+- **Replaced/retracted source:** find a new source for the claim, or remove the claim; flag the wiki page for retirement or re-ingestion against the new URL
+- **Wiki ingestion error:** correct the article only if it was relying on the wrong wiki summary; flag the wiki page for re-ingestion regardless
+
+The split-policy verdict (from Step 3 of SKILL.md) decides whether the report renders a verified/unverified verdict or just surfaces the divergence:
+
+- **Hard facts** (numbers, percentages, dollar figures, dates, direct quotes, named attributions): **Live wins.** The verdict comes from the live page. Corrections to hard facts are almost always authoritative — if Reuters changed "$700M" to "$710M" three months after the original report, $710M is the truth and the article should match.
+- **Prose claims** (causal language like "triggered a panic," characterizations like "a collapse," qualitative framing): **No verdict.** Surface both excerpts and let the writer judge. Prose drift is more ambiguous: the live page softening "triggered" to "preceded" might be a legitimate correction or might be later-edition hedging the writer chose to ignore. Not a verdict the fact-checker should auto-make.
+
+Every divergence — regardless of verdict — should also note that the wiki page may need re-ingestion. Over time this turns the fact-checker into a feedback loop that hardens the wiki itself.
 
 ### Secondary vs. primary sources
 

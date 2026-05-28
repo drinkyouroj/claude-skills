@@ -61,17 +61,48 @@ Then scan the entire draft for sentences containing factual assertions — numbe
 
 Present the extraction as a numbered list before proceeding to verification.
 
-### Step 2: Resolve Sources
+### Step 2: Resolve and Cross-Check Sources
 
-For each URL extracted in Step 1:
+For each **unique** URL extracted in Step 1 (de-dupe — one source cited in five claims gets resolved once), run three resolutions and reconcile them. The wiki is treated as **corroboration**, not a substitute for the live source. Every cited URL gets hit, every time.
 
-1. **Check the wiki first.** Search `wiki/sources/` for a page whose `source_url` matches the URL. If found, read the wiki source page — it contains a summary, key points, and quotes already extracted from the original. This is faster and more reliable than re-fetching.
+**2a. URL sanity check (always runs first)**
 
-2. **If not in the wiki, use WebFetch** to retrieve the page content from the URL.
+Issue a lightweight request to the URL and capture:
+- HTTP status (200 OK, 301/302 redirect, 403/404/410, 5xx, timeout)
+- Final URL after redirects
+- Page `<title>` (or first `<h1>`) for topic comparison
 
-3. **If WebFetch fails** (paywall, JavaScript-rendered, blocked domain, 403/404), flag the source as **"source inaccessible"** rather than marking the claim unverified. Note the failure reason.
+Flag any of the following as **link-health issues**, independent of content verification:
+- Non-2xx status (404, 410, 403, 5xx, timeout)
+- Redirect to a *different article* (path changed, or new URL points to a section/home page instead of the original article)
+- Title/topic clearly unrelated to the wiki's recorded topic for that URL (cheap heuristic for "the article was replaced")
 
-4. **If the wiki source page exists but the URL is different** (e.g., the draft links to a Tom's Hardware article, but the wiki has the same data sourced from a TrendForce report), note this as a potential source improvement — the claim may be verifiable from a better source.
+A link-health issue does not, by itself, make a claim unverified — the content cross-check in 2c-2d may still verify it via the live page or the wiki. But these issues are surfaced separately in the Link Health section of the report because dead/redirected links undermine reader trust regardless.
+
+**2b. Wiki lookup**
+
+Search `wiki/sources/` for a page whose `source_url` matches the URL. If found, load the summary, key points, and extracted quotes. This is the wiki's *recorded* version of what the source said at ingestion time.
+
+If a wiki page exists for a *different* URL on the same topic (e.g., the draft cites Tom's Hardware, but the wiki has the same data from the original TrendForce report), surface this as a potential source upgrade — Marcus benefits from primary sources.
+
+**2c. Live content fetch (always runs)**
+
+WebFetch the URL and capture the live page content. This is the source's *current* version of the facts.
+
+If WebFetch fails (hard paywall, JavaScript-rendered without fallback, blocked domain, 403/404), capture the failure reason and proceed to 2d with `live = unavailable`.
+
+**2d. Reconcile**
+
+For each URL, you now have up to three signals: link health (2a), wiki extract (2b), live content (2c). Resolve into one of these states before claim-level verification in Step 3:
+
+| Wiki | Live | Resolution state |
+|---|---|---|
+| Found | Fetched | **Cross-check mode** — verify claim against both. Agreement → high-confidence Verified. Disagreement → Wiki/Source Divergence (Step 3 rules decide verdict by claim type). |
+| Found | Unavailable | **Wiki-only mode** — verify against wiki. Mark medium confidence and add the URL to the Link Health section noting it could not be fetched live. |
+| Missing | Fetched | **Live-only mode** — verify against live (this matches the current fallback behavior). Recommend adding this URL to the wiki for future runs. |
+| Missing | Unavailable | **Source inaccessible** — cannot verify. Note failure reason. |
+
+The point: a claim that previously passed silently because the wiki agreed with it will now also be checked against the live page. The new failure mode this catches — **the wiki and the live source disagree** — is what hardens the fact-check against stale ingestion and silent source edits.
 
 ### Step 3: Verify Each Claim
 
@@ -83,11 +114,23 @@ For each claim + source pair, determine whether the source contains evidence sup
 
 | Category | Meaning | Action needed |
 |---|---|---|
-| **Verified** | Source contains the claimed fact with matching or consistent figures | None |
+| **Verified** | Both wiki and live source (or whichever was available) contain the claimed fact with matching or consistent figures | None |
 | **Partially verified** | Source covers the topic but the specific figure or framing differs | Flag the discrepancy; recommend correction |
-| **Not found in source** | Source does not contain the claimed information | Recommend finding the correct source or removing the link |
-| **Source inaccessible** | Could not fetch the URL (paywall, error, etc.) | Note failure reason; recommend manual verification |
+| **Not found in source** | Neither the live source nor the wiki contains the claimed information | Recommend finding the correct source or removing the link |
+| **Wiki/source divergence** | Wiki extract supports the claim but live source disagrees — *or vice versa* | See split-policy rules below; report both excerpts side-by-side |
+| **Source inaccessible** | Could not fetch the URL live AND wiki has no record (or live is the only available signal and failed) | Note failure reason; recommend manual verification |
 | **Unsourced** | Factual claim with no inline link | Recommend adding a source or flagging as editorial judgment |
+
+**Wiki/source divergence — split-policy verdict:**
+
+When the wiki and the live source disagree on whether a claim is supported, the verdict depends on **what kind of claim it is**. Hard facts are decided by the live source because corrections and updates are usually authoritative. Prose-y claims (causal language, characterizations, framing) are surfaced without a verdict because prose drift is more ambiguous and often a judgment call the writer should make.
+
+| Claim type | Verdict policy |
+|---|---|
+| Number, percentage, dollar figure, date, direct quote, named attribution | **Live wins.** Mark verified/unverified based on the live source. Flag the wiki page as a candidate for re-ingestion in the report. |
+| Causal language ("X triggered Y"), characterization ("a panic," "a collapse"), qualitative framing | **No verdict.** Report the wiki excerpt and the live excerpt side-by-side. Recommend the writer decide whether the article phrasing, the wiki, or the live page is the source of the divergence. |
+
+In both cases, the divergence itself is surfaced prominently — even when "live wins" gives a clean verdict, the report records that the wiki and live source disagreed, because that's a signal the wiki may need a refresh.
 
 **Pay special attention to:**
 - Exact numbers — is it 171% or 170%? $710 or $700? These matter.
@@ -108,16 +151,19 @@ Present the verification report in the format below. Group by status. For every 
 ## Fact Check Report: [Article Title]
 
 **Claims extracted:** [N linked] + [N unsourced]
-**Verified:** [N] | **Partially verified:** [N] | **Not found in source:** [N] | **Source inaccessible:** [N] | **Unsourced:** [N]
+**Verified:** [N] | **Partially verified:** [N] | **Not found in source:** [N] | **Wiki/source divergence:** [N] | **Source inaccessible:** [N] | **Unsourced:** [N]
+**Link health:** [N URLs OK] | [N redirected] | [N broken/inaccessible]
 
 ---
 
 ### Verified Claims
 
-| # | Claim (from article) | Source | Status |
-|---|---|---|---|
-| 1 | [brief claim description] | [source name] | ✓ Verified |
-| 2 | ... | ... | ✓ Verified |
+| # | Claim (from article) | Source | Cross-check | Status |
+|---|---|---|---|---|
+| 1 | [brief claim description] | [source name] | wiki + live agree | ✓ Verified |
+| 2 | ... | ... | live only (no wiki) | ✓ Verified |
+
+The "Cross-check" column records which signals agreed: `wiki + live agree`, `wiki only` (live unavailable), `live only` (no wiki page), or `wiki + live agree on hard fact` for divergence cases where live won cleanly.
 
 ---
 
@@ -133,6 +179,22 @@ Present the verification report in the format below. Group by status. For every 
 
 ---
 
+### Wiki / Source Divergence
+
+For each claim where the wiki extract and the live source disagreed. Hard-fact divergences include a verdict (live wins); prose divergences are surfaced without a verdict per the split policy in Step 3.
+
+#### Claim #[N]: [brief description] — [hard fact | prose]
+**Article says:** "[exact text from the draft]"
+**Wiki extract says:** "[relevant passage from wiki/sources/...]" (ingested [date if available])
+**Live source now says:** "[relevant passage from current live page]"
+**Likely cause:** [source was edited or corrected | source was retracted | wiki ingestion error | unclear]
+**Verdict:** [✓ Verified against live / ✗ Not supported by live / ⚠ No verdict — writer judgment]
+**Recommendation:** [correct the article to match live / re-ingest the wiki page / flag for manual review]
+
+[repeat for each divergence]
+
+---
+
 ### Unsourced Claims
 
 | # | Claim | Recommendation |
@@ -141,15 +203,20 @@ Present the verification report in the format below. Group by status. For every 
 
 ---
 
-### Source Accessibility Issues
+### Link Health
 
-| URL | Issue | Recommendation |
-|---|---|---|
-| [URL] | [403 / paywall / JS-rendered] | [manual verification needed / use archive link] |
+URL-level issues independent of content verification. Even when a claim verifies cleanly via the wiki, a broken or redirected URL undermines reader trust and should be fixed.
+
+| URL | Status | Issue | Recommendation |
+|---|---|---|---|
+| [URL] | 404 | Page no longer exists | Find replacement source or archive.org snapshot |
+| [URL] | 301 → [new URL] | Redirects to unrelated page (was article, now section index) | Update link to the new article URL or use an archive snapshot |
+| [URL] | 200 but title changed | Page title no longer matches the article's topic; may have been replaced | Spot-check manually; consider archive link |
+| [URL] | timeout / paywall / JS-rendered | Live fetch failed; verification used wiki only | Manual verification recommended |
 
 ---
 
-**Summary:** [one-paragraph assessment — overall sourcing quality, most critical issues to address, whether the piece is ready to publish from a factual accuracy standpoint]
+**Summary:** [one-paragraph assessment — overall sourcing quality, most critical issues to address, any wiki pages flagged for re-ingestion, and whether the piece is ready to publish from a factual accuracy standpoint]
 ```
 
 ---
