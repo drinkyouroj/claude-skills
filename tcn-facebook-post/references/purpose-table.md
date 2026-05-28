@@ -8,7 +8,7 @@ Canonical mapping for FB post purpose → shape → image source → voice notes
 |---|---|---|---|---|
 | **Awareness** | Caption (≤30 words) | AI-generated (via `ai-image-prompts-skill`) | Soft, observational. Drop closed em dashes entirely. One warmth-marker max ("honestly," / "look," / "the thing is"). No edge. | No link |
 | **Engagement** | Caption (≤30 words) | AI-generated | Question-framing or "tell me in the comments" pattern. Active second person OK. Designed for FB algorithm comment-signal. | No link |
-| **Soft funnel** | Paragraph (50-80 words) | Substack article hero from the older piece referenced (URL specified in monthly plan's `Brief note` cell, or surfaced by `tcn-content-plan` Step 1 prompt when no monthly entry) — AI-generated fallback only if no usable hero exists | Slight authority. 1 closed em dash max. Plain-English summary of the older piece's argument. | Soft link: "wrote about this back in [month] — [link]" |
+| **Soft funnel** | Paragraph (50-80 words) | Substack article hero from the older piece referenced (URL passed by `tcn-content-plan` via the `flagship_url` parameter — resolved from the older referenced piece in the active monthly plan's Calendar table or Source Hooks section; or surfaced by `tcn-content-plan` Step 1 prompt when no monthly entry) — AI-generated fallback only if no usable hero exists | Slight authority. 1 closed em dash max. Plain-English summary of the older piece's argument. | Soft link: "wrote about this back in [month] — [link]" |
 | **Flagship CTA** | Paragraph (50-80 words) | Substack article hero (today's piece) | Slight authority. Plain-English tagline of the flagship's argument. No "predictably," "naturally," "of course." | Hard link at end: "Full piece: [link]" |
 
 ## Shape rules
@@ -43,7 +43,7 @@ Invoke `ai-image-prompts-skill` to draft the prompt. The prompt must:
 ### Substack hero (Soft funnel, Flagship CTA)
 
 - Flagship CTA: the article's published hero image, fetched from the published article URL
-- Soft funnel: the older referenced piece's hero, URL specified in monthly plan
+- Soft funnel: the older referenced piece's hero, URL passed from the monthly plan via `flagship_url`
 - If hero image not available, fall back to AI-generated (surface the gap in the recommendation)
 
 ### Stock-photo fallback
@@ -56,7 +56,7 @@ Format: a one-line search-query suggestion ("freeway gridlock at dusk, no logos"
 
 ## Weekday rotation (default)
 
-Used by `tcn-content-plan` Step 3 when the monthly plan's `FB:` cell is absent.
+Used by `tcn-content-plan` Mode 2 Step 3 when the monthly plan's Daily Operational Map `FB purpose` cell is absent for the target date (or the monthly plan itself doesn't exist).
 
 | Day | Purpose | Rationale |
 |---|---|---|

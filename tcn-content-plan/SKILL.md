@@ -49,6 +49,7 @@ If a vocabulary or substitution decision is needed mid-task, resolve it by refer
 **Reference files** (load when needed):
 - `references/note-formats.md` — all 7 Note formats with word counts and examples
 - `references/posting-rules.md` — posting windows, weekly cadence, flagship-day structure
+- `references/pillars.md` — the 5 stable editorial pillars and rotation rules (consumed by Mode 3 renewal flow)
 
 **Sister skills to delegate to** (use the Skill tool, do not freehand the prose):
 - `tcn-post` — for every X/Twitter standalone or thread draft
@@ -65,15 +66,52 @@ If either file has been read earlier in the conversation, do not re-read — rel
 
 ## Mode 1: Check Today's Plan
 
-1. Determine today's date and weekday. Construct the expected filename: `YYYY-MM-DD-{lowercase_weekday}-options.md` in `workspace/notes/` (e.g., `2026-05-15-friday-options.md`). The weekday is lowercase and spelled in full — `friday`, not `Friday`, not `fri`.
-2. To find the correct day number N (still needed for the title block and frontmatter), check `workspace/plans/tcn-notes-30-day-map.md` for the entry matching today's date. If no monthly plan exists, read the `day:` frontmatter field from each existing note file in `workspace/notes/` and take the max + 1 as today's N. Do not try to parse N from filenames — filenames now use the lowercase weekday, not the day number.
-3. **File exists** → read it. Then check the **Status update** block at the top of the file (template defined in Step 9):
-   - **Block absent, empty, or timestamped more than ~2 hours ago** → prompt the user: "What's happened since [last timestamp or 'drafting time']? Any triggers fired or fizzled?" Use the answer plus the shelf-life labels on each option to fill in (or refresh) the block — mark every Frame-forward option as safe to post, mark every Data-forward / Conditional option as safe or hold based on whether its trigger fired, and write the result to the file before summarizing. The block is the answer to "what can I post?" so populate it first; don't make the user re-derive option dependencies from prose.
-   - **Block is fresh** → display it directly. That's already the answer.
-   After the status update is fresh, summarize the day's Notes, X standalone recommendation, **FB post recommendation**, and schedule table. Ask if anything else needs updating.
+### Step 0: Runway check (do this first, before anything else)
 
-   **FB-specific check:** if the file lacks a `## Facebook` section (was drafted before this skill shipped), surface: "This plan was drafted before FB support shipped — no FB content for today. Run /create-daily to regenerate, or accept the gap." Do not auto-regenerate; let the user decide.
-4. **File missing** → say "No plan exists for today yet — drafting one now" and proceed to Mode 2 for today's date.
+Determine the active monthly plan: `workspace/plans/30-day-content-plan-{YYYY-MM}.md` where `YYYY-MM` is today's calendar month (e.g., `30-day-content-plan-2026-06.md` for June 2026).
+
+Read its frontmatter `expires_at:` field. Compute `days_remaining = expires_at - today`.
+
+Check whether a WIP shortlist exists at `workspace/plans/.next-month-shortlist-WIP.md`. If yes, read its `target_month:` to confirm it's for the upcoming month.
+
+Check the active plan's `created:` field. If `created == today`, skip the runway warning entirely (Mode 3 already ran today; don't nag).
+
+Emit at most one runway message per Mode 1 invocation, per this table:
+
+| Days remaining | WIP exists? | Message |
+|---|---|---|
+| ≥ 8 | n/a | (no message) |
+| 7 | no | "Heads up — 7 days left in the [Month] plan. Want to start the next-month conversation soon?" |
+| 7 | yes | (no message — already in motion) |
+| 5 | no | "5 days left in the [Month] plan. Reasonable time to start Pass 1 of the next-month conversation. Start now, or finish today's check first?" |
+| 5 | yes | "WIP shortlist exists from [WIP last_updated date], ready to resume Pass 2 when you are." |
+| 3 | no | "3 days left in the [Month] plan and no shortlist WIP exists. Strongly recommend starting now — type 'next month' and I'll move into Mode 3." |
+| 3 | yes | (no message — resumption already surfaced at 5d, don't double-nag) |
+| 1 | n/a | "Tomorrow is [first day of next month] and there's no [next month] plan yet. Today's check will proceed, but if we don't draft the new plan today, tomorrow's Mode 1 falls back to weekday-default Note formats and FB purpose (no flagship anchor)." |
+| 0 or negative | n/a | "We're in [current month] and there's no [current month] plan. Drafting daily plans against weekday-default Note formats and FB purpose until you run Mode 3 for the new month." |
+
+After emitting the message (if any), proceed to Step 1.
+
+### Step 1: Build today's daily plan path
+
+Determine today's date and weekday. Construct the expected filename: `YYYY-MM-DD-{lowercase_weekday}-options.md` in `workspace/notes/` (e.g., `2026-05-15-friday-options.md`). The weekday is lowercase and spelled in full — `friday`, not `Friday`, not `fri`.
+
+### Step 2: Determine day number N
+
+Read the `day:` frontmatter field from each existing note file in `workspace/notes/` and take the max + 1 as today's N. The day number is a continuous counter across the whole notes archive and is no longer carried in the monthly plan. Do not try to parse N from filenames — filenames use the lowercase weekday, not the day number.
+
+### Step 3: Branch on daily file existence
+
+**File exists** → read it. Then check the **Status update** block at the top of the file (template defined in Mode 2 Step 9):
+
+- **Block absent, empty, or timestamped more than ~2 hours ago** → prompt the user: "What's happened since [last timestamp or 'drafting time']? Any triggers fired or fizzled?" Use the answer plus the shelf-life labels on each option to fill in (or refresh) the block — mark every Frame-forward option as safe to post, mark every Data-forward / Conditional option as safe or hold based on whether its trigger fired, and write the result to the file before summarizing. The block is the answer to "what can I post?" so populate it first; don't make the user re-derive option dependencies from prose.
+- **Block is fresh** → display it directly. That's already the answer.
+
+After the status update is fresh, summarize the day's Notes, X standalone recommendation, **FB post recommendation**, and schedule table. Ask if anything else needs updating.
+
+**FB-specific check:** if the file lacks a `## Facebook` section (was drafted before this skill shipped), surface: "This plan was drafted before FB support shipped — no FB content for today. Run /create-daily to regenerate, or accept the gap." Do not auto-regenerate; let the user decide.
+
+**File missing** → say "No plan exists for today yet — drafting one now" and proceed to Mode 2 for today's date.
 
 ---
 
@@ -100,7 +138,9 @@ Build the SPENT list — everything that appeared in any prior Note and must not
 
 ### Step 3: Look up format assignments and FB purpose
 
-**Note formats:** Read `workspace/plans/tcn-notes-30-day-map.md` and find the entry for the target date to get that day's assigned formats. If the monthly plan doesn't exist or doesn't specify formats:
+**Monthly plan filename:** `workspace/plans/30-day-content-plan-{YYYY-MM}.md` where `YYYY-MM` is the target date's calendar month.
+
+**Note formats:** If the monthly plan exists, find the row in its `## Daily Operational Map` table that matches the target date and read the "Notes formats" column (comma-separated list of 1–3 format names). If the plan doesn't exist, doesn't have a Daily Operational Map, or the row is blank, fall back to:
 - Don't repeat the same format combination used in the prior 2 days
 - Include at least one Primary Source Drop per 3-day window
 - Reserve Article Tease for flagship publish days (typically Fridays when an article goes live)
@@ -108,7 +148,7 @@ Build the SPENT list — everything that appeared in any prior Note and must not
 
 Load `references/note-formats.md` for format definitions before drafting.
 
-**Facebook purpose:** From the same monthly plan entry, read the `FB:` cell. If present, use its value (one of: `Awareness`, `Engagement`, `Soft funnel`, `Flagship CTA`). If absent or the monthly plan doesn't exist, fall back to the weekday rotation:
+**Facebook purpose:** From the same Daily Operational Map row, read the `FB purpose` column. If present, use its value (one of: `Awareness`, `Engagement`, `Soft funnel`, `Flagship CTA`). If absent or the monthly plan doesn't exist, fall back to the weekday rotation:
 
 | Day | Default purpose |
 |---|---|
@@ -361,63 +401,283 @@ After fixes, update the file's `status:` field from `draft` to `voice-checked` s
 
 ## Mode 3: Create Monthly Plan
 
-Run at the start of a new month or when the user explicitly asks for a fresh 30-day content map. This is a two-step process: surface what the wiki supports, then confirm with the user before building the map.
+Run when the user explicitly asks for a fresh 30-day content map, or when Mode 1's runway escalation prompts the user to start the next-month conversation and they accept.
 
-### Step 1: Run or read the insight sweep
+Load `references/pillars.md` before doing anything else — the 5 pillars and the rotation rules govern flagship selection.
 
-Check `wiki/syntheses/` for an insight-sweep file created within the past 2 weeks. If one exists, read it and extract the top 5 hooks. If not, run the INSIGHT_SWEEP workflow from CLAUDE.md: read `wiki/overview.md`, all pages in `wiki/concepts/`, all pages in `wiki/entities/` with `sources: 5` or higher, and surface the strongest editorial hooks.
+### Step A: Determine target month and check for existing state
 
-The insight sweep identifies what the wiki knows deeply enough to support a flagship piece right now. Pillar pieces built on thin wiki coverage will require source acquisition mid-month, which disrupts the schedule.
+Determine the **target month**: the calendar month the new plan will cover.
+- If today is in the same calendar month as the active plan's `month:` field, the target is the *next* calendar month.
+- If there's no active plan, or the active plan's `month:` is already in the past, the target is the current calendar month.
+- If the user explicitly named a target ("plan for July"), use that.
 
-### Step 2: Interview the user
+Check for a WIP shortlist file at `workspace/plans/.next-month-shortlist-WIP.md`:
 
-Present the top 3–5 hooks and ask:
+| WIP state | Action |
+|---|---|
+| No WIP file | Proceed to Step B. |
+| WIP exists, `target_month` matches | Read its `state:` field. Jump directly to the right pass: `pass-0-in-progress` → resume Step C; `pass-1-in-progress` → resume Step D from the first unmarked candidate; `pass-2-in-progress` → resume Step E from the first un-walked candidate; `ready-to-generate` → confirm with user, then go to Step F. |
+| WIP exists, `target_month` does not match | Ask: "WIP exists for [old target month] but we'd be planning [new target]. Discard the old WIP and start fresh, or resume the old one?" Branch on answer. |
 
-> "Here are the strongest candidates for this month's flagship pieces based on what the wiki supports right now:
+Check for a prior plan: scan `workspace/plans/` for files matching `30-day-content-plan-YYYY-MM.md` and find the most recent. This is the **prior plan**.
+
+| Prior plan state | Branch |
+|---|---|
+| Exists (renewal case) | Proceed through Steps B → C → D → E → F → G. |
+| Does not exist (first-ever case) | Skip to **Step F-first-time** at the end of this mode. |
+
+### Step B: Compute candidate sets (silent — no user interaction)
+
+Read the prior plan in full. Extract:
+- Its `flagships:` frontmatter list (or, if absent, parse the Spine table)
+- Its `source_hooks:` block (or, if absent, the Source Hooks section)
+- Its `month:` field for the prior month's date window
+
+Read these inputs in parallel:
+- `published/` — every file with publish date in the trailing 60 days (slugs + frontmatter titles)
+- `wiki/syntheses/` — all files; also all `wiki/concepts/` and `wiki/entities/` pages modified since the prior plan's `created:` date (use `git log --since=<date> --diff-filter=AM wiki/` if available; else mtime comparison)
+- `wiki/syntheses/` — `Insight Sweep — *` and `insight-sweep-*` files regardless of date (used in Step B.2 escalation if fired)
+
+Compute three lists:
+
+1. **Wiki delta** — wiki pages added since the prior plan's `created:` date, or expanded by ≥30% (size or new section). One-line hook per page from the page's frontmatter `query:` or first heading.
+2. **Unused eligible** — wiki pages with `sources: 5+` that are NOT named as flagship anchors in the active plan OR any of the prior 3 archived plans. Read each candidate archived plan's `flagships:` frontmatter list (or Spine table fallback) to compute "named as flagship anchor."
+3. **Recently published exclusion** — slugs + topic phrases extracted from `published/` filenames and frontmatter titles for the trailing 60 days.
+
+Candidate pool = `union(wiki_delta, unused_eligible) MINUS recently_published`.
+
+**News-state annotation pass.** For each surviving candidate, run a web search: `"[candidate topic phrase]" news last 30 days`. Capture top 3–5 results (outlet + angle + date) and label the candidate:
+
+- **COLD** — no major-outlet coverage in 30 days
+- **WARM** — 1–2 significant pieces, conversation has not saturated
+- **HOT** — 3+ significant pieces, mainstream conversation is active
+
+Store the label plus a one-line prose summary on each candidate. If a search fails (network, rate limit), label `SEARCH_FAILED` and surface to the user before Step D.
+
+**Step B.2: Single-topic dominance escalation.** After news-state annotation, check whether the wiki delta is dominated by a single topic cluster (any one of: ≥70% of delta candidates reference the same concept/entity page; ≥70% share their primary cited source; ≥70% of hook descriptions share the same dominant noun phrase).
+
+If single-topic dominance fires, check:
+- Most recent insight sweep date (`wiki/syntheses/insight-sweep-*` or `Insight Sweep — *.md` — max mtime)
+- Count of files in `raw/` with mtime after the most recent insight sweep
+
+Then branch:
+
+| Sweep age | Raw/ activity | Surface to user |
+|---|---|---|
+| Stale (>7 days) | n/a | "Wiki delta is dominated by [topic cluster]. Last insight sweep was [N days ago]. Want me to run a fresh insight sweep before we continue Pass 1?" |
+| Fresh (≤7 days) | High (≥10 new raw/ files) | "Wiki delta is narrow and dominated by [topic cluster]. The last insight sweep is recent ([N days ago]) but [M] new files have landed in raw/ since then. Suggest: ingest the new raw/ batch into the wiki first, then re-run the insight sweep, then resume here. Proceed with ingestion?" |
+| Fresh (≤7 days) | Low | "Wiki delta is narrow and dominated by [topic cluster]. Recent insight sweep already reflects current raw/ material. Options: (a) proceed with the narrow pool — pick one strong angle from the cluster, (b) defer renewal a week to give raw/ time to grow, (c) lower the source-count bar on 'unused eligible' to surface deeper-tail candidates. Which?" |
+
+Branch on user direction. If user chooses to run a sweep or ingest, do so, then re-enter Step B from the top with the broadened input. Otherwise proceed to Step C.
+
+### Step C: Pass 0 — Carryover from prior plan
+
+Cross-reference the prior plan's `flagships:` list against `published/` filenames within the prior plan's date window. Match by slug similarity and frontmatter title similarity. Compute a best-guess `shipped` / `didn't ship` split.
+
+Present:
+
+> "From the [Prior Month] plan, here's what I think shipped vs. didn't — please confirm:
 >
-> [list hooks with one-line descriptions]
+> **Shipped (found in published/):**
+> - [Flagship name] → matched to `YYYY-MM-DD-slug.md`
 >
-> Which ones do you want to anchor the month to? And are there live events on the calendar (Fed meetings, earnings, legislative votes, economic data releases) that should shape specific weeks?"
+> **Didn't ship (no match in published/):**
+> - [Flagship name] → original rationale: [pulled from prior plan's Source Hooks]
+>
+> For each didn't-ship: carry forward to [Target Month], defer to later, or drop entirely?"
 
-Wait for answers before building the map.
+Wait for answers. Write all decisions to the WIP file at `workspace/plans/.next-month-shortlist-WIP.md`, setting `state: pass-1-in-progress` once Pass 0 closes.
 
-### Step 3: Generate the 30-day map
+### Step D: Pass 1 — Broad keep/cut/maybe
 
-Structure the month around the chosen flagship pieces. For each flagship:
-- Assign to a Friday (unrestricted posting window)
-- Seed it in the 3–5 days before with Notes that build the analytical frame without giving away the argument
-- Follow it the next day with an Article Tease Note
-- Leave mid-week space for live-news-reactive Notes (Contested Claims, Primary Source Drops)
+Present the candidate pool with news-state annotations, in this order:
 
-Map all 30 days as a numbered list. Each entry:
 ```
-**Item [N] — [Date] ([Day of week])**: [Platforms] | [Note formats] | FB: [Purpose] | CTA: yes/no | [Brief note: what this seeds or establishes]
+## Carryover (from Pass 0)
+- [Flagship name] — your rationale: [pass-0 answer]
+
+## Wiki delta (new or expanded since prior plan)
+- [Page] — added/expanded YYYY-MM-DD, sources: N, hook: [one-line]
+  News state (last 30d): [COLD/WARM/HOT] — [prose summary of outlets + angles]
+
+## Unused eligible (high source coverage, not yet a flagship)
+- [Page] — sources: N, last touched YYYY-MM-DD, hook: [one-line]
+  News state (last 30d): [...]
+
+## Recently published (excluded — shown for reference)
+- YYYY-MM-DD-slug.md
+- ...
 ```
 
-**FB purpose assignment:** Assign each day's `FB:` cell using the weekday rotation default (see `tcn-facebook-post/references/purpose-table.md` § Weekday rotation). The default mapping is:
+Ask:
 
-- Mon, Wed, Sat → Awareness
-- Tue → Engagement
-- Thu, Sun → Soft funnel
-- Fri → Flagship CTA
+> "Mark each candidate as **keep**, **cut**, or **maybe**. We'll deep-dive the keep+maybe pile in Pass 2."
 
-After auto-assigning, ask the user: `"Any weeks where the FB rotation should shift? E.g., a week with two flagships might need a second hard-funnel day, or a quiet news week might lean more on Engagement posts."` Adjust specific cells based on the answer.
+Wait for answer. Record marks to the WIP file. Set `state: pass-2-in-progress` and proceed.
 
-For Soft funnel days, also assign the older Substack article URL that will be linked. The URL belongs in the `Brief note` cell.
+### Step E: Pass 2 — Walk the shortlist
 
-### Step 4: Write the file
+For each keep + maybe candidate, in order, present:
 
-Save to `workspace/plans/tcn-notes-30-day-map.md`. Include a "Source Hooks" section at the end listing the insight-sweep hooks that informed the flagship selections, with wiki page citations.
+> "**[Candidate name]**
+> Wiki support: [list of supporting pages with source counts]
+> Operator angle: [what your operator credibility uniquely adds — pulled from the wiki page's `operator_observation:` field if present, else inferred from the page's frontmatter, else asked of you]
+> Nearby published: [any `published/` piece in the trailing 60 days touching the adjacent topic, with overlap-risk note]
+> Calendar context: [WebSearch result for the candidate's topic + the target Friday window — overlap with FOMC dates, data releases, earnings, hearings, votes that could affect attention. Mandatory — if search fails, write 'search failed; manually verify before deciding']
+>
+> Flagship (Friday anchor), seed Note (Tuesday/Thursday warm-up), or defer?"
 
-If any FB purposes were assigned non-default values, append an **FB Cadence Note** section after Source Hooks explaining the reasoning. Example:
+The web search is **not optional**. If it returns nothing relevant, the line reads "no event-window pressure surfaced in search."
 
-```markdown
+Wait for answer per candidate. Record to WIP. Block further "Flagship" decisions once `fridays_in_target_month` flagship slots are filled — surface: "All N flagship slots filled — remaining decisions are seed Note vs. defer."
+
+After all candidates walked, run an **independent month calendar sweep**:
+
+WebSearch:
+- FOMC meeting dates in target month (Federal Reserve calendar)
+- BLS major data releases for target month (CPI, jobs report, PCE)
+- Congressional / Supreme Court major calendar items
+- Major earnings landmarks if target month is in earnings season
+- Election deadlines or political calendar items relevant to TCN beats
+
+Present digest organized by week:
+
+> "Here's the [Target Month] calendar I'm seeing — anything I missed, or context you want to add to specific weeks?
+>
+> **Week 1 (Jun 1–7)** — [events with dates]
+> **Week 2 (Jun 8–14)** — [events with dates]
+> ...
+>
+> What should shift?"
+
+The framing is "what should shift?", not "are there events I should know about?" — your input augments a complete-feeling baseline.
+
+Apply shifts (reassign Friday flagships, add seed-Note triggers, add posting-window notes). Set `state: ready-to-generate` and proceed.
+
+### Step F: Generate the 30-day map
+
+Compose the target month's plan file at `workspace/plans/30-day-content-plan-{YYYY-MM}.md` using the template in the **Plan template** section below.
+
+**Validate before writing:**
+- Frontmatter parses as YAML
+- `flagships:` list has entries matching `fridays_in_target_month`
+- `pillar_order:` contains valid pillar numbers (1–5)
+- Every flagship date falls within the target month
+- The chosen pillar order does not repeat the Friday-1 pillar from the prior plan (per `references/pillars.md` rotation rule 3)
+- The closer slot (typically the last Friday) is not the same pillar that closed the prior plan (rotation rule 2)
+
+If any validation fails, surface the specific failure and halt. Do NOT delete the WIP file.
+
+On validation pass: write the file. Then delete `workspace/plans/.next-month-shortlist-WIP.md`.
+
+### Step G: Confirm with the user
+
+Print a summary:
+
+> "Plan for [Target Month] written to `workspace/plans/30-day-content-plan-{YYYY-MM}.md`.
+>
+> Flagships (one per Friday):
+> - [Date, pillar, title]
+> ...
+>
+> Pillar order: [list]
+> Closer: [last Friday's flagship + pillar]
+>
+> WIP shortlist deleted. Ready to use."
+
+### Step F-first-time: Simpler flow when no prior plan exists
+
+Used only when `workspace/plans/` has no archived `30-day-content-plan-YYYY-MM.md` files.
+
+1. Run the INSIGHT_SWEEP workflow from the substack-research `CLAUDE.md`: read `wiki/overview.md`, all `wiki/concepts/`, all `wiki/entities/` with `sources: 5+`. Surface the top 5 hooks.
+2. Ask: "Here are the strongest candidates for this month's flagship pieces based on what the wiki supports right now: [list with one-line descriptions]. Which ones do you want to anchor the month to?"
+3. Run the independent month calendar sweep from Step E (without the per-candidate web search — there's no shortlist to walk).
+4. Write the plan file using the template in **Plan template** below. Mark `source_hooks.generated_from: "first-time"` in the frontmatter.
+
+### Plan template
+
+```yaml
+---
+title: "30-Day Content Plan — [Month YYYY]"
+month: YYYY-MM
+type: synthesis
+tags: [content-plan, editorial-calendar, substack, twitter, linkedin, facebook]
+created: YYYY-MM-DD
+expires_at: YYYY-MM-DD              # last day of the month
+prior_plan: "30-day-content-plan-YYYY-MM.md"   # null if first-time
+sources: N
+query: "..."
+
+pillar_order:
+  - N    # Pillar number from references/pillars.md
+  # ...
+
+flagships:
+  - date: YYYY-MM-DD
+    pillar: N
+    title: "..."
+    wiki_anchor: "wiki/.../..."
+  # ...
+
+source_hooks:
+  generated_from: "renewal"          # or "first-time"
+  carryover_from_prior:
+    - "..."
+  wiki_delta_added:
+    - "..."
+  unused_eligible_pulled:
+    - "..."
+  news_state_at_generation:
+    "[Page title]": "COLD"
+    "[Page title]": "HOT — Bloomberg + FT + Reuters"
+---
+
+# 30-Day Content Plan — [Month YYYY]
+
+## Revision Log
+[Running notes on cuts/recasts/replacements with reasoning. Empty at generation; appended as the month progresses.]
+
+## Spine
+[Friday | Issue | Pillar table — one row per flagship Friday]
+
+## Weekly Rhythm + Time Budget + Hook Methodology
+[As in prior plans]
+
+## The Calendar
+[# | Date | Platform | Pillar | Format | Topic/Angle | Hook A | Hook B | Hook C | CTA | Purpose]
+
+## Daily Operational Map
+[| Date | Weekday | Notes formats (1-3) | FB purpose |]
+
+## Pillar Coverage Audit
+[Per-pillar accounting of which issues hit each]
+
+## Purpose Mix
+[Authority / Growth / Connection percentages]
+
 ## FB Cadence Note
+[Only if non-default FB rotation used; explains the shift]
 
-Week 2 (Days 8-14) has two flagships (Tue + Fri). Tue's typical Engagement is shifted to Soft funnel to tease Tuesday's flagship, then back to standard rotation Wed onward. Week 3 reverts to default.
+## Source Hooks
+[Insight-sweep + wiki-delta + unused-eligible hooks with wiki page citations]
+
+## What This Plan Deliberately Does Not Include
+[Anti-patterns the plan respects]
 ```
 
-If all FB purposes are default, omit the section.
+### Renewal flow guardrails (anti-patterns — must not happen)
+
+1. **Never silently auto-promote carryover items.** Every carryover appears in Pass 0; user confirms each. The skill does not decide that something carries.
+2. **Never overwrite an existing plan file without user confirmation.** If `30-day-content-plan-{target_month}.md` already exists at write time, halt and surface: "A plan for [target_month] already exists. Replace, append, or abort?"
+3. **Never skip the news-state web search for shortlisted candidates.** If web search fails for a candidate, the annotation reads "search failed — manually verify before deciding." Never silently present without context.
+4. **Never auto-filter candidates by news_state HOT.** The label is annotation only; editorial decision belongs to the user.
+5. **Never write to archived plan files.** Once a plan moves out of the active month, it is read-only. The renewal flow reads `prior_plan` for carryover; that is the only access.
+6. **Never delete the WIP file before plan validation passes.** Cleanup is the last step, gated on validation.
+7. **Never let Mode 1's runway warning fire on a day Mode 3 has already been run.** Cooldown until the new plan's `created:` date passes (already enforced by Mode 1 Step 0).
+8. **Never invent more flagship slots than the target month has Fridays.** `fridays_in_target_month` is a hard cap.
+9. **Never run Pass 2 without Pass 1 complete.** State machine enforced via the WIP `state:` field.
+10. **Never present a candidate that's in the recently-published exclusion list as a "keep" recommendation.** Recently-published is a hard filter on the candidate pool.
 
 ---
 
@@ -426,10 +686,14 @@ If all FB purposes are default, omit the section.
 | File | Path |
 |---|---|
 | Daily plans | `workspace/notes/YYYY-MM-DD-{lowercase_weekday}-options.md` |
-| Monthly plan | `workspace/plans/tcn-notes-30-day-map.md` |
+| Monthly plan (active + archives) | `workspace/plans/30-day-content-plan-{YYYY-MM}.md` |
+| Renewal WIP shortlist | `workspace/plans/.next-month-shortlist-WIP.md` |
+| Archived dead artifacts | `workspace/plans/_archive/` |
 | Wiki overview | `wiki/overview.md` |
 | Wiki syntheses | `wiki/syntheses/` |
+| Raw research material | `raw/` |
 | Anti-AI style | `workspace/core/anti-ai-writing-style.md` |
+| Pillars reference | `references/pillars.md` (this skill) |
 
 ---
 
@@ -455,3 +719,17 @@ A daily plan works when:
 - **No vague placeholder verbs** ("hit a number," "saw movement," etc.) — hard fail
 - **Vocabulary cliff fully glossed:** every FB post is glossable to a reader with zero context on the beat
 - **Flagship CTA posts include the actual article URL**, not a placeholder (or, if URL pending, the recommendation flags the gap prominently)
+
+A monthly plan works when:
+- The file is named `30-day-content-plan-{YYYY-MM}.md` with `YYYY-MM` matching the `month:` frontmatter field
+- Frontmatter includes `month`, `created`, `expires_at`, `pillar_order`, `flagships`, `source_hooks`, `prior_plan` (null for first-time) — and they parse as valid YAML
+- The `flagships:` list has length `== fridays_in_target_month`
+- Every flagship date falls within the target month
+- `pillar_order:` contains valid pillar numbers (1–5) per `references/pillars.md`
+- The Friday-1 pillar does not repeat the prior plan's Friday-1 pillar (rotation rule 3)
+- The closer pillar does not repeat the prior plan's closer pillar (rotation rule 2)
+- The body includes all required sections: Revision Log, Spine, Weekly Rhythm, The Calendar, Daily Operational Map, Pillar Coverage Audit, Purpose Mix, Source Hooks, What This Plan Deliberately Does Not Include
+- The Daily Operational Map has a row for every date in the target month (`fridays_in_target_month` flagship Fridays inclusive; flagship-Friday rows note "see Calendar")
+- The `source_hooks.news_state_at_generation:` field has an entry for every shortlist candidate that became a flagship
+- If renewal: the WIP shortlist file was deleted as the final step (no orphan WIP after a successful generation)
+- If renewal: every "carryover" flagship has a documented original rationale in the Source Hooks section

@@ -31,7 +31,7 @@ This skill is invoked by `tcn-content-plan` Step 7.5 in Mode 2 (Create Daily Pla
 ## What this skill does NOT own
 
 - The weekday rotation lookup (`tcn-content-plan` owns)
-- The monthly-plan `FB:` override (`tcn-content-plan` reads this from the 30-day map)
+- The monthly-plan `FB:` override (`tcn-content-plan` reads this from the active `30-day-content-plan-{YYYY-MM}.md`'s Daily Operational Map)
 - The X copy, Substack Note copy, or LinkedIn copy
 - The schedule table or Status block formatting (`tcn-content-plan` owns the daily plan file)
 - Voice-passes on other surfaces — `tcn-text-humanizer` handles X/Notes; this skill is self-contained on voice
@@ -126,7 +126,7 @@ For each option:
 4. Construct image guidance:
    - **AI-generated:** invoke `ai-image-prompts-skill` with the option's anchor concept; capture its returned prompt as the image guidance text. If `ai-image-prompts-skill` is unavailable, output a stock-photo search-query suggestion and surface the gap.
    - **Substack hero (Flagship CTA):** if `flagship_url` is provided, output `Use Substack hero from [flagship_url]`. If URL is `[ARTICLE_URL_PENDING]`, output the same with a hard reminder that the URL must be inserted before posting.
-   - **Substack hero (Soft funnel):** output `Use Substack hero from [older-piece-url]` where the URL comes from the monthly plan's `Brief note` cell. If absent, fall back to AI-generated and surface the gap.
+   - **Substack hero (Soft funnel):** output `Use Substack hero from [older-piece-url]` where the URL comes from the monthly plan — caller passes it in `flagship_url` for Soft funnel days (caller resolves the URL from the older referenced piece in the Calendar table's Topic/Angle cell or Source Hooks section). If absent, fall back to AI-generated and surface the gap.
 
 Aim for genuine variation across options — different angles, not different word choices on the same angle.
 
