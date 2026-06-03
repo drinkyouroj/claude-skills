@@ -80,78 +80,204 @@ The full design rationale lives in `docs/superpowers/specs/2026-06-03-youtube-co
 
 ---
 
-## Slide-Type Mapping
+## Beat Type Taxonomy
 
-Each narration slide maps deterministically to a slide template type from `slides/deck.html`. The mapping is driven by the narration's zone (Cold Open / Body / Outro) and slide sub-label.
+Every beat from the narration is assigned one of five types before any slides are built. Full CSS skeletons and worked examples for each type live in `references/beat-types.md`.
 
-| Narration slide | Default template | Fallback / variant | Justoon role |
+| Type | Source | Visual treatment | Needs image? |
 |---|---|---|---|
-| Cold Open / Hook (Slide 1) | `sl-title` | — | none |
-| Cold Open / Thesis (Slide 2) | `sl-lead` | `sl-section` if thesis is one declarative phrase | none |
-| Body / Receipt (data-heavy) | `sl-data` with `ms-numgrid` | `sl-data` with `sl-chart` SVG if the article has a chart | **A** (pointing teacher) |
-| Body / Frame | `sl-frames` | `sl-compare` for two-way comparison | none |
-| Body / Anaphora (paired-statement refrain) | `sl-compare` (two-pair side-by-side) | `sl-frames` if more than two pairs | none |
-| Body / Stakes | `sl-lead` | — | **A** (pointing teacher) |
-| Body / Twist | `sl-frames` (numbered escalation) | `sl-compare` (before/after) | **C** (reaction-as-anchor) |
-| Body / Historical Echo | `sl-compare` (then/now) | `sl-lead` | none |
-| Body / Verbatim | `sl-quote` | — | none |
-| Outro / Tease (Slide N-1) | `sl-lead` with bullet listing | `sl-section` with `[TEASE]` kicker if shorter | none |
-| Outro / End (Slide N) | `sl-end` | — | none |
+| `scene-header` | Generated from scene label (not a beat) | TCN kicker, dark BG, kicker text only | No |
+| `stamp` | Beat with short text/phrase as element | Text centered, Courier Prime, dark BG | No |
+| `hero-number` | Beat with a single figure as element | Large number + optional label, dark BG | No |
+| `refrain` | Beat marked `[REFRAIN]` | Full-screen phrase, **inverted colors** (white BG, black text) | No |
+| `illustration` | Beat whose element can't be produced with typography | Full-bleed fal.ai image, optional text overlay | **Yes** |
 
-**Justoon role column:** activates only when `--justoon-refs` is provided. Role A = full-body pointing teacher, picked from `justoon-point-{right,up,down,open-palm}.png`. Role C = bust reaction-as-anchor, picked from `justoon-react-{deadpan,raised-eyebrow,concerned,smirk,shocked}.png`. Variant selection within a role is interpretive per the slide's specific content — full picker logic lives in `references/template-mapping.md` §7. Slides marked `none` stay typography-only even with `--justoon-refs` active. Anchor / fallback for any missing variant: `justoon-neutral.png`.
+**Typing rule:** if the `element:` note describes anything other than words, numbers, or short phrases on a plain dark background — type it as `illustration`. Everything else falls to stamp, hero-number, or refrain.
 
-**Combined slide types** (e.g., `THE FRAME + STAKES, Author's Debug` from dispatch-004): pick the first sub-label's template type, adjust the layout (fewer numbered columns, more prose), and note the combination in the prompt. Do not invent new template types. For Justoon role, also use the first sub-label's role.
+**scene-header slides** are generated (not typed from beats). One scene-header per scene. Kicker format: `DISPATCH №NNN · SCENE NAME`. Full kicker convention in `references/template-mapping.md` §2.
 
-The full mapping table with fallback rules, combined-type handling, and worked examples lives in `references/template-mapping.md`.
+**refrain treatment is non-negotiable.** The inverted colors (white background, black text) signal recurrence to the viewer. Every `[REFRAIN]` beat gets identical visual treatment — no variation between instances.
+
+**illustration overlays:** when a beat's element note includes text landing over an illustration (e.g. "$400,000 lands over the left figure"), the fal.ai image is the base visual and the text is an HTML/CSS overlay. The image is still generated in Pass 1; the overlay is added in Pass 2 using the `illustration` CSS skeleton's `.overlay-text` class.
 
 ---
 
 ## Kicker Convention
 
-The legacy decks used `PART ONE OF THREE` / `[01] CONTEXT` / `[02] FRAME` / `[03] CALL` kickers tied to the retired Cover/Part-One/Part-Two structure. Those are retired. The new convention uses the narration's actual zone and slide label:
-
-```
-DISPATCH №004 · HOOK                              ← Cold Open / Slide 1
-DISPATCH №004 · THESIS                            ← Cold Open / Slide 2
-DISPATCH №004 · THE RECEIPT · UNIT ECONOMICS      ← Body slide with sub-label
-DISPATCH №004 · THE RECEIPT · HIP-143             ← Body slide
-DISPATCH №004 · THE TWIST · VOTE CONCENTRATION    ← Body slide
-DISPATCH №004 · THE FRAME + STAKES · AUTHOR'S DEBUG  ← Body slide (combined type)
-DISPATCH №004 · TEASE                             ← Outro / Slide N-1
-DISPATCH №004 · END                               ← Outro / Slide N
-```
-
-**Kicker rules:**
-- Mono typeface, wide-tracked (`0.18em`), all-caps, slate-400 on dark
-- Middle dot `·` as separator — never `|`, never `/`
-- Zero-padded dispatch number (`№004`, not `№4`)
-- Sub-labels in the kicker correspond to the narration's slide sub-label after the comma (e.g., `THE RECEIPT, Unit Economics` → `THE RECEIPT · UNIT ECONOMICS`)
-
-Full kicker conventions, edge cases, and the substitution rule for combined slide types live in `references/template-mapping.md`.
+Full kicker convention, rules, and examples: `references/template-mapping.md` §2.
 
 ---
 
-## Animation Intensification
+## Two-Pass Workflow
 
-The skill instructs Claude Design to use **existing primitives more aggressively.** No new CSS classes are invented; no extensions to `deck-stage.js`. Six primitives, intensified:
+### Pass 1 — Image generation batch
 
-- **`sl-reveal` cascade** — up to `sl-reveal-5` (5-stagger), longer durations on body slides
-- **`sl-mark-pulse`** — title slide + end slide + slow ambient pulse on Section dividers (mark at 24px)
-- **`sl-caret` blinking** — section heading kicker + end-card heading kicker (two per deck max)
-- **`sl-chart-draw`** — every Data slide; if two data slides exist, second draws after first completes
-- **`sl-glow`** (radial slate) — title + end slide + behind any single dominant number on Data slides
-- **Hairline `sl-hairline` draws** — animated left-to-right reveal in 360ms on slide entry
+1. **Read the uploaded narration.** Parse scenes, beats, element notes, refrain markers.
 
-**Guardrails (preserved — non-negotiable):**
-- No bounce, no spring, no rainbow gradients
-- Easing remains `cubic-bezier(0.2, 0, 0, 1)`
-- Durations remain in the 120/200/360ms family (no >500ms transitions)
-- No emoji, no icon fonts, no shadows on dark
-- One typeface (Courier Prime); slate-400 / slate-600 / black / twilight palette only
+2. **Type every beat.** Apply the typing rule from Beat Type Taxonomy above. Produce a brief inventory:
 
-The prompt restates the guardrails verbatim so Claude Design does not drift toward exotic motion. Full directive tables and worked examples live in `references/template-mapping.md`.
+```
+Beat inventory — Dispatch №006 (102 beats across 10 scenes):
+  scene-header: 10 (generated)
+  stamp: 38
+  hero-number: 14
+  refrain: 2
+  illustration: 38
+  Total slides: 112
+```
 
-**Small-screen interaction:** animation intensification respects the safe zone (next section). Hairline draws, `sl-glow`, and `sl-mark-pulse` may extend to the viewport edges — they are decorative. `sl-reveal` cascades and `sl-chart-draw` apply to safe-zone content only, so they remain visible at thumbnail playback.
+3. **Output the image batch.** For every `illustration` beat, produce one numbered image prompt in this format:
+
+```
+IMAGE BATCH — Dispatch №NNN ([N] images)
+
+[001] Scene SS · BNN
+Style: flat vector illustration, dark background (#0f172a), muted slate color palette
+(#334155 mid-slate, #475569 slate, #64748b light-slate, #e2e8f0 near-white for
+highlights), clean geometric lines, no gradients, no photography, no realistic
+textures, no shadows, no lens flare, minimal detail, geometric simplification,
+editorial illustration aesthetic
+Content: [description derived from element note — composition, colors from palette,
+negative space for text overlays, no text in image]
+Filename: NNN-SS-BNN.png
+
+[002] Scene SS · BNN
+...
+```
+
+Full style anchor and worked examples: `references/image-prompt-style.md`.
+
+4. **Present Pass 1 gate prompt and stop.** Do not proceed until the user confirms images have been uploaded.
+
+### Pass 2 — Full deck build
+
+1. **Confirm image uploads.** Check that the uploaded filenames match the batch. Note any missing images (those illustration slides will render with a dark placeholder box and a note).
+
+2. **Build scene-header slides.** One per scene, in order. Kicker text from the scene label. Format: `DISPATCH №NNN · [SCENE NAME IN CAPS]`.
+
+3. **Build beat slides in order.** For each beat:
+   - Apply the beat's type template (CSS skeletons in `references/beat-types.md`)
+   - For illustration beats: reference the uploaded image by filename; add text overlay if the element note includes text landing over the image
+   - For refrain beats: apply the inverted-color treatment
+   - For stamp/hero-number beats: apply the typography template
+
+4. **Write the complete HTML deck.** One file: `dispatch-NNN.html`. Structure:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>The Civic Node — Dispatch №NNN</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .deck {
+      position: relative;
+      width: min(100vw, 100vh);
+      height: min(100vw, 100vh);
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      container-type: size;
+      opacity: 0;
+      transition: opacity 200ms cubic-bezier(0.2, 0, 0, 1);
+      pointer-events: none;
+
+      --type-hero:   clamp(80px, 24cqmin, 360px);
+      --type-h1:     clamp(28px,  9cqmin, 144px);
+      --type-h2-mid: clamp(22px,  6.5cqmin, 96px);
+      --type-body:   clamp(14px,  5cqmin,  72px);
+      --type-kicker: clamp(10px,  2.5cqmin, 36px);
+      --safe-zone:   min(85cqw, 85cqh);
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Beat type CSS — see references/beat-types.md for full skeletons */
+    .slide.scene-header { background: #0f172a; display: flex; align-items: center; justify-content: center; }
+    .slide.scene-header .kicker { font-family: 'Courier Prime', monospace; font-size: var(--type-kicker); letter-spacing: 0.18em; text-transform: uppercase; color: #557FA3; }
+
+    .slide.stamp { background: #0f172a; display: flex; align-items: center; justify-content: center; padding: min(7.5cqw, 7.5cqh); }
+    .slide.stamp .text { font-family: 'Courier Prime', monospace; font-size: var(--type-h1); color: #e2e8f0; text-align: center; text-wrap: balance; }
+
+    .slide.hero-number { background: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1cqmin; }
+    .slide.hero-number .number { font-family: 'Courier Prime', monospace; font-size: var(--type-hero); color: #e2e8f0; text-align: center; line-height: 1; }
+    .slide.hero-number .label { font-family: 'Courier Prime', monospace; font-size: var(--type-body); color: #557FA3; text-align: center; text-wrap: balance; }
+
+    .slide.refrain { background: #f8fafc; display: flex; align-items: center; justify-content: center; padding: min(7.5cqw, 7.5cqh); }
+    .slide.refrain .text { font-family: 'Courier Prime', monospace; font-size: var(--type-h1); color: #0f172a; text-align: center; text-wrap: balance; }
+
+    .slide.illustration { position: relative; background: #0f172a; }
+    .slide.illustration .bg-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+    .slide.illustration .overlay-text { position: absolute; bottom: 15cqh; left: 50%; transform: translateX(-50%); font-family: 'Courier Prime', monospace; font-size: var(--type-hero); color: #e2e8f0; text-align: center; text-shadow: 0 0 40px rgba(0,0,0,0.8); white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+
+    <!-- Scene 01: HOOK -->
+    <div class="slide scene-header active" id="s01-header">
+      <div class="kicker">DISPATCH №NNN · HOOK</div>
+    </div>
+
+    <!-- Scene 01 · B1 — illustration -->
+    <div class="slide illustration" id="s01-b01">
+      <img class="bg-image" src="NNN-01-B01.png" alt="">
+    </div>
+
+    <!-- Scene 01 · B2 — stamp -->
+    <div class="slide stamp" id="s01-b02">
+      <div class="text">SAME SHIFT</div>
+    </div>
+
+    <!-- [continues for all beats...] -->
+
+  </div>
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let current = 0;
+
+    function advance() {
+      slides[current].classList.remove('active');
+      current = Math.min(current + 1, slides.length - 1);
+      slides[current].classList.add('active');
+    }
+
+    function retreat() {
+      slides[current].classList.remove('active');
+      current = Math.max(current - 1, 0);
+      slides[current].classList.add('active');
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') advance();
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') retreat();
+    });
+
+    document.addEventListener('click', advance);
+  </script>
+</body>
+</html>
+```
+
+5. **Present Pass 2 gate prompt.** See Inputs and Outputs section.
 
 ---
 
