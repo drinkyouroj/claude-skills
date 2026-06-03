@@ -1,28 +1,8 @@
 # Template Mapping — tcn-youtube-slideshow
 
-*Loaded at runtime when mapping a specific narration slide to a slide directive. Holds the slide-type table, kicker convention, and animation intensification rules — pulled out of `SKILL.md` so the main file stays skim-able.*
+*Kicker convention reference for scene-header slides. Loaded at runtime by `tcn-youtube-slideshow`.*
 
----
-
-## 1. Slide-type mapping
-
-| Narration slide | Default template type | Fallback / variant |
-|---|---|---|
-| Cold Open / Hook (Slide 1) | `sl-title` — full-bleed title, pulsing mark, slate-400 mark, mono kicker | — |
-| Cold Open / Thesis (Slide 2) | `sl-lead` — prose-heavy lead with single h3 + 1-2 paragraph body | `sl-section` if thesis is one declarative phrase |
-| Body / Receipt (data-heavy) | `sl-data` with `ms-numgrid` 3-column number layout | `sl-data` with `sl-chart` SVG if there's a real chart in the article |
-| Body / Frame | `sl-frames` — [01]/[02]/[03] grid | `sl-compare` if it's two-way comparison |
-| Body / Anaphora (paired-statement refrain) | `sl-compare` — two-pair side-by-side, paired statements are the rhetorical move | `sl-frames` if more than two pairs |
-| Body / Stakes | `sl-lead` | — |
-| Body / Twist | `sl-frames` (numbered escalation) | `sl-compare` (before/after) |
-| Body / Historical Echo | `sl-compare` (then/now) | `sl-lead` |
-| Body / Verbatim | `sl-quote` — large pull quote, hairline above, source attribution below | — |
-| Outro / Tease (Slide N-1) | `sl-lead` with bullet-style listing | `sl-section` with `[TEASE]` kicker if shorter |
-| Outro / End (Slide N) | `sl-end` — canonical end-card, pulsing mark at 44px, disclosure block, URL CTA | — |
-
-The skill picks the **default** unless user steering or article structure flags a fallback. The narration's slide sub-label (e.g., `THE RECEIPT, Unit Economics`) already indicates which type to use — picking is deterministic, not creative.
-
-**Combined slide types** (e.g., `THE FRAME + STAKES, Author's Debug`) → pick the FIRST sub-label's template type, adjust the layout (fewer numbered columns, more prose), note the combination in the prompt. Do NOT invent new template types.
+*Note: §1 (slide-type mapping) and §3+ (animation intensification) were superseded by the beat-segmented format introduced 2026-06-03. See `references/beat-types.md` for the current beat type taxonomy and `docs/superpowers/specs/2026-06-03-youtube-constant-motion-design.md` for the design rationale. The archived content is preserved below the `---ARCHIVED---` marker.*
 
 ---
 
@@ -57,7 +37,31 @@ Kicker rules:
 
 ---
 
-## 3. Animation intensification
+---ARCHIVED (superseded 2026-06-03)---
+
+## 1. Slide-type mapping [ARCHIVED]
+
+| Narration slide | Default template type | Fallback / variant |
+|---|---|---|
+| Cold Open / Hook (Slide 1) | `sl-title` — full-bleed title, pulsing mark, slate-400 mark, mono kicker | — |
+| Cold Open / Thesis (Slide 2) | `sl-lead` — prose-heavy lead with single h3 + 1-2 paragraph body | `sl-section` if thesis is one declarative phrase |
+| Body / Receipt (data-heavy) | `sl-data` with `ms-numgrid` 3-column number layout | `sl-data` with `sl-chart` SVG if there's a real chart in the article |
+| Body / Frame | `sl-frames` — [01]/[02]/[03] grid | `sl-compare` if it's two-way comparison |
+| Body / Anaphora (paired-statement refrain) | `sl-compare` — two-pair side-by-side, paired statements are the rhetorical move | `sl-frames` if more than two pairs |
+| Body / Stakes | `sl-lead` | — |
+| Body / Twist | `sl-frames` (numbered escalation) | `sl-compare` (before/after) |
+| Body / Historical Echo | `sl-compare` (then/now) | `sl-lead` |
+| Body / Verbatim | `sl-quote` — large pull quote, hairline above, source attribution below | — |
+| Outro / Tease (Slide N-1) | `sl-lead` with bullet-style listing | `sl-section` with `[TEASE]` kicker if shorter |
+| Outro / End (Slide N) | `sl-end` — canonical end-card, pulsing mark at 44px, disclosure block, URL CTA | — |
+
+The skill picks the **default** unless user steering or article structure flags a fallback. The narration's slide sub-label (e.g., `THE RECEIPT, Unit Economics`) already indicates which type to use — picking is deterministic, not creative.
+
+**Combined slide types** (e.g., `THE FRAME + STAKES, Author's Debug`) → pick the FIRST sub-label's template type, adjust the layout (fewer numbered columns, more prose), note the combination in the prompt. Do NOT invent new template types.
+
+---
+
+## 3. Animation intensification [ARCHIVED]
 
 | Primitive | Existing (in current decks) | Intensified (this skill prescribes) |
 |---|---|---|
@@ -80,7 +84,7 @@ The skill's prompt explicitly restates these guardrails so Claude Design doesn't
 
 ---
 
-## 4. Visible-text budgets per template type
+## 4. Visible-text budgets per template type [ARCHIVED]
 
 Each slide displays ≤25 visible words across all on-screen elements (kicker + headline + body + foot row + attribution), OR one hero number + ≤15 supporting words. Speaker notes are separate; this budget applies only to what *renders on screen.*
 
@@ -111,7 +115,7 @@ No ad-hoc `font-size` declarations elsewhere in the deck.
 
 ---
 
-## 5. Slide-splitting rules
+## 5. Slide-splitting rules [ARCHIVED]
 
 When a narration slide's mapped content exceeds the visible-text budget for its template, split the *visual* into two panels with a shared kicker. The narration stays one slide for pacing and speaker-notes purposes.
 
@@ -149,13 +153,13 @@ If more than ~2 slides in a single deck need splitting, halt and surface to the 
 
 ---
 
-## 6. Future-option seam
+## 6. Future-option seam [ARCHIVED]
 
 Per the spec's Q8=B path, a future iteration may extend `deck-stage.js` with NEW animation primitives — scroll-triggered number counters (numbers ticking up), text-typewriter effects on quote slides, programmatic chart morphing between data slides, dynamic radial-glow pulses that breathe with the slide. Not built today — the existing primitives, used aggressively, should be enough for the first few decks. When/if needed, the prompt structure can accept new animation directives without restructuring the skill itself — only the §3 animation table and the SKILL.md's Animation Intensification section need updating.
 
 ---
 
-## 7. Justoon variant-pick guidance
+## 7. Justoon variant-pick guidance [ARCHIVED]
 
 Activated when `--justoon-refs` is provided to the skill. Read this section at process step 5b ("Pick Justoon variants").
 
