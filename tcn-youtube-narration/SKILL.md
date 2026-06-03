@@ -291,7 +291,7 @@ Distill the article's argument to one or two sentences. Often a verbatim or near
 
 ### 5. Pick the middle-slide menu
 
-Read the article's argument structure and select **5-8 from the menu** (Receipt / Frame / Stakes / Twist / Historical Echo / Verbatim). The Receipt is almost always picked, often twice with distinct sub-labels (e.g., `THE RECEIPT · UNIT ECONOMICS`, `THE RECEIPT · HIP-143`). One of Frame or Twist is almost always picked. The expanded count keeps per-slide visible-text density inside the ≤25-word budget without forcing a panel-split downstream.
+Read the article's argument structure and select **5-8 from the menu** (Receipt / Frame / Stakes / Twist / Historical Echo / Verbatim). The Receipt is almost always picked, often twice with distinct sub-labels (e.g., `THE RECEIPT · UNIT ECONOMICS`, `THE RECEIPT · HIP-143`). One of Frame or Twist is almost always picked. The expanded scene count gives each scene less narrative work to do, keeping beats focused and the visual pacing tight.
 
 ### 6. Detect a refrain candidate (optional)
 
@@ -329,7 +329,6 @@ Use the gate prompt from the Inputs and Outputs section. Wait for approval or re
 - **Article too short for a 5-7 min trailer** (less than ~800 words article-side) — surface to user: "this piece is short enough that the video would cover most of it. Confirm you want a trailer (with curiosity-gap funnel) or a near-full read-through?" Let user override.
 - **Cannot pace to 8-12 scenes** — if the script lands at <8 scenes (too compressed) or >12 scenes (too sprawling), surface to user. <8 usually means the article is too thin for video. >12 usually means the cold-open angle isn't narrow enough. Don't silently exceed; ask the user whether to re-pick the hook or to accept the count.
 - **Beat count outside 80-120** — if total beats land under 80 (scenes too coarse) or over 120 (scenes too granular), surface to user with the actual count. Under 80: ask whether to add more granularity to body scenes. Over 120: ask whether to merge closely related beats.
-- **More than ~3 visual density flags** — narration is the wrong place to be visually dense. If 3+ slides need a panel-split flag, the body menu picked too few categories or the chosen sub-labels are too broad. Re-pick before finalizing.
 - **No obvious hook angle** (rare) — present 2-3 candidate cold-open frames and ask the user to pick.
 - **Fact-check report has flagged unresolved items** — surface those before drafting. A trailer can't safely include claims the fact-check skill flagged. Override only if the user explicitly accepts the editorial risk.
 - **User redirects** — re-invoke the relevant step:
