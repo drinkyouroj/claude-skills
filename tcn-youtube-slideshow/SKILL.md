@@ -134,18 +134,20 @@ Images are scarce and thematic — not beat-matched. The goal is 4-10 images per
 ```
 IMAGE PLACEMENT — Dispatch №NNN (N images)
 
-[IMAGE 1] Scenes 01-02 · Backdrop
+[IMAGE 1] Scenes 01-02 · Backdrop · 16:9
 Narrative: two workers at the Samsung plant, same shift, hundred yards apart
 Covers: S01 B1-B4 (image persists; stamps and numbers overlay it)
 Usage: backdrop — typography beats layer over this image
 
-[IMAGE 2] Scene 03 · Standalone + Backdrop
+[IMAGE 2] Scene 03 · Standalone + Backdrop · 16:9
 Narrative: the chokepoint — the memory chip at the center of the boom
 Covers: S03 B1 (standalone), B2-B8 (backdrop behind receipt beats)
 Usage: mixed
 
 ...
 ```
+
+**Aspect ratio in the placement map:** mark each image as `16:9` (default for all full-bleed uses) or the specific ratio if it is not fullscreen. Pass this ratio to `ai-image-prompts` as part of the remix step — full guidance in `references/image-prompt-style.md`.
 
 4. **Generate an image prompt for each moment using the `ai-image-prompts` skill.** For each image in the placement map, invoke `ai-image-prompts` in Content Illustration Mode:
    - Provide the narration text for the relevant beats as the content input

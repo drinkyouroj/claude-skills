@@ -17,9 +17,11 @@ outside the slate palette. No readable text in the image — text is added as HT
 overlays in the deck. No faces or recognizable real people — silhouettes and geometric
 figure abstraction only. No brand logos or company marks.
 
-The image will be displayed as a full-bleed background on a square canvas (1:1 aspect
-ratio, 1080×1080). Leave compositional breathing room — the image may have typography
-overlaid on top of it.
+**Aspect ratio: 16:9 (1920×1080) by default.** This is the standard for full-bleed
+slides — backdrop and standalone image moments. Generate at 16:9 unless the image is
+not fullscreen (e.g. a small inline illustration within a slide, or a portrait-format
+figure). Leave compositional breathing room — backdrop images will have typography
+overlaid on top of them.
 ```
 
 ---
