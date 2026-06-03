@@ -95,9 +95,9 @@ The full ecosystem diagram lives in the design spec at `docs/superpowers/specs/2
 
 Three zones, **8-12 scenes, 80-120 beats total**, 700-1,050 words at ~140 wpm. Each beat carries **one visual element** — the spoken narration can be longer, but the on-screen element is always exactly one thing. The downstream `tcn-youtube-slideshow` maps each beat to one static slide.
 
-### Cold Open (always 2 slides, 45-60 sec)
+### Cold Open (always 2 scenes, 45-60 sec)
 
-**Slide 1 — Hook.** A relatable analogy, surprising number, or "wait, what?" moment. No setup. No TCN-specific jargon. Earns the next 30 seconds of attention.
+**Scene 1 — Hook.** A relatable analogy, surprising number, or "wait, what?" moment. No setup. No TCN-specific jargon. Earns the next 30 seconds of attention.
 
 Example (Helium piece, calibrated to register 7):
 
@@ -117,9 +117,9 @@ Vibes.
 
 That example is the floor for register-7 catchiness, not the ceiling. Aim higher when the article supports it. Rhetorical questions, one-word landings, and unexpected analogies are the moves.
 
-**Slide 2 — Thesis.** What the piece argues, distilled to one or two sentences. Often a verbatim or near-verbatim line from the article. The promise the video is making.
+**Scene 2 — Thesis.** What the piece argues, distilled to one or two sentences. Often a verbatim or near-verbatim line from the article. The promise the video is making.
 
-### Body (5-8 slides, 3-4 min)
+### Body (5-8 scenes, 3-4 min)
 
 Read the article and pick **5-8 from this menu** by asking *which of these does this article most strongly support?* The expanded count (vs. the older 3-5 target) gives each middle slide less work to do, which keeps the per-slide visible-text budget achievable. Repeating a category is fine — `THE RECEIPT · UNIT ECONOMICS` followed by `THE RECEIPT · HIP-143` is two Receipt slides, not one overloaded Receipt slide.
 
@@ -146,14 +146,14 @@ Each slide is a small-screen object first. The downstream `tcn-youtube-slideshow
 
 If the visible budget can't be met by re-pacing — e.g., a chart that genuinely needs eight labels — flag it in the Script Notes footer under a `**Visual density flags:**` bullet so the slideshow skill knows to plan a panel-split for that slide specifically. Panel-splits at the visual layer are a last resort; re-pacing at narration time is the cleaner fix.
 
-### Outro (always 2 slides, 30-45 sec)
+### Outro (always 2 scenes, 30-45 sec)
 
-**Slide N-1 — Tease.** Open loops. Explicitly name what the video did NOT cover. This is the funnel mechanism that converts viewers into readers.
+**Scene N-1 — Tease.** Open loops. Explicitly name what the video did NOT cover. This is the funnel mechanism that converts viewers into readers.
 
-**Slide N — End.** Disclosure (if any) + Substack CTA. **Same close every video** for channel branding:
+**Scene N — End.** Disclosure (if any) + Substack CTA. **Same close every video** for channel branding:
 
 ```
-**[SLIDE N — END]**
+**[SCENE N — END]**
 
 The Civic Node. Subscribe free at drinkyouroj.substack.com.
 Weekly. No hype.
@@ -231,6 +231,8 @@ Each scene opens with a scene label followed by its beat count. Each beat has th
 The `---` between scenes is intentional. Timing annotations (`[stop — let it sit]`, `[hold ~1.5s]`, `[REFRAIN]`) attach to the `[stop]` marker of the beat they modify.
 
 **One element per beat.** If the `element:` note describes two independent things appearing simultaneously, split into two beats. An overlay (text landing on top of an existing illustration context) counts as one element.
+
+**`[SLIDE NN]` is the scene-level container.** The `[SLIDE NN — SCENE TITLE]` header in generated scripts matches the dispatch-006 convention — it marks a scene (multiple beats), not a single beat. Each scene header is followed by its beats (B1, B2, etc.).
 
 ### Script Notes footer (always present)
 
@@ -327,7 +329,7 @@ Use the gate prompt from the Inputs and Outputs section. Wait for approval or re
 - **Article draft missing or unreadable** — surface the failure, ask for a valid path, halt.
 - **Voice canonical file missing** — apply the degraded-mode fallback used by `tcn-headline`: flag explicitly to the user, skip voice-aware work (no AI-tells cross-check, no banned-vocabulary substitutions), but continue with the structural work this skill can still do. Do NOT fall back to generic register (per the elasticity-bug failure mode documented in `tcn-headline`).
 - **Article too short for a 5-7 min trailer** (less than ~800 words article-side) — surface to user: "this piece is short enough that the video would cover most of it. Confirm you want a trailer (with curiosity-gap funnel) or a near-full read-through?" Let user override.
-- **Cannot pace to 9-12 slides within the visible-text budget** — if even after re-pacing the script lands at <9 slides (too compressed) or >12 slides (too sprawling), surface to user. <9 usually means the article is too thin for video. >12 usually means the cold-open angle isn't narrow enough — too many distinct sub-arguments competing for screen time. Don't silently exceed; ask the user whether to re-pick the hook or to accept the over/under count.
+- **Cannot pace to 8-12 scenes** — if the script lands at <8 scenes (too compressed) or >12 scenes (too sprawling), surface to user. <8 usually means the article is too thin for video. >12 usually means the cold-open angle isn't narrow enough. Don't silently exceed; ask the user whether to re-pick the hook or to accept the count.
 - **More than ~3 visual density flags** — narration is the wrong place to be visually dense. If 3+ slides need a panel-split flag, the body menu picked too few categories or the chosen sub-labels are too broad. Re-pick before finalizing.
 - **No obvious hook angle** (rare) — present 2-3 candidate cold-open frames and ask the user to pick.
 - **Fact-check report has flagged unresolved items** — surface those before drafting. A trailer can't safely include claims the fact-check skill flagged. Override only if the user explicitly accepts the editorial risk.
