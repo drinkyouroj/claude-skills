@@ -1,5 +1,7 @@
 # Structure Templates — tcn-youtube-narration
 
+*Note: This file was written for the pre-beat-segmented (9-12-slide, ≤25-visible-words) format superseded 2026-06-03. For current format conventions, see the beat markup convention in `SKILL.md` §Output Format and the Script Notes footer template in `SKILL.md` §Output Format. The content below is preserved for reference.*
+
 Canonical templates for slide markup, the three narration zones (Cold Open / Body / Outro), the Script Notes footer, and the title block. Loaded at runtime when instantiating a slide. Skim, do not memorize.
 
 **Slide-count target:** 9-12 slides total (was 7-9 in the pre-small-screen format). Body zone is 5-8 middle slides. Each slide's *visible* content (kicker + headline + supporting bullets or hero number + attribution) stays ≤25 words OR one hero number + ≤15 supporting words. The spoken narration around the visible content is longer (60-90 words / 25-40 sec per slide is typical).
