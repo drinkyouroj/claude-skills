@@ -1,25 +1,35 @@
 ---
 name: tcn-youtube-slideshow
-description: "Step 2 of the Civic Node YouTube production workflow: converts an approved narration script into a single Claude Design prompt that produces a complete slide deck bundled HTML file matching the TCN design system. The skill maps each narration slide to a template slide type, applies intensified-but-on-brand animation directives, and embeds the narration as speaker notes. Invoke when the user says \"build the slideshow\", \"make the slides\", \"Claude Design prompt for this deck\", \"turn this narration into slides\", or has approved a youtube-narration.md and wants the deck. Does NOT apply to article slides, social media graphics, or thumbnail generation (those come from separate skills)."
+description: "Step 2 of the Civic Node YouTube production workflow: runs directly in Claude Design to convert an uploaded beat-segmented narration script into a complete ~110-slide constant-motion HTML deck. Two-pass workflow: Pass 1 identifies illustration beats and outputs a fal.ai image-generation batch; Pass 2 (after images are uploaded) builds the full deck with one slide per beat plus scene-header slides. Invoke when the user uploads a youtube-narration.md in Claude Design and says 'build the slideshow', 'make the slides', or 'run this skill'. Does NOT apply to article slides, social media graphics, or thumbnail generation."
 ---
 
 # The Civic Node — YouTube Slideshow (Step 2 of the YouTube Production Workflow)
 
 ## What This Skill Does
 
-Converts a finished YouTube narration script into a single, self-contained Claude Design prompt that yields a complete slide deck as one bundled HTML file. The prompt maps each narration slide to a TCN design system slide template, restates the brand guardrails, prescribes intensified-but-on-brand animation directives, enforces small-screen / thumbnail readability and multi-aspect (16:9 / 9:16 / 1:1) layout from a single source, and embeds the narration verbatim as speaker notes. The output is a markdown file (`youtube-slideshow.md`) ready to paste into a new Claude Design project at `claude.ai/design`.
+Converts a finished YouTube narration script into a complete ~110-slide constant-motion HTML deck. Each narration beat becomes one static slide; scene labels become scene-header slides. The deck plays as near-continuous motion — ~2-3 seconds of static screen between slide advances.
 
-This skill is a **prompt-builder, not a slideshow generator.** It does not render HTML, ship CSS, or extend the kinetic engine. It assembles a precise context handoff to Claude Design, which does the rendering against the TCN design system.
+**This skill runs directly in Claude Design.** It does not produce a prompt file for a human to paste. The user uploads `youtube-narration.md` to a Claude Design project, loads this skill as context, and Claude Design executes the workflow directly.
+
+**Two-pass workflow:**
+- **Pass 1:** Read the narration, identify illustration beats, output a numbered fal.ai image-generation batch. Pause for the user to generate and upload images.
+- **Pass 2:** After images are uploaded, build the full HTML deck — scene-header slides + one beat slide per narration beat — referencing uploaded images for illustration beats.
+
+**Output:** A single bundled HTML file (`dispatch-NNN.html`) with ~110 slides, simple CSS cross-dissolve transitions, and manual keypress advancement. No dependency on `deck-stage.js` or the existing animation primitive system.
 
 ---
 
-## Why a Prompt-Builder, Not a Slideshow Generator
+## Why Beats, Not Animation States
 
-The TCN design system already exists. The CSS variables, slide-type stylesheets, `deck-stage.js` kinetic engine, brand marks, and the `slides/deck.html` reference template are all in the canonical design-system bundle. The slide vocabulary (`sl-title`, `sl-lead`, `sl-section`, `sl-data`, `sl-frames`, `sl-compare`, `sl-quote`, `sl-end`) is fixed. The animation primitives (`sl-reveal`, `sl-mark-pulse`, `sl-caret`, `sl-chart-draw`, `sl-glow`, `sl-hairline`) are fixed.
+The previous format used ~10 slides with animation primitives (`sl-reveal` cascades, `sl-chart-draw`, etc.) that built up content within each slide. Two problems:
 
-The bottleneck is not "we need a new slideshow design." The bottleneck is "every week, Justin manually composes a Claude Design brief from the narration and the design system, and the result drifts in consistency." This skill removes that bottleneck.
+1. **Claude Design's animation UI is hard to verify.** You can't see beat 7 of 13 without playing through the animation. If beat 7 is wrong, you have to describe an animation state change and hope Claude Design re-generates it correctly.
 
-What this skill produces is a deterministic, article-specific brief — kicker text, slide type, headline, body, animation directives, speaker notes — that Claude Design can execute against the existing design system without further clarification. The design rules live in the design system. This skill just wires the narration to them.
+2. **On-screen motion came from animation, not from visual change.** A viewer watched one slide for 30-40 seconds while elements appeared. That's not constant motion.
+
+With discrete static slides — one per beat — both problems disappear. Each slide is a visible, editable object. Motion comes from advancing slides, not from animation triggers. The recording workflow (Justin pressing a key at each beat-stop) produces genuine visual change every 2-3 seconds.
+
+**What this means for Claude Design:** build simple, static slides. The only transition is a 200ms cross-dissolve between slides. No `sl-reveal`, no `sl-chart-draw`, no cascade primitives. The content is what changes; the animation is incidental.
 
 ---
 
@@ -28,45 +38,45 @@ What this skill produces is a deterministic, article-specific brief — kicker t
 This skill is **Step 2 of the YouTube production workflow** — it runs after the narration is approved and before video recording.
 
 **Upstream (what this skill reads):**
-- `tcn-youtube-narration` output (`youtube-narration.md`) — slide structure, content, Script Notes footer with forward-compat hooks
-- The TCN design system bundle (CSS, deck-stage.js, slide templates) — referenced in the produced prompt, not parsed by the skill
+- `tcn-youtube-narration` output (`youtube-narration.md`) — uploaded to Claude Design. Contains scenes, beats, element notes, refrain markers, Script Notes footer.
 
-**Downstream (sibling skills, planned, not built today):**
-- `tcn-youtube-title` — packages titles for YouTube upload (consumes the recorded transcript)
-- `tcn-youtube-description` — packages descriptions and chapter timestamps (consumes the recorded transcript)
-- `tcn-youtube-thumbnail` — produces thumbnail image prompts (consumes the recorded transcript and the cold-open candidate)
+**Downstream (sibling skills, planned):**
+- `tcn-youtube-title` — title generation, consumes the recorded transcript.
+- `tcn-youtube-description` — description body, tags, chapter timestamps, consumes the recorded transcript.
+- `tcn-youtube-thumbnail` — thumbnail image prompt + text overlay, consumes the recorded transcript and cold-open candidate.
 
 The packaging skills run after recording because they consume the timestamped transcript, not the upstream narration. This skill is the last upstream-of-recording step.
 
-The full ecosystem diagram lives in the design spec at `docs/superpowers/specs/2026-05-20-tcn-youtube-slideshow-design.md`.
+The full design rationale lives in `docs/superpowers/specs/2026-06-03-youtube-constant-motion-design.md`.
 
 ---
 
 ## Inputs and Outputs
 
-### Required input
+### Required input (upload to Claude Design project)
 
-- **Path to a finished narration.** Typically `workspace/drafts/<slug>/youtube-narration.md`. The skill reads this file verbatim — slide markers, Script Notes footer, forward-compat hooks. If the user pastes the narration contents directly instead of supplying a path, save the paste to a temp file and proceed.
+- **`youtube-narration.md`** — the finished beat-segmented narration from `tcn-youtube-narration`. Contains scene labels, beat markers (`▸ **B1** · *element:* ...`), `[REFRAIN]` markers, and Script Notes footer.
 
 ### Optional inputs
 
-- **Path to the TCN design system bundle.** Defaults to the user's maintained path (Justin's current path: `~/Documents/The Civic Node — Design System.zip`). If not provided, the skill leaves a placeholder in the prompt with an instruction to upload before pasting.
-- **`--justoon-refs <path>`** — path to the Justoon slideshow library. Defaults to `~/Pictures/tcn-justin-slideshow/`. Absence triggers "no Justoon" mode: the skill produces typography-only slides exactly as today. Presence triggers per-slide Justoon auto-picks per the slide-type table (Receipt/Stakes → role A pointing pose; Twist → role C reaction). The library's `justoon-neutral.png` is the required anchor / fallback if a mapped variant is missing. Library convention: `~/Pictures/tcn-justin-slideshow/CLAUDE.md`.
-- **Steering** — free-text guidance like "use sl-compare instead of sl-frames on Slide 4", "make Slide 3's chart larger", "skip animation intensification on the Tease slide", or "no Justoon on this dispatch" (forces no-Justoon mode even when `--justoon-refs` resolves).
-- **Override slide type** — for any individual slide, the user can force a specific template (e.g., "Slide 3 must be sl-data with the SVG chart variant").
-- **Override Justoon variant** — for any individual slide, the user can force a specific variant or none (e.g., "Slide 8: use justoon-react-raised-eyebrow instead of deadpan", or "Slide 4: no Justoon").
+- **Uploaded fal.ai images** — present only in Pass 2. Named per the `NNN-SS-BNN.png` convention (see `references/image-prompt-style.md`). Absence in Pass 1 is expected; absence in Pass 2 means the illustration slides will render with placeholder boxes.
+- **Steering** — free-text guidance like "make the refrain treatment use a border instead of inverted colors", "scene 4 needs a different illustration approach", "no scene-header slides".
 
 ### Output artifact
 
-- **File:** `workspace/drafts/<slug>/youtube-slideshow.md`
-- **Contents:** a single, self-contained Claude Design prompt with all article-specific content filled in
-- **Does NOT contain:** rendered HTML, CSS, or JavaScript — those are Claude Design's job
+- **File:** `dispatch-NNN.html`
+- **Contents:** ~110 static slides (one per beat + one scene-header per scene), CSS cross-dissolve transitions, manual keypress advancement
+- **Does NOT contain:** speaker notes, animation primitives, deck-stage.js dependency
 
-### Gate prompt presented to user
+### Gate prompt presented to user (Pass 1)
 
-> Claude Design prompt complete (~[N] lines, [K] narration slides, [P] visual panel-splits, multi-aspect 16:9 / 9:16 / 1:1). Open `youtube-slideshow.md`, copy its contents, paste into a new Claude Design project at `claude.ai/design`, upload the design system files, and ask Claude Design to build the deck. After build, verify by resizing the browser to each target aspect and checking thumbnail-size legibility at ~240px wide. Approve, redirect (e.g., 'swap slide 4 to sl-compare', 'lower animation intensity', 'merge the panel-split on slide 6'), or cancel?
+> Image batch complete — [N] illustration beats across [M] scenes. Generate these images using fal.ai with the style anchor from `references/image-prompt-style.md`. Upload the results to this Claude Design project, then say "continue" to build the deck.
 
-**Stop after presenting the prompt.** Wait for user approval or redirect before doing anything else.
+### Gate prompt presented to user (Pass 2)
+
+> Deck complete — [N] slides ([M] scenes × 1 scene-header + [K] beat slides). Open `dispatch-NNN.html` in a browser, resize to 1:1 (1080×1080), and advance through the deck to verify. Approve, redirect, or cancel?
+
+**Stop after each pass gate.** Do not proceed to Pass 2 without user confirmation that images have been uploaded.
 
 ---
 
