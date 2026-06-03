@@ -1,15 +1,15 @@
 ---
 name: tcn-youtube-narration
-description: Step 1 of the Civic Node YouTube production workflow — converts an approved article draft into a 5-7 minute trailer-format narration script with slide markers, pacing notes, and refrain markers. Calibrated to a "Hank Green meets Vox" register and explicitly written to drive Substack click-through, not to summarize the article. Invoke this skill when the user says "write the narration", "narration script", "video script from this article", "narrate this for YouTube", "do the script for Friday's video", or when the user points at a finished article draft and asks for a video script. Does NOT apply to social posts (that's tcn-post), full articles (tcn-draft), or YouTube packaging — title, description, and thumbnail come from separate skills.
+description: Step 1 of the Civic Node YouTube production workflow — converts an approved article draft into a 5-7 minute trailer-format narration script with beat markers, pacing notes, and refrain markers. Produces a beat-segmented script (8-12 scenes, 80-120 beats) where each beat is one spoken unit paired with one visual element. Calibrated to a "Hank Green meets Vox" register and written to drive Substack click-through, not to summarize the article. Invoke this skill when the user says "write the narration", "narration script", "video script from this article", "narrate this for YouTube", "do the script for Friday's video", or when the user points at a finished article draft and asks for a video script. Does NOT apply to social posts (that's tcn-post), full articles (tcn-draft), or YouTube packaging — title, description, and thumbnail come from separate skills.
 ---
 
 # The Civic Node — YouTube Narration (Step 1 of the YouTube Production Workflow)
 
 ## What This Skill Does
 
-Converts a finished Civic Node article draft into a 5-7 minute trailer-format YouTube narration script (700-1,050 words at ~140 wpm) with standardized slide markers and a Script Notes footer. The output is structured as a trailer-funnel: it teases the article's strongest hook, names what the video deliberately does not cover, and routes viewers to read the full piece on Substack. The register sits at a 6-7 on a 1-10 dial — recognizably TCN-Marcus, but sharper, more colloquial, and tuned for a broader YouTube audience than the Substack reader base.
+Converts a finished Civic Node article draft into a 5-7 minute trailer-format YouTube narration script (700-1,050 words at ~140 wpm) with beat markers and a Script Notes footer. The output is structured as a trailer-funnel: it teases the article's strongest hook, names what the video deliberately does not cover, and routes viewers to read the full piece on Substack. The register sits at a 6-7 on a 1-10 dial — recognizably TCN-Marcus, but sharper, more colloquial, and tuned for a broader YouTube audience than the Substack reader base.
 
-**Slide pacing target: 9-12 slides total**, calibrated for small-screen / phone-thumbnail consumption of the downstream slideshow (see `tcn-youtube-slideshow`). Same 5-7 min runtime as before; the slide budget is finer-grained so each slide carries less on-screen content and the visual cadence matches mobile viewing. Going under 9 slides usually means the piece is too compressed for video; going over 12 means the upstream article needs a tighter cold-open angle.
+**Beat pacing target: 8-12 scenes, 80-120 beats total**, calibrated for the downstream constant-motion slideshow (see `tcn-youtube-slideshow`). Same 5-7 min runtime; each beat carries one visual element, producing a visual change every ~3-4 seconds on average (~3.8s in the dispatch-006 reference). Going under 8 scenes usually means the piece is too compressed for video; going over 12 scenes usually means the cold-open angle isn't narrow enough — too many distinct sub-arguments competing for screen time. Going over 120 beats usually means individual scenes are over-granular; scenes typically run 8-12 beats.
 
 ---
 
@@ -80,7 +80,7 @@ The full ecosystem diagram lives in the design spec at `docs/superpowers/specs/2
 ### Output artifact
 
 - **File:** `workspace/drafts/<slug>/youtube-narration.md`
-- **Contents:** Title block (article title + dispatch number + slide count + format tag), 9-12 slide blocks in standardized markup (each within the ≤25-visible-words/slide budget), Script Notes footer.
+- **Contents:** Title block (article title + dispatch number + scene/beat count + format tag), 8-12 scene blocks in beat-segmented markup, Script Notes footer.
 - **Does NOT contain:** title options, YouTube description, chapter timestamps, tags, thumbnail prompt — those come from separate skills.
 
 ### Gate prompt presented to user
@@ -93,7 +93,7 @@ The full ecosystem diagram lives in the design spec at `docs/superpowers/specs/2
 
 ## The Narration Structure
 
-Three zones, **9-12 slides total**, 700-1,050 words at ~140 wpm. Each slide carries **≤25 visible-text words** that would render on screen (see "Visible-text budget" below) — the spoken narration is longer than what appears on the slide, but the on-screen text per slide stays inside the small-screen budget so the downstream `tcn-youtube-slideshow` doesn't have to split slides visually.
+Three zones, **8-12 scenes, 80-120 beats total**, 700-1,050 words at ~140 wpm. Each beat carries **one visual element** — the spoken narration can be longer, but the on-screen element is always exactly one thing. The downstream `tcn-youtube-slideshow` maps each beat to one static slide.
 
 ### Cold Open (always 2 slides, 45-60 sec)
 
@@ -207,24 +207,30 @@ Full dial worked examples, register-comparison side-by-sides, and the spoken-wor
 ```markdown
 # [Article Title in Spoken-Word Friendly Form]
 ## The Civic Node · Dispatch №[NNN]
-## [N] slides · trailer-format · small-screen · 5-7 min target
+## [N] scenes · [N] beats · beat-segmented motion format · trailer · small-screen · 5-7 min target
 ```
 
-The dispatch number is detected from existing dispatches in the workspace (see step 9 of the process), or captured from the user. The format tag (`trailer-format · small-screen`) distinguishes the current format (9-12 slides, ≤25-visible-words/slide budget, multi-aspect deck downstream) from the legacy `Part One / Part Two` format and from the older 7-9-slide pre-small-screen-pacing scripts.
+The dispatch number is detected from existing dispatches in the workspace (see step 9 of the process), or captured from the user. The format tag (`beat-segmented motion format · trailer · small-screen`) distinguishes the current format from the legacy `Part One / Part Two` format and the older 7-9-slide pre-beat-format scripts.
 
-### Slide markup convention
+### Beat markup convention
+
+Each scene opens with a scene label followed by its beat count. Each beat has three parts: beat number, one `element:` note, and one spoken unit ending in `[stop]`.
 
 ```markdown
-**[SLIDE NN — SLIDE TITLE]**
+**[SLIDE NN — SCENE TITLE]** · [N] beats
 
-[narration text — short sentences, no em-dashes, one-word landings welcome]
+▸ **B1** · *element: [one visual element — a stamp, a number, a phrase, or an illustration description]*
+"[spoken narration — one unit, short sentences]" **[stop]**
 
-[blank line between paragraphs to mark a breath point]
+▸ **B2** · *element: [one visual element]*
+"[spoken narration]" **[stop]**
 
 ---
 ```
 
-The `---` between slides is intentional. It gives the reader visual separation when reading aloud.
+The `---` between scenes is intentional. Timing annotations (`[stop — let it sit]`, `[hold ~1.5s]`, `[REFRAIN]`) attach to the `[stop]` marker of the beat they modify.
+
+**One element per beat.** If the `element:` note describes two independent things appearing simultaneously, split into two beats. An overlay (text landing on top of an existing illustration context) counts as one element.
 
 ### Script Notes footer (always present)
 
