@@ -134,23 +134,22 @@ Full kicker convention: `references/template-mapping.md` §2.
 
 ---
 
-### 5. `illustration`
+### 5. HTML/CSS/SVG visual beats
 
-**Source:** Narration beats where `element:` describes a visual that cannot be produced with typography alone — figures, maps, diagrams, abstract icons, metaphorical compositions.
-**Visual:** Full-bleed AI-generated image (from fal.ai Pass 1 batch) as the slide background. Optional text or number overlay in HTML/CSS on top. Image fills the slide; text is layered.
-**Examples:** "two figure silhouettes, Samsung plant outline behind them", "a US map with a single dot", "a lone ratepayer figure, no union behind it", "$400,000 lands over the left figure"
+**Source:** Narration beats where `element:` describes a non-typographic visual that can be expressed through geometric shapes, lines, or simple SVG — diagrams, bars, arrows, funnels, maps, grids, flows, icons.
+**Visual:** Claude Design composes these inline as HTML/CSS/SVG. No external image file is needed.
+**Examples:** "a scale bar labeled SAMSUNG begins to grow", "a funnel narrows", "a US map outline with a dot", "a timeline with a gap", "two diverging arrows", "a grid of ticks fills a row"
 
-**Text overlay rule:** if the beat's `element:` note includes text appearing over an illustration ("$400,000 lands over…", "GRANTED + checkmark"), add the text as an absolutely positioned HTML overlay. The overlay uses `hero-number` or `stamp` sizing as appropriate.
+**Rule:** if it can be communicated with CSS shapes, SVG paths, or HTML layout — render it inline. If it requires a real pictorial image (a person, a specific place, a scene), it's a narrative image moment handled in Pass 1, not a beat slide.
 
-**Filename convention:** images are named `NNN-SS-BNN.png` where NNN = dispatch number (zero-padded 3 digits), SS = scene number (zero-padded 2 digits), BNN = B + beat number (zero-padded 2 digits). Example: `006-01-B01.png`.
+**Image backdrop beats:** beats that fall within an image moment (see Pass 1 placement map) are rendered with the image as a full-bleed background and the beat's typographic element overlaid:
 
-**CSS skeleton:**
 ```css
-.slide.illustration {
+.slide.image-backdrop {
   position: relative;
   background: #0f172a;
 }
-.slide.illustration .bg-image {
+.slide.image-backdrop .bg-image {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -158,31 +157,52 @@ Full kicker convention: `references/template-mapping.md` §2.
   object-fit: cover;
   object-position: center;
 }
-/* overlay text — used when beat has text landing over illustration */
-.slide.illustration .overlay-text {
+.slide.image-backdrop .overlay-text {
   position: absolute;
   bottom: 15cqh;
   left: 50%;
   transform: translateX(-50%);
   font-family: 'Courier Prime', monospace;
-  font-size: clamp(80px, 24cqmin, 360px); /* hero-number for figures */
+  font-size: clamp(80px, 24cqmin, 360px);
   color: #e2e8f0;
   text-align: center;
-  text-shadow: 0 0 40px rgba(0,0,0,0.8); /* only exception to no-shadows rule — needed for legibility over image */
+  text-shadow: 0 0 40px rgba(0,0,0,0.8); /* exception to no-shadows rule — legibility over image */
   white-space: nowrap;
 }
 ```
+
+**Standalone image slides** (from Pass 1 placement map) use the same `.image-backdrop` CSS but with no overlay:
+
+```css
+.slide.image-moment {
+  position: relative;
+  background: #0f172a;
+}
+.slide.image-moment .bg-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+```
+
+**Filename convention:** article-specific images are named `NNN-NN.png` where NNN = dispatch number (zero-padded 3 digits) and NN = image sequence number (zero-padded 2 digits). Example: `006-01.png`, `006-02.png`.
 
 ---
 
 ## Typing decision tree
 
 ```
+Is it a generated scene label (not a narration beat)?
+  → scene-header
+
 Does the element: note describe only words/numbers/phrases on a plain dark background?
-  YES → stamp or hero-number (is it primarily a figure? hero-number; otherwise stamp)
+  YES → stamp or hero-number (primarily a figure? hero-number; otherwise stamp)
   NO  → Does it match [REFRAIN] marker?
           YES → refrain
-          NO  → illustration
-Is it a generated scene label (not a beat)?
-  → scene-header
+          NO  → is this an abstract visual expressible in HTML/CSS/SVG?
+                  YES → render inline as HTML/CSS/SVG
+                  NO  → this is a narrative image moment; handle in Pass 1
 ```

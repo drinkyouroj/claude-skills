@@ -1,80 +1,64 @@
-# Image Prompt Style — tcn-youtube-slideshow
+# TCN Style Brief — for `ai-image-prompts` remix
 
-*The TCN aesthetic anchor for fal.ai image generation. Use this when writing Pass 1 image prompts in the two-pass workflow. Include the style anchor verbatim in every prompt.*
-
----
-
-## Style anchor (include verbatim in every prompt)
-
-```
-Style: flat vector illustration, dark background (#0f172a), muted slate color palette
-(#334155 mid-slate, #475569 slate, #64748b light-slate, #e2e8f0 near-white for
-highlights), clean geometric lines, no gradients, no photography, no realistic
-textures, no shadows, no lens flare, minimal detail, geometric simplification,
-editorial illustration aesthetic
-```
+*Pass this as the style constraint when invoking `ai-image-prompts` in Content Illustration Mode during Pass 1. After `ai-image-prompts` selects a template prompt from its library, include this brief in the remix step (Step 5) so the customized output matches TCN's visual aesthetic.*
 
 ---
 
-## What to specify in the Content field
+## Style brief (include in the ai-image-prompts remix step)
 
-The content description translates the narration's `element:` note into a visual brief. Rules:
-
-1. **Describe the composition, not the meaning.** "Two human figure silhouettes facing right, side by side" — not "two workers representing labor inequality."
-2. **Name colors from the palette.** "Left figure in near-white (#e2e8f0), right figure in mid-slate (#334155)" rather than "one bright, one dark."
-3. **Specify negative space.** If part of the frame should be empty (for a text overlay that Claude Design will add), say so: "lower third empty for text overlay."
-4. **Avoid text in images.** Any text (stamps, numbers, labels) will be added as HTML/CSS overlays — do not include readable text in the fal.ai image.
-5. **Use geometric abstractions for concepts.** A "chokepoint" → a funnel shape. A "union" → overlapping circles or a cluster. A "power grid" → grid lines radiating from a central node. Flat vector, not literal.
-
----
-
-## Reference dispatch-006 examples
-
-**006-01-B01** (two figure silhouettes):
 ```
-Style: [style anchor above]
-Content: Two simplified human figure silhouettes, flat geometric, side by side facing
-right. Left figure near-white (#e2e8f0), right figure mid-slate (#334155). Faint
-rectangular outline behind them suggesting an industrial building. Figures centered,
-lower two-thirds of frame. Upper third empty. No text. No detail beyond basic body shape.
-```
+TCN visual style: dark editorial aesthetic, dark background (#0f172a near-black),
+muted slate color palette for supporting elements (#334155 mid-slate, #475569 slate,
+#64748b light-slate, #e2e8f0 near-white for highlights and focal elements), flat
+design sensibility, clean geometric composition, editorial illustration register.
 
-**006-03-B08** (globe with ripple):
-```
-Style: [style anchor above]
-Content: Simplified flat globe outline, dark slate (#334155) lines on dark background
-(#0f172a). Concentric ripple rings emanating from a point in the northern hemisphere,
-near-white (#e2e8f0) rings fading outward. Centered in frame. Clean, minimal, no
-continents labeled, no text.
-```
+No photography, no realistic textures, no lens flare, no bright saturated colors
+outside the slate palette. No readable text in the image — text is added as HTML
+overlays in the deck. No faces or recognizable real people — silhouettes and geometric
+figure abstraction only. No brand logos or company marks.
 
-**006-05-B07** (US map with single dot):
-```
-Style: [style anchor above]
-Content: Flat outline of the contiguous United States, mid-slate (#475569) fill,
-slightly lighter slate border (#64748b). Single small bright dot (#e2e8f0) in
-western Pennsylvania. No state borders, no labels, no text. Map centered in frame,
-generous margin on all sides.
+The image will be displayed as a full-bleed background on a square canvas (1:1 aspect
+ratio, 1080×1080). Leave compositional breathing room — the image may have typography
+overlaid on top of it.
 ```
 
 ---
 
-## Filename convention
+## What to provide as content input to ai-image-prompts
 
-`NNN-SS-BNN.png`
+For each image moment, pass:
+1. **The narration text** for the relevant beats — this is the "content" for Content Illustration Mode
+2. **A one-sentence narrative summary** of what the image needs to communicate
+3. **Usage note** — whether this is a backdrop (text will overlay) or standalone (image fills the full slide)
+
+Example input for dispatch-006 Image 1:
+```
+Content: "Two workers walk out of the same Samsung plant in Korea. Same shift. They
+worked it a hundred yards apart. One of them builds memory chips. His bonus runs toward
+four hundred thousand dollars. The other builds phones and televisions. His bonus comes
+to about four thousand. Same company. Same shift. A hundred to one."
+
+Narrative: Two figures representing the same-company pay gap — the core visual hook of the video.
+
+Usage: Backdrop — stamps and numbers will overlay this image across several beats.
+```
+
+---
+
+## Image placement filename convention
+
+Article-specific images are named `NNN-NN.png`:
 - NNN = dispatch number, zero-padded 3 digits (e.g. `006`)
-- SS = scene number, zero-padded 2 digits (e.g. `01`)
-- BNN = B + beat number within scene, zero-padded 2 digits (e.g. `B01`)
+- NN = image sequence number within the dispatch, zero-padded 2 digits (e.g. `01`, `02`)
 
-Example: `006-01-B01.png` = dispatch 006, scene 01, beat 1.
+Example: `006-01.png` = dispatch 006, first image. `006-05.png` = dispatch 006, fifth image.
+
+The placement map in Pass 1 lists which image number covers which beats/scenes.
 
 ---
 
-## What to avoid
+## Targeting the right ai-image-prompts category
 
-- No photography, no realistic rendering, no 3D effects
-- No text inside the image (text overlays are HTML/CSS)
-- No gradients, no lens flare, no shadows
-- No bright saturated colors outside the slate palette
-- No faces or recognizable people — silhouettes and geometric figures only
-- No brand logos or real company marks
+The `infographic-edu-visual` category is the closest match for TCN's editorial visual style. Try it first. If no strong match, try `others` (for more unusual editorial compositions) or `comic-storyboard` (for figurative/narrative scenes with people or figures).
+
+Avoid `product-marketing`, `social-media-post`, and `profile-avatar` — these skew commercial and bright, away from TCN's tone.

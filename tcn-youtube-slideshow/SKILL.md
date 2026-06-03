@@ -82,23 +82,24 @@ The full design rationale lives in `docs/superpowers/specs/2026-06-03-youtube-co
 
 ## Beat Type Taxonomy
 
-Every beat from the narration is assigned one of five types before any slides are built. Full CSS skeletons and worked examples for each type live in `references/beat-types.md`.
+Every beat from the narration is assigned one of four types before any slides are built. CSS skeletons and examples live in `references/beat-types.md`.
 
-| Type | Source | Visual treatment | Needs image? |
-|---|---|---|---|
-| `scene-header` | Generated from scene label (not a beat) | TCN kicker, dark BG, kicker text only | No |
-| `stamp` | Beat with short text/phrase as element | Text centered, Courier Prime, dark BG | No |
-| `hero-number` | Beat with a single figure as element | Large number + optional label, dark BG | No |
-| `refrain` | Beat marked `[REFRAIN]` | Full-screen phrase, **inverted colors** (white BG, black text) | No |
-| `illustration` | Beat whose element can't be produced with typography | Full-bleed fal.ai image, optional text overlay | **Yes** |
+| Type | Source | Visual treatment |
+|---|---|---|
+| `scene-header` | Generated from scene label (not a beat) | TCN kicker, dark BG, kicker text only |
+| `stamp` | Beat with short text/phrase as element | Text centered, Courier Prime, dark BG |
+| `hero-number` | Beat with a single figure as element | Large number + optional label, dark BG |
+| `refrain` | Beat marked `[REFRAIN]` | Full-screen phrase, **inverted colors** (white BG, black text) |
 
-**Typing rule:** if the `element:` note describes anything other than words, numbers, or short phrases on a plain dark background — type it as `illustration`. Everything else falls to stamp, hero-number, or refrain.
+**Typing rule:** every beat is one of the four types above. All are pure HTML/CSS — no external images are needed for beat slides themselves.
+
+**Abstract visual elements** (diagrams, charts, bars, arrows, maps, flows, icons) are rendered as HTML/CSS/SVG inline by Claude Design. If a beat's `element:` note describes a non-typographic visual that can be communicated through geometric shapes and CSS — a scale bar, a funnel, a simple map outline, a grid of ticks — Claude Design composes it directly. These are not sent for image generation.
 
 **scene-header slides** are generated (not typed from beats). One scene-header per scene. Kicker format: `DISPATCH №NNN · SCENE NAME`. Full kicker convention in `references/template-mapping.md` §2.
 
 **refrain treatment is non-negotiable.** The inverted colors (white background, black text) signal recurrence to the viewer. Every `[REFRAIN]` beat gets identical visual treatment — no variation between instances.
 
-**illustration overlays:** when a beat's element note includes text landing over an illustration (e.g. "$400,000 lands over the left figure"), the fal.ai image is the base visual and the text is an HTML/CSS overlay. The image is still generated in Pass 1; the overlay is added in Pass 2 using the `illustration` CSS skeleton's `.overlay-text` class.
+**Article-specific images** are separate from beat slides and handled in Pass 1. An image may display as a full-bleed backdrop behind a stretch of beats, or stand alone as a dedicated image slide. Images are scarce — 4-10 per dispatch — and placed by narrative logic, not beat-to-beat.
 
 ---
 
@@ -110,56 +111,65 @@ Full kicker convention, rules, and examples: `references/template-mapping.md` §
 
 ## Two-Pass Workflow
 
-### Pass 1 — Image generation batch
+### Pass 1 — Narrative image placement and prompt generation
 
-1. **Read the uploaded narration.** Parse scenes, beats, element notes, refrain markers.
+Images are scarce and thematic — not beat-matched. The goal is 4-10 images per dispatch, each covering a meaningful stretch of narrative (typically 10-30 seconds, multiple beats). Images appear at visual context transitions: when the story enters a new physical setting, introduces a key subject or figure, or needs a pictorial anchor that an abstract HTML/CSS diagram cannot provide.
 
-2. **Type every beat.** Apply the typing rule from Beat Type Taxonomy above. Produce a brief inventory:
+1. **Read the uploaded narration.** Parse scenes, beats, element notes, refrain markers. Read the full narration as a story — follow the narrative arc, not the beat list.
+
+2. **Identify image moments.** Mark where a real pictorial image would ground the viewer. Triggers:
+   - The story introduces a specific physical setting or subject (a factory, a figure, a place)
+   - A character or subject recurs across scenes (the chip worker, the ratepayer)
+   - A moment of visual contrast or juxtaposition that words and diagrams alone don't carry
+   - The tease/outro where the viewer needs to feel the stakes
+
+   For each image moment, determine:
+   - Which scenes and beats it covers (the image may persist across many beat advances)
+   - Whether it's a **backdrop** (image held behind typography beats; text overlays on top) or a **standalone slide** (image is the full visual for one beat or a pause)
+
+   If no genuine image moments exist (rare), skip Pass 1 entirely and proceed to Pass 2.
+
+3. **Output the image placement map:**
 
 ```
-Beat inventory — Dispatch №006 (102 beats across 10 scenes):
-  scene-header: 10 (generated)
-  stamp: 38
-  hero-number: 14
-  refrain: 2
-  illustration: 38
-  Total slides: 112
-```
+IMAGE PLACEMENT — Dispatch №NNN (N images)
 
-3. **Output the image batch.** For every `illustration` beat, produce one numbered image prompt in this format:
+[IMAGE 1] Scenes 01-02 · Backdrop
+Narrative: two workers at the Samsung plant, same shift, hundred yards apart
+Covers: S01 B1-B4 (image persists; stamps and numbers overlay it)
+Usage: backdrop — typography beats layer over this image
 
-```
-IMAGE BATCH — Dispatch №NNN ([N] images)
+[IMAGE 2] Scene 03 · Standalone + Backdrop
+Narrative: the chokepoint — the memory chip at the center of the boom
+Covers: S03 B1 (standalone), B2-B8 (backdrop behind receipt beats)
+Usage: mixed
 
-[001] Scene SS · BNN
-Style: flat vector illustration, dark background (#0f172a), muted slate color palette
-(#334155 mid-slate, #475569 slate, #64748b light-slate, #e2e8f0 near-white for
-highlights), clean geometric lines, no gradients, no photography, no realistic
-textures, no shadows, no lens flare, minimal detail, geometric simplification,
-editorial illustration aesthetic
-Content: [description derived from element note — composition, colors from palette,
-negative space for text overlays, no text in image]
-Filename: NNN-SS-BNN.png
-
-[002] Scene SS · BNN
 ...
 ```
 
-Full style anchor and worked examples: `references/image-prompt-style.md`.
+4. **Generate an image prompt for each moment using the `ai-image-prompts` skill.** For each image in the placement map, invoke `ai-image-prompts` in Content Illustration Mode:
+   - Provide the narration text for the relevant beats as the content input
+   - In the remix step, pass the TCN style brief from `references/image-prompt-style.md` as the style constraint — this keeps the output consistent with TCN's dark, editorial aesthetic
+   - Work through all images before presenting any to the user
 
-4. **Present Pass 1 gate prompt and stop.** Do not proceed until the user confirms images have been uploaded.
+5. **Present the placement map and all generated prompts, then stop.**
+
+> Image prompts complete — [N] images for Dispatch №NNN. Generate each image using your preferred image generation tool, naming files `NNN-01.png`, `NNN-02.png`, etc. (dispatch number + image sequence). Upload the results to this Claude Design project, then say "continue" to build the deck.
 
 ### Pass 2 — Full deck build
 
-1. **Confirm image uploads.** Check that the uploaded filenames match the batch. Note any missing images (those illustration slides will render with a dark placeholder box and a note).
+1. **Confirm image uploads.** Check that the uploaded filenames match the placement map (`NNN-01.png`, `NNN-02.png`, etc.). Note any missing images — those positions will render with a dark placeholder. Do not halt.
 
 2. **Build scene-header slides.** One per scene, in order. Kicker text from the scene label. Format: `DISPATCH №NNN · [SCENE NAME IN CAPS]`.
 
 3. **Build beat slides in order.** For each beat:
    - Apply the beat's type template (CSS skeletons in `references/beat-types.md`)
-   - For illustration beats: reference the uploaded image by filename; add text overlay if the element note includes text landing over the image
    - For refrain beats: apply the inverted-color treatment
    - For stamp/hero-number beats: apply the typography template
+   - For beats with abstract visual elements (diagrams, charts, bars, icons): render as HTML/CSS/SVG inline — no image file needed
+   - For **backdrop beats** (beats covered by an image from the placement map): display the image as a full-bleed background `<img>`, add the beat's typographic element as an absolutely-positioned HTML overlay
+
+4. **Insert standalone image slides** at the positions in the placement map marked as standalone. Each is a full-bleed `<div class="slide image-moment">` with the uploaded file referenced by filename.
 
 4. **Write the complete HTML deck.** One file: `dispatch-NNN.html`. Structure:
 
@@ -347,18 +357,16 @@ Apply the typing rule from Beat Type Taxonomy. Produce a brief inventory:
 ```
 Beat inventory — Dispatch №006 (102 beats across 10 scenes):
   scene-header: 10 (generated)
-  stamp: 38
+  stamp: 40
   hero-number: 14
   refrain: 2
-  illustration: 38
-  Total slides: 112
+  [abstract visual / HTML+CSS]: 36
+  Total beat slides: 112
 ```
 
-If illustration count is 0, skip Pass 1 entirely and proceed to Pass 2.
+### 3. Pass 1 — narrative image placement and prompts
 
-### 3. Pass 1 — image batch
-
-For every illustration beat, write one numbered image prompt (see Two-Pass Workflow §Pass 1 for format). Present the batch and the Pass 1 gate prompt. Stop.
+Read the full narration as a story. Identify 4-10 image moments (see Two-Pass Workflow §Pass 1 for the full placement logic). Invoke `ai-image-prompts` in Content Illustration Mode for each moment. Present the placement map and all generated prompts. Stop and wait for image uploads.
 
 ### 4. Pass 2 — deck build
 
