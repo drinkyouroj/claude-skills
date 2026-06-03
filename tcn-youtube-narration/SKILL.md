@@ -132,19 +132,19 @@ Read the article and pick **5-8 from this menu** by asking *which of these does 
 
 If the article has a refrain candidate (a single sentence the article repeats or implies repeatedly), place it across 2-3 middle slides and mark each occurrence as `[REFRAIN]` in the Script Notes footer.
 
-### Visible-text budget (per slide)
+### Per-beat rule
 
-Each slide is a small-screen object first. The downstream `tcn-youtube-slideshow` skill must produce a deck that's readable at thumbnail playback (~240px wide on a phone) and that works across 16:9, 9:16, and 1:1 aspect ratios from one HTML source. To make that possible, the *narration itself* paces around what will be visible on screen.
+Each beat carries **one visual element**. The `element:` note in the beat markup describes exactly what lands on screen when that beat fires.
 
-**The rule:** for each slide, identify what would actually render on the slide visual — the kicker, the headline/hook line, supporting bullets or one big number, source attribution if any. That visible content must stay **≤25 words total**, OR **one hero number plus ≤15 supporting words**. The spoken narration around it can be longer (a slide's spoken portion is typically 60-90 words ≈ 25-40 sec); the budget applies only to what would be lifted onto the slide as visible text.
+**The rule:** one `element:` note = one thing on screen. If a note describes two independent things appearing simultaneously, it is two beats. An overlay (e.g. "$400,000 lands over the left figure") counts as one element — the illustration context is already established by an earlier beat.
 
 **Practical effect:**
 
-- A Receipt slide with five numbers becomes two slides (e.g., `THE RECEIPT · UNIT ECONOMICS` and `THE RECEIPT · HIP-143`), each carrying ≤3 numbers visually.
-- A Frame slide with a four-part argument becomes a Frame slide (the framing line) followed by a Stakes or Twist slide (the consequences) — instead of one dense slide that tries to do both.
-- A Verbatim quote longer than ~25 words gets trimmed to its sharpest clause for the visual; the full quote stays in the spoken narration.
+- A Receipt scene with five numbers becomes five beats — one number per beat, each on screen for ~3 seconds.
+- A Frame scene with a four-part argument becomes four beats — one part per beat.
+- A Verbatim quote is one beat: the quote (or its sharpest clause) is the element.
 
-If the visible budget can't be met by re-pacing — e.g., a chart that genuinely needs eight labels — flag it in the Script Notes footer under a `**Visual density flags:**` bullet so the slideshow skill knows to plan a panel-split for that slide specifically. Panel-splits at the visual layer are a last resort; re-pacing at narration time is the cleaner fix.
+There is no word-count budget at the beat level — the `element:` note is inherently one thing.
 
 ### Outro (always 2 scenes, 30-45 sec)
 
@@ -242,15 +242,16 @@ The `---` between scenes is intentional. Timing annotations (`[stop — let it s
 ## Script Notes
 
 **Word count:** [N]
-**Estimated runtime:** [M]:[SS] at ~140 wpm (TCN-natural pace)
+**Beat count:** [N] across [M] scenes
+**Estimated runtime:** [M]:[SS] at ~140 wpm (TCN-natural pace) + ~0.4s × [beat count] beat-stops
 **Voice register:** [N]/10 (Hank-Vox blend) — verified against workspace/core/anti-ai-writing-style.md
 
 **Refrain markers (read slow each time):**
-- "[refrain line]" (Slides [list], callback in Slide [N])
+- "[refrain line]" (Scene [NN] / B[N], callback at Scene [NN] / B[N])
 
 **Breath / pacing cues:**
-- Slide [NN]: [cue, e.g., "hold the silence after 'Vibes.' for ~1 second"]
-- Slide [NN]: [cue]
+- Scene [NN] / B[N]: [cue, e.g., "hold the silence after 'Vibes.' for ~1 second"]
+- Scene [NN] / B[N]: [cue]
 
 **Supersedence (if the article has fact-corrections post-narration):**
 - (none on this pass — Script Notes block surfaces corrections when present)
@@ -261,15 +262,12 @@ The `---` between scenes is intentional. Timing annotations (`[stop — let it s
 **Refrain candidate** (for slideshow skill downstream use):
 - [the refrain line, if any]
 
-**Cuts from the article** (what we deliberately did not cover, for Tease slide reference):
+**Cuts from the article** (what we deliberately did not cover, for Tease scene reference):
 - [bulleted list of major article sections not in the video]
 
-**Visual density flags** (for slideshow skill — slides that will need a panel-split):
-- Slide [NN]: [reason, e.g., "chart needs 8 axis labels", "Verbatim quote 47 words"]
-- (none on this pass — narration paced within ≤25 visible-words/slide budget)
 ```
 
-The "Cold-open candidate," "Refrain candidate," "Cuts from the article," and "Visual density flags" fields are **forward-compat hooks** the slideshow + title + thumbnail skills will read later. They cost nothing to produce now and save work downstream. The Visual density flags field is the explicit handoff to `tcn-youtube-slideshow` for slides that should panel-split at the visual layer.
+The "Cold-open candidate," "Refrain candidate," and "Cuts from the article" fields are **forward-compat hooks** the slideshow + title + thumbnail skills will read later. They cost nothing to produce now and save work downstream.
 
 ---
 
@@ -303,7 +301,7 @@ If the article repeats or implies a single load-bearing sentence, mark it as a r
 
 Apply voice calibration (dial 6-7, Hank-Vox blend) and spoken-word adaptations (sentence-length cap, no em-dashes, no subordinate-clause stacks, one-word landings, numbers spelled out). Mark candidate refrain lines as `[REFRAIN]`.
 
-For each slide, mentally identify the *visible* subset — the kicker, headline/hook line, supporting bullets or hero number, attribution. Hold that subset to ≤25 words (or one hero number + ≤15 supporting words). If a slide can't meet the budget by re-pacing — e.g., a chart with eight required axis labels, a Verbatim quote that's irreducible — record the slide number under `**Visual density flags**` in the Script Notes footer so the slideshow skill can plan a panel-split. Re-pace at the narration layer first; flag for visual split only as a last resort.
+For each scene, break the spoken content into beats. Each beat is one spoken unit paired with one `element:` note describing a single on-screen visual. Write beats in order, applying timing annotations (`[stop — let it sit]`, `[hold ~1.5s]`, `[REFRAIN]`) where the delivery calls for them. Aim for 8-12 beats per scene; scenes shorter than 5 beats usually need more granularity, scenes longer than 15 beats should be split into two scenes with distinct sub-labels.
 
 ### 8. Compose the Script Notes footer
 
@@ -330,6 +328,7 @@ Use the gate prompt from the Inputs and Outputs section. Wait for approval or re
 - **Voice canonical file missing** — apply the degraded-mode fallback used by `tcn-headline`: flag explicitly to the user, skip voice-aware work (no AI-tells cross-check, no banned-vocabulary substitutions), but continue with the structural work this skill can still do. Do NOT fall back to generic register (per the elasticity-bug failure mode documented in `tcn-headline`).
 - **Article too short for a 5-7 min trailer** (less than ~800 words article-side) — surface to user: "this piece is short enough that the video would cover most of it. Confirm you want a trailer (with curiosity-gap funnel) or a near-full read-through?" Let user override.
 - **Cannot pace to 8-12 scenes** — if the script lands at <8 scenes (too compressed) or >12 scenes (too sprawling), surface to user. <8 usually means the article is too thin for video. >12 usually means the cold-open angle isn't narrow enough. Don't silently exceed; ask the user whether to re-pick the hook or to accept the count.
+- **Beat count outside 80-120** — if total beats land under 80 (scenes too coarse) or over 120 (scenes too granular), surface to user with the actual count. Under 80: ask whether to add more granularity to body scenes. Over 120: ask whether to merge closely related beats.
 - **More than ~3 visual density flags** — narration is the wrong place to be visually dense. If 3+ slides need a panel-split flag, the body menu picked too few categories or the chosen sub-labels are too broad. Re-pick before finalizing.
 - **No obvious hook angle** (rare) — present 2-3 candidate cold-open frames and ask the user to pick.
 - **Fact-check report has flagged unresolved items** — surface those before drafting. A trailer can't safely include claims the fact-check skill flagged. Override only if the user explicitly accepts the editorial risk.
