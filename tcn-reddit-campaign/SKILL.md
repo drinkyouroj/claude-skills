@@ -97,11 +97,13 @@ No drafting unless asked.
 
 ## Mode 3 — Build standing in a sub
 Given a named sub, read/refresh its dossier, then produce a deeper warming plan (genuine participation
-ideas grounded in current threads) to move it Locked → Ready. Record progress in `targets.md` (create it if absent).
+ideas grounded in current threads) to move it Locked → Ready. Record progress in `targets.md` (create
+it if absent) — one row per warmed sub: `| sub | current karma | gate to clear | last warming action | last updated |`.
 
 ## Fallbacks
 - Missing `10-final.md` and no draft file in the slug folder → ask for pasted text; continue.
 - Chrome unavailable → ask user to paste rules + karma; continue.
+- `audience-profiles` unavailable → use unaided knowledge of the Marcus persona; note the degrade (skip-not-halt).
 - Ambiguous rules → classify **Risky**, surface the ambiguity, never auto-upgrade to Ready.
 - Missing voice anchor file → skip AI-tell pass, keep structural output; note the skip.
 - Sub private/banned/not found → **No-go** with reason; no draft.
@@ -116,7 +118,9 @@ ideas grounded in current threads) to move it Locked → Ready. Record progress 
 - Submitting anything to Reddit (the user does this manually — by hard constraint).
 
 ## Related skills
-- `audience-profiles` — the Marcus persona that seeds discovery.
+- `audience-profiles` — the Marcus persona that seeds discovery. Invoke it via the Skill tool (or read
+  `audience-profiles/references/marcus-profile.md`); if unavailable, fall back to unaided knowledge of
+  the Marcus persona (skip-not-halt) and note it.
 - `workspace/core/anti-ai-writing-style.md` — the canonical voice anchor (shared across the ecosystem).
 - Future: callable as a post-publish step from `tcn-content-plan` / `tcn-article-builder`. Standalone today.
 

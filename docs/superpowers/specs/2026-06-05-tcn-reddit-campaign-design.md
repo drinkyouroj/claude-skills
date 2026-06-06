@@ -159,11 +159,12 @@ verdict per sub: Ready / Locked / Risky / No-go  (+ cooldown check)
 ---
 sub: r/<name>
 last_refreshed: YYYY-MM-DD
-self_promo_policy: strict | promo-friendly | discussion-heavy | promo-thread | banned
+self_promo_policy: strict | promo-friendly | discussion-heavy | promo-thread | banned | unknown
 karma_gate: <number or unknown>
+karma_gate_type: comment | post | combined | unknown
 age_gate_days: <number or unknown>
-flair_required: yes | no | <which>
-link_policy: link-post | text+comment | either
+flair_required: no | "<comma-list of flairs>"   # 'no' = none; a quoted list = required, pick one
+link_policy: link-post | text+comment | either | text-only
 best_time_notes: <freeform>
 ---
 
@@ -182,7 +183,7 @@ best_time_notes: <freeform>
 ```
 
 ### 8.3 Targets — `targets.md` (optional)
-Standing subs actively being warmed (Mode 3 output): sub, current karma there, gate to clear, last warming action.
+Standing subs actively being warmed (Mode 3 output). One row per sub: `| sub | current karma | gate to clear | last warming action | last updated |`.
 
 ---
 

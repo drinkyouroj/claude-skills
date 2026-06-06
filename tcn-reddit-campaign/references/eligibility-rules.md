@@ -32,7 +32,7 @@ stale) — not by the verdict rules below.
 ```
 1.  self_promo_policy == banned                                  → No-go   ("self-promo prohibited")
 2.  link_policy == text-only                                     → No-go   ("links banned even in comments — can't share the piece; use Mode 3 to build karma")
-3.  posts_today >= MAX_SUBS_PER_DAY                              → Risky   ("daily burst cap reached — defer to tomorrow")
+3.  posts_today >= MAX_SUBS_PER_DAY                              → No-go   ("daily burst cap reached — defer to tomorrow; no draft today")
 4.  last_posted_to_sub_days_ago != never
        AND last_posted_to_sub_days_ago < COOLDOWN_DAYS          → No-go   ("on cooldown, N days left")
 5.  age_gate_days known AND account_age_days < age_gate_days     → Locked  ("account too young: need X days")
