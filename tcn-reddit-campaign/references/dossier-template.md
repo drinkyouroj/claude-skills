@@ -1,7 +1,7 @@
 # Subreddit Dossier Schema
 
 A dossier is the cached, ground-truthed record for a single subreddit. The skill writes one
-per sub at `…/workspace/reddit-campaign/dossiers/r-<sub>.md` and reuses it across articles.
+per sub at `~/Documents/substack-research/Substack Research/workspace/reddit-campaign/dossiers/r-<sub>.md` and reuses it across articles.
 Refresh a dossier (re-read the live rules via Chrome) when `last_refreshed` is older than the
 freshness window (see `eligibility-rules.md` for the window).
 
