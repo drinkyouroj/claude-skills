@@ -6,7 +6,7 @@ Edit this file directly when banned-list refinements, structural patterns, or an
 
 ## Why a Separate File from Thumbnail Headlines
 
-Thumbnail in-image headlines (`../tcn-youtube-thumbnail/references/thumbnail-headline-patterns.md`) and YouTube titles are two different rhetorical objects:
+Thumbnail in-image headlines (`../../tcn-youtube-thumbnail/references/thumbnail-headline-patterns.md`) and YouTube titles are two different rhetorical objects:
 
 - **Thumbnail headline** lives *inside* the image. 3–6 words. Visual stop-element. Read in a fraction of a second of scrolling.
 - **Title** lives *beside* the thumbnail in the feed. 8–14 words. Search-indexed metadata. Truncated to ~55 chars on mobile, expandable to ~90 on desktop, hard-capped at 100.
@@ -240,7 +240,7 @@ Examples of title candidates that violate criteria, with the reason. Educational
 At drafting time (process step 5, SKILL.md §6), the skill:
 
 1. Loads this file's contents into its drafting context.
-2. Loads the inherited bans by reference from `../tcn-youtube-thumbnail/references/thumbnail-headline-patterns.md`.
+2. Loads the inherited bans by reference from `../../tcn-youtube-thumbnail/references/thumbnail-headline-patterns.md`.
 3. Extracts the cold-open candidate / first ~30 seconds of transcript, the dispatch concept, the thumbnail in-image headline (if present), and any concrete anchors.
 4. Drafts 3 candidates following the two-part-stop pattern, each using a different mechanism from the taxonomy above.
 5. Filters candidates against the inherited banned-word, banned-template, and anti-AI-tell lists, and against the title-specific bans in this file.

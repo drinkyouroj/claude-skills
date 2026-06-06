@@ -6,7 +6,7 @@ Living reference for `tcn-youtube-description`. Block-by-block decision rules, t
 
 ## The Audit-Standard mechanism (description-only)
 
-A sixth mechanism specific to the description hook surface, added to the five inherited from `../tcn-youtube-title/references/title-patterns.md`.
+A sixth mechanism specific to the description hook surface, added to the five inherited from `../../tcn-youtube-title/references/title-patterns.md`.
 
 **Definition.** The hook proposes a known industry, regulatory, or institutional standard that the subject failed to meet. The first half names the standard; the second half names the gap.
 
