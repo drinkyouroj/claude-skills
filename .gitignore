@@ -8,8 +8,10 @@
 *.tar.gz
 
 # Claude Code local machine config — not shared
-.claude/settings.local.json
-.claude/skills/
+.claude/
+
+# Workspace scratch dirs (debug artifacts, eval runs)
+*-workspace/
 
 # Generated CLAUDE.md files inside skill subdirectories
 CLAUDE.md
