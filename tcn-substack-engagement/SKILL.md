@@ -83,8 +83,10 @@ local dedup ledger.
    fallback signal for what was posted if the live Notes read is thin). Live reads win on conflict. See
    `references/dedup-and-targeting.md`.
 4. **Live discovery.** Search the day's topic (Top + Recent) and scan the feed for who is actually
-   posting the beat now. Treat the plan's named Tier-1 list as aspirational seeds, not a checklist —
-   verify handles. Rank per `references/dedup-and-targeting.md`.
+   posting the beat now. Treat the plan's named Tier-1 list as aspirational seeds, not a checklist.
+   Sensor-verify every handle — comment, restack, AND follow — is an *active author account* on the
+   profile before filing it; a name-match in search results is not verification (see
+   `references/dedup-and-targeting.md` → Handle verification). Rank per `references/dedup-and-targeting.md`.
 5. **Target-confirm gate (human checkpoint).** Present the ranked list as *live poster → which plan
    angle → the note permalink*, plus the proposed follow list (~3–5). The user prunes. Draft **only the
    survivors.**
@@ -145,4 +147,4 @@ exact field labels and header format (including the `**Date:**` line) — use it
 ## References
 - `references/browser-recipe.md` — the read-only Chrome interaction recipe + the forbidden-actions list.
 - `references/dedup-and-targeting.md` — four-level dedup, spent-lane pivot, aspirational-Tier-1 caveat,
-  ranking + follow-selection heuristics, tunable defaults.
+  handle verification (hard gate before filing), ranking + follow-selection heuristics, tunable defaults.

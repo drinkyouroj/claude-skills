@@ -32,8 +32,25 @@ for the flagship out of all comments.
 ## Aspirational-Tier-1 caveat
 The plan's named Tier-1 accounts are **seeds, not a checklist.** Several are frequently not posting the
 day's beat, and some handles are wrong (e.g., the Substack handle `@noahsmith` is a CS academic with a
-handful of subscribers, **not** Noahpinion). Verify every handle live. The live, on-topic conversation
-is usually among mid-tier writers surfaced by a topic search — weight toward whoever is actually in it.
+handful of subscribers, **not** Noahpinion). Verify every handle live (see **Handle verification** below
+— a handle that merely resolves is not enough). The live, on-topic conversation is usually among mid-tier
+writers surfaced by a topic search — weight toward whoever is actually in it.
+
+## Handle verification (hard gate before filing any target or follow)
+Every handle that lands on the worksheet — comment target, restack target, or follow — must be
+sensor-verified first. Verification means a read of the profile confirms it is an **active author on the
+beat**:
+- It has **published** Notes/posts (an Activity feed with real content), not an empty feed.
+- It shows a real activity/subscriber signal, not a dormant **reader account** (the tells: "hasn't
+  published anything yet," a handful of reads, no Notes).
+- Display name + handle + content all match the person you mean. Public figures often have a name-squat or
+  a personal lurker account that is **not** their author presence — their real reach may live on another
+  platform entirely.
+
+A name surfacing in a topic search, or a handle that merely resolves to a page, is **not** verification —
+that is exactly what produced a filed follow to an empty account. If the profile cannot be verified, do
+not file it. Fewer verified targets beat a padded list with a dead one; closing a thin day at one verified
+follow is a clean day.
 
 ## Comment-target ranking (highest first)
 1. **In the live conversation** — actively posting the beat now (Recent tab / recent feed).
@@ -50,6 +67,9 @@ was found. Do not pad with weak targets.
 Candidate pool (~`FOLLOW_COUNT`/day), deduped against accounts the user already follows:
 1. Authors engaged with today (comment or restack targets) the user does not already follow.
 2. Live-topic discoveries on the beat that fit the audience but were not selected as comment targets.
+
+Every candidate clears **Handle verification** before it lands: an empty or reader account trains no
+algorithm and earns no reciprocity, so an unverified follow is worse than none.
 
 Follows always land on the worksheet for the user to click — never auto-clicked (hard constraint 1).
 Each follow ships with a one-line rationale tying it to building the audience-aligned algorithm.
