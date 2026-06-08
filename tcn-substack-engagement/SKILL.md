@@ -74,7 +74,8 @@ local dedup ledger.
    see Fallbacks.
 2. **Load context.** Parse the plan's **Engagement** section (comment targets + angles, restack targets
    + addenda), the `duplication_audit` frontmatter (`spent_this_week`, `fresh_today`), and the hold
-   list. Load the voice anchor. Read yesterday's worksheet in `workspace/engagement/` if present.
+   list. Load the voice anchor. Read prior worksheets from the last `LEDGER_LOOKBACK_DAYS` days in
+   `workspace/engagement/` if present (the local dedup ledger).
 3. **Dedup read (hard gate).** Read Likes & Replies; read the user's own Notes published today; build the
    **spent set** at four levels (note / author / angle / own-published-framing). Merge two supplements:
    the prior worksheet's targets, and the plan note's recommended default pairing / `fresh_today` (a
@@ -104,7 +105,8 @@ Then three checklists. **Each comment item:** `- [ ]` · target author + handle 
 note's gist (1 line) · the paste-ready comment text · "why this target" (1 line: which plan angle, why
 unspent). **Each restack item:** `- [ ]` · note permalink + author · the note's gist (1 line) · the
 paste-ready one-sentence addendum. **Each follow item:** `- [ ]` · account name + profile link ·
-rationale (1 line). See `workspace/engagement/README.md` for the exact template.
+rationale (1 line). The README template at `workspace/engagement/README.md` is authoritative for the
+exact field labels and header format (including the `**Date:**` line) — use its labels verbatim.
 
 ## Fallbacks (skip-not-halt unless a hard gate)
 - **No plan note for today** → offer to invoke `tcn-content-plan` (Mode 1), or take a topic from the

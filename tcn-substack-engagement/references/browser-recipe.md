@@ -20,8 +20,9 @@ note:
 1. Use `find` to get the element ref for the note's text.
 2. Open its permalink by clicking the **note body** (read-only navigation), or read the body in place.
 3. Capture the permalink URL for the worksheet (the user needs it to act).
-Reading reply context: opening the comment view is fine (read-only). The reply composer sometimes needs
-an in-modal scroll to reveal fields — only ever to *observe*, never to type.
+Reading reply context: opening the comment view to read existing replies is fine (read-only). **Never
+open the reply composer.** If reply content is not fully visible, scroll the comment *thread* view (not a
+composer) to read it.
 
 ## 2. External dedup read — Likes & Replies
 - Navigate to `substack.com/@drinkyouroj/likes`.
