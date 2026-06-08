@@ -73,8 +73,9 @@ local dedup ledger.
    `~/Documents/substack-research/Substack Research/workspace/notes/YYYY-MM-DD-*-options.md`. If none,
    see Fallbacks.
 2. **Load context.** Parse the plan's **Engagement** section (comment targets + angles, restack targets
-   + addenda), the `duplication_audit` frontmatter (`spent_this_week`, `fresh_today`), and the hold
-   list. Load the voice anchor. Read prior worksheets from the last `LEDGER_LOOKBACK_DAYS` days in
+   + addenda), the `duplication_audit` frontmatter (`spent_this_week`, `fresh_today`), and the hold list
+   (it lives in the `live_news` frontmatter under a 'HELD for the … flagship' entry and/or inline in the
+   Engagement preamble). Load the voice anchor. Read prior worksheets from the last `LEDGER_LOOKBACK_DAYS` days in
    `workspace/engagement/` if present (the local dedup ledger).
 3. **Dedup read (hard gate).** Read Likes & Replies; read the user's own Notes published today; build the
    **spent set** at four levels (note / author / angle / own-published-framing). Merge two supplements:
