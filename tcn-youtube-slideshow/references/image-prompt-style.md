@@ -17,11 +17,15 @@ outside the slate palette. No readable text in the image — text is added as HT
 overlays in the deck. No faces or recognizable real people — silhouettes and geometric
 figure abstraction only. No brand logos or company marks.
 
-**Aspect ratio: 16:9 (1920×1080) by default.** This is the standard for full-bleed
-slides — backdrop and standalone image moments. Generate at 16:9 unless the image is
-not fullscreen (e.g. a small inline illustration within a slide, or a portrait-format
-figure). Leave compositional breathing room — backdrop images will have typography
-overlaid on top of them.
+**Aspect ratio: 1:1 (1080×1080) by default.** The deck records on a square canvas (the deck
+element is min(100vw,100vh)) and full-bleed images are placed with object-fit: cover, so a 16:9
+source would be center-cropped to the square and lose ~43% of its width and any composed edge
+margins. Generate full-bleed backdrop and standalone image moments at 1:1. Compose for the
+square: keep the focal subject centered or in the upper portion and leave the lower-center
+calmer, because backdrop overlay text sits bottom-center. Use a non-square ratio only when the
+image is not full-bleed (a small inline illustration within a slide, or a portrait-format
+figure). The finished video reaches 16:9 by compositing this 1:1 deck beside the host's
+talking-head cam — that widening happens outside the deck, not in the source image.
 ```
 
 ---

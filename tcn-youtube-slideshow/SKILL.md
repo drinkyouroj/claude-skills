@@ -134,12 +134,12 @@ Images are scarce and thematic — not beat-matched. The goal is 4-10 images per
 ```
 IMAGE PLACEMENT — Dispatch №NNN (N images)
 
-[IMAGE 1] Scenes 01-02 · Backdrop · 16:9
+[IMAGE 1] Scenes 01-02 · Backdrop · 1:1
 Narrative: two workers at the Samsung plant, same shift, hundred yards apart
 Covers: S01 B1-B4 (image persists; stamps and numbers overlay it)
 Usage: backdrop — typography beats layer over this image
 
-[IMAGE 2] Scene 03 · Standalone + Backdrop · 16:9
+[IMAGE 2] Scene 03 · Standalone + Backdrop · 1:1
 Narrative: the chokepoint — the memory chip at the center of the boom
 Covers: S03 B1 (standalone), B2-B8 (backdrop behind receipt beats)
 Usage: mixed
@@ -147,7 +147,7 @@ Usage: mixed
 ...
 ```
 
-**Aspect ratio in the placement map:** mark each image as `16:9` (default for all full-bleed uses) or the specific ratio if it is not fullscreen. Pass this ratio to `ai-image-prompts` as part of the remix step — full guidance in `references/image-prompt-style.md`.
+**Aspect ratio in the placement map:** mark each full-bleed image as `1:1` (1080×1080) — the deck records on a square canvas (`min(100vw, 100vh)`) and places full-bleed images with `object-fit: cover`, so a 16:9 source would be center-cropped to the square and lose ~43% of its width. The finished video reaches 16:9 by compositing this 1:1 deck beside the host's talking-head cam — that widening happens outside the deck, not in the source image. Use a non-square ratio only for an image that is not full-bleed (a small inline illustration, or a portrait-format figure). Pass this ratio to `ai-image-prompts` as part of the remix step — full guidance in `references/image-prompt-style.md`.
 
 4. **Generate an image prompt for each moment using the `ai-image-prompts` skill.** For each image in the placement map, invoke `ai-image-prompts` in Content Illustration Mode:
    - Provide the narration text for the relevant beats as the content input
@@ -345,10 +345,10 @@ The output is `dispatch-NNN.html` — a single self-contained HTML file produced
 
 Read the uploaded `youtube-narration.md`. Extract:
 - Dispatch number (from title block `## The Civic Node · Dispatch №NNN`)
-- Scene labels and beat count per scene
+- Scene markers and beat count per scene. **Scene markers appear as `[SCENE NN — TITLE]`.** Older decks (dispatches 002-006) labeled them `[SLIDE NN — TITLE]` — treat that as a scene marker too; it never meant a rendered slide. Either way, this skill renders **one slide per beat** plus one scene-header per scene, and assigns its own slide IDs (`sNN-header`, `sNN-bMM`); it does not reuse the narration's scene numbers as slide numbers.
 - Each beat's element note and spoken text
 - Refrain markers (`[REFRAIN]`)
-- Script Notes footer (cold-open candidate, etc.)
+- Script Notes footer (cold-open candidate, refrain candidate / motifs, etc.)
 
 Halt if the file is missing or the beat markup convention (`▸ **B1** · *element:*`) is not present.
 
