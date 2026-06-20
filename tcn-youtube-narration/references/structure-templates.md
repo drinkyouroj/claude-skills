@@ -1,6 +1,6 @@
 # Structure Templates — tcn-youtube-narration
 
-*Note: This file was written for the pre-beat-segmented (9-12-slide, ≤25-visible-words) format superseded 2026-06-03. For current format conventions, see the beat markup convention in `SKILL.md` §Output Format and the Script Notes footer template in `SKILL.md` §Output Format. The content below is preserved for reference.*
+*Note: This file was written for the pre-beat-segmented (9-12-slide, ≤25-visible-words) format superseded 2026-06-03. For current format conventions, see the beat markup convention in `SKILL.md` §Output Format and the Script Notes footer template in `SKILL.md` §Output Format. The content below is preserved for reference. The `[SLIDE NN]` markers below are also superseded: scenes are now labeled `[SCENE NN — TITLE]` (the narration owns scenes + beats; the slideshow owns the one-slide-per-beat rendering).*
 
 Canonical templates for slide markup, the three narration zones (Cold Open / Body / Outro), the Script Notes footer, and the title block. Loaded at runtime when instantiating a slide. Skim, do not memorize.
 

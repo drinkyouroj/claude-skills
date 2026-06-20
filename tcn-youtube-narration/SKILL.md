@@ -9,7 +9,7 @@ description: Step 1 of the Civic Node YouTube production workflow — converts a
 
 Converts a finished Civic Node article draft into a 5-7 minute trailer-format YouTube narration script (700-1,050 words at ~140 wpm) with beat markers and a Script Notes footer. The output is structured as a trailer-funnel: it teases the article's strongest hook, names what the video deliberately does not cover, and routes viewers to read the full piece on Substack. The register sits at a 6-7 on a 1-10 dial — recognizably TCN-Marcus, but sharper, more colloquial, and tuned for a broader YouTube audience than the Substack reader base.
 
-**Beat pacing target: 8-12 scenes, 80-120 beats total**, calibrated for the downstream constant-motion slideshow (see `tcn-youtube-slideshow`). Same 5-7 min runtime; each beat carries one visual element, producing a visual change every ~3-4 seconds on average (~3.8s in the dispatch-006 reference). Going under 8 scenes usually means the piece is too compressed for video; going over 12 scenes usually means the cold-open angle isn't narrow enough — too many distinct sub-arguments competing for screen time. Going over 120 beats usually means individual scenes are over-granular; scenes typically run 8-12 beats.
+**Beat pacing target: 8-12 scenes, ~100-130 beats total**, calibrated for the downstream constant-motion slideshow (see `tcn-youtube-slideshow`), which renders **one slide per beat** — so beat granularity IS the on-screen motion. Same 5-7 min runtime. The motion target is a visual change every ~2-3 seconds, achieved by the **one-clause-per-beat rule** (see Per-beat rule) plus **evolving visual motifs** (see Evolving visual motifs) — never by within-slide animation. Going under 8 scenes usually means the piece is too compressed for video; going over 12 scenes usually means the cold-open angle isn't narrow enough. Landing under ~100 beats usually means beats are still carrying whole sentences instead of single clauses — the motion bug that makes a deck feel like a shuffle of static cards instead of constant motion. The dispatch-006 reference runs 109 beats across 11 scenes.
 
 ---
 
@@ -77,11 +77,14 @@ The full ecosystem diagram lives in the design spec at `docs/superpowers/specs/2
 - **Length override** — defaults to 5-7 min target. Accepts "make it 4 min" or "make it 8 min"; recalibrate compression.
 - **Steering** — free-text guidance like "lean into the historical-echo angle," "keep the McDonald's analogy as the hook," "no Verbatim slide this time."
 
-### Output artifact
+### Output artifacts
 
-- **File:** `workspace/drafts/<slug>/youtube-narration.md`
-- **Contents:** Title block (article title + dispatch number + scene/beat count + format tag), 8-12 scene blocks in beat-segmented markup, Script Notes footer.
-- **Does NOT contain:** title options, YouTube description, chapter timestamps, tags, thumbnail prompt — those come from separate skills.
+This skill writes **two** files on every run:
+
+- **Primary — narration script:** `workspace/drafts/<slug>/youtube-narration.md`
+  - **Contents:** Title block (article title + dispatch number + scene/beat count + format tag), 8-12 scene blocks in beat-segmented markup, Script Notes footer.
+  - **Does NOT contain:** title options, YouTube description, chapter timestamps, tags, thumbnail prompt — those come from separate skills.
+- **Ledger breadcrumb:** `workspace/dispatch-narration/dispatch-<NNN>-<slug>.md` — a lightweight index note written on the same pass that finalizes the script (process step 11). It records the dispatch number, slug, title, and a pointer back to the narration file. Its only job is to keep dispatch-number detection (step 9) in sync: the breadcrumb lands in the exact folder step 9 scans, so the next run counts this dispatch instead of re-suggesting a number that already shipped. Skipping this write is precisely how №005 and №006 went undetected — their scripts landed in `workspace/drafts/` but nothing was ever written back to `workspace/dispatch-narration/`, so detection froze at the last hand-placed dispatch (004).
 
 ### Gate prompt presented to user
 
@@ -93,16 +96,16 @@ The full ecosystem diagram lives in the design spec at `docs/superpowers/specs/2
 
 ## The Narration Structure
 
-Three zones, **8-12 scenes, 80-120 beats total**, 700-1,050 words at ~140 wpm. Each beat carries **one visual element** — the spoken narration can be longer, but the on-screen element is always exactly one thing. The downstream `tcn-youtube-slideshow` maps each beat to one static slide.
+Three zones, **8-12 scenes, ~100-130 beats total**, 700-1,050 words at ~140 wpm. Each beat is **one short spoken clause + one visual element** (see the Per-beat rule). The downstream `tcn-youtube-slideshow` renders one slide per beat, so the beat count is the motion budget — a beat that carries a whole sentence is a slide that sits static while you keep talking.
 
 ### Cold Open (always 2 scenes, 45-60 sec)
 
 **Scene 1 — Hook.** A relatable analogy, surprising number, or "wait, what?" moment. No setup. No TCN-specific jargon. Earns the next 30 seconds of attention.
 
-Example (Helium piece, calibrated to register 7):
+Example (Helium piece, calibrated to register 7 — shown here unsegmented for voice; the real script breaks this into one-clause beats):
 
 ```
-**[SLIDE 01 — HOOK]**
+**[SCENE 01 — HOOK]**
 
 Buying a McDonald's franchise comes with a 200-page disclosure document.
 Federal law requires it. The pricing. The exit terms. What happens if
@@ -134,17 +137,39 @@ If the article has a refrain candidate (a single sentence the article repeats or
 
 ### Per-beat rule
 
-Each beat carries **one visual element**. The `element:` note in the beat markup describes exactly what lands on screen when that beat fires.
+Each beat is **one short spoken clause paired with one visual element**. Both halves are single: one clause out of the mouth, one thing landing on screen. This is the rule that produces constant motion. The slideshow renders one slide per beat, so a beat that carries a whole multi-sentence thought is a slide that sits static for five or six seconds while you keep talking. That reads as a card, not as motion.
 
-**The rule:** one `element:` note = one thing on screen. If a note describes two independent things appearing simultaneously, it is two beats. An overlay (e.g. "$400,000 lands over the left figure") counts as one element — the illustration context is already established by an earlier beat.
+**Two-part rule:**
+1. **One `element:` note = one thing on screen.** If a note describes two independent things appearing at once, it is two beats. An overlay (e.g. "$400,000 lands over the left figure") counts as one element — the illustration context was established by an earlier beat.
+2. **One spoken clause per beat.** If the spoken unit is a full sentence whose clauses can each carry their own visual, split it across beats. Target ~3-10 spoken words per beat; a beat over ~12 words is almost always two beats wearing a trench coat.
+
+**Worked split** (the motion bug, fixed):
+
+- Chunky — 1 beat, ~5.5s static: *"Ninety-seven percent were street arrests. People pulled off sidewalks, not out of jail."*
+- Fixed — 3 beats, 3 visual changes: *"Ninety-seven percent were street arrests."* [97% lands] / *"People pulled off sidewalks."* [street icon] / *"Not out of jail."* [empty cell, crossed out]
 
 **Practical effect:**
 
-- A Receipt scene with five numbers becomes five beats — one number per beat, each on screen for ~3 seconds.
+- A Receipt scene with five numbers becomes five beats — one number per beat.
 - A Frame scene with a four-part argument becomes four beats — one part per beat.
+- A two-sentence thought becomes two-to-four beats — one clause each.
 - A Verbatim quote is one beat: the quote (or its sharpest clause) is the element.
 
-There is no word-count budget at the beat level — the `element:` note is inherently one thing.
+There is no minimum word budget — "Vibes." and "Same shift." are complete beats. The ceiling is the thing to watch: when a beat runs long, split.
+
+### Evolving visual motifs (the motion multiplier)
+
+Finer beats get you frequent cuts. **Evolving motifs** get you motion that feels continuous instead of like a shuffle of unrelated cards. A motif is a single visual element that recurs and transforms across beats — so each beat morphs from the one before instead of replacing it with a fresh card.
+
+This is the technique that makes the dispatch-006 deck read as one moving picture rather than a stack of stamps: two worker figures that light up, get numbers stamped over them, then reappear dim at the close; a valve a hand closes on early that the narrator has "no valve to grab" at the end; a question mark that forms, hangs as a refrain, and returns.
+
+**How to build them:**
+- Pick 1-3 motifs per script — usually the cold-open image, the refrain's visual, and one structural diagram (a split, a ledger, a map).
+- In the `element:` notes, describe each motif's *next state*, not a new object: "the left figure lights up" → "$400,000 lands over it" → "the figure returns, dim, far off." The slideshow reads these as one continuous transformation.
+- Bookend: plant the motif in the cold open, pay it off in the Tease/close. The valve and two-figures bookends in 006 are the model.
+- Refrains are motifs by default — identical visual treatment every time, so the recurrence is legible.
+
+Mark the primary motif(s) in the Script Notes footer under **Refrain candidate** (the slideshow uses it for rhythm planning). The `element:` note still names only *what* lands and *what state* it's in — never *how* it animates. Easing, fades, and count-ups belong to the slideshow.
 
 ### Outro (always 2 scenes, 30-45 sec)
 
@@ -217,22 +242,22 @@ The dispatch number is detected from existing dispatches in the workspace (see s
 Each scene opens with a scene label followed by its beat count. Each beat has three parts: beat number, one `element:` note, and one spoken unit ending in `[stop]`.
 
 ```markdown
-**[SLIDE NN — SCENE TITLE]** · [N] beats
+**[SCENE NN — TITLE]** · [N] beats
 
-▸ **B1** · *element: [one visual element — a stamp, a number, a phrase, or an illustration description]*
-"[spoken narration — one unit, short sentences]" **[stop]**
+▸ **B1** · *element: [one visual element — a stamp, a number, a phrase, or a motif's next state]*
+"[spoken narration — one short clause]" **[stop]**
 
 ▸ **B2** · *element: [one visual element]*
-"[spoken narration]" **[stop]**
+"[spoken narration — one short clause]" **[stop]**
 
 ---
 ```
 
 The `---` between scenes is intentional. Timing annotations (`[stop — let it sit]`, `[hold ~1.5s]`, `[REFRAIN]`) attach to the `[stop]` marker of the beat they modify.
 
-**One element per beat.** If the `element:` note describes two independent things appearing simultaneously, split into two beats. An overlay (text landing on top of an existing illustration context) counts as one element.
+**One clause + one element per beat.** See the Per-beat rule. If the `element:` note describes two independent things appearing at once, or the spoken unit packs two independently-visualizable clauses, split into two beats. An overlay (text landing on an existing illustration context) counts as one element.
 
-**`[SLIDE NN]` is the scene-level container.** The `[SLIDE NN — SCENE TITLE]` header in generated scripts matches the dispatch-006 convention — it marks a scene (multiple beats), not a single beat. Each scene header is followed by its beats (B1, B2, etc.).
+**`[SCENE NN]` is the scene container, not a slide.** Each `[SCENE NN — TITLE]` header marks a scene (multiple beats). The downstream slideshow renders **one slide per beat** plus one scene-header slide per scene — so the scene count and the on-screen slide count are different numbers, and the narration never numbers slides. (Earlier dispatches, 002-006, labeled scenes `[SLIDE NN]`; that was a misnomer the slideshow always read as a scene marker. New scripts use `[SCENE NN]`.)
 
 ### Script Notes footer (always present)
 
@@ -297,11 +322,11 @@ Read the article's argument structure and select **5-8 from the menu** (Receipt 
 
 If the article repeats or implies a single load-bearing sentence, mark it as a refrain candidate and place it across 2-3 middle slides.
 
-### 7. Draft the script slide-by-slide
+### 7. Draft the script scene-by-scene
 
 Apply voice calibration (dial 6-7, Hank-Vox blend) and spoken-word adaptations (sentence-length cap, no em-dashes, no subordinate-clause stacks, one-word landings, numbers spelled out). Mark candidate refrain lines as `[REFRAIN]`.
 
-For each scene, break the spoken content into beats. Each beat is one spoken unit paired with one `element:` note describing a single on-screen visual. Write beats in order, applying timing annotations (`[stop — let it sit]`, `[hold ~1.5s]`, `[REFRAIN]`) where the delivery calls for them. Aim for 8-12 beats per scene; scenes shorter than 5 beats usually need more granularity, scenes longer than 15 beats should be split into two scenes with distinct sub-labels.
+For each scene, break the spoken content into **one-clause beats** (see Per-beat rule): one short spoken clause + one `element:` note per beat. Establish 1-3 **evolving motifs** (see Evolving visual motifs) and write each `element:` note as the motif's next state where one applies. Write beats in order, applying timing annotations (`[stop — let it sit]`, `[hold ~1.5s]`, `[REFRAIN]`) where the delivery calls for them. Aim for ~9-14 beats per scene; a scene under 7 beats is usually still carrying whole sentences and needs finer segmentation, a scene over 16 beats should split into two with distinct sub-labels.
 
 ### 8. Compose the Script Notes footer
 
@@ -309,16 +334,48 @@ Word count, runtime estimate, pacing cues, refrain markers, cold-open candidate,
 
 ### 9. Detect dispatch number and compose title block
 
-Scan the user's dispatch-narration archive (default: `workspace/dispatch-narration/` relative to the active project root; configurable via steering input) for existing files matching `dispatch-NNN-*.md` and parse out the dispatch numbers. Suggest the next sequential integer (e.g., if `dispatch-002`, `dispatch-003`, `dispatch-004` exist, suggest `005`).
+Dispatch numbers come from **two sources that must agree**. Scan both, then take the **highest** number found across both:
 
-- If detection succeeds with high confidence, surface the suggestion to the user with a one-line confirmation: "Suggesting Dispatch №005 — confirm or override."
-- If detection fails (no existing files, ambiguous numbering, gap in sequence) **or** the user is re-recording an existing dispatch (the canonical example: the Friday 2026-05-22 re-record of dispatch-004), ask the user explicitly which dispatch number to use.
+1. **The ledger** — files matching `dispatch-NNN-*.md` in `workspace/dispatch-narration/` (default; configurable via steering input). Parse the leading `NNN`.
+2. **Shipped narration outputs** — every `youtube-narration.md` under `workspace/drafts/*/`; parse the `## The Civic Node · Dispatch №NNN` line from each.
 
-Write the number into the title block as `Dispatch №[NNN]` (zero-padded to three digits).
+Suggest the next sequential integer after the highest number found across BOTH sources. Scanning the drafts outputs as well as the ledger is the safety net: a narration ships to `workspace/drafts/<slug>/` and its ledger breadcrumb (step 11) might be missing on older dispatches, so the drafts scan guarantees detection still counts it. A missing breadcrumb can never silently freeze the counter when the drafts folder is also read.
+
+- If both sources agree, or the drafts scan is simply ahead of the ledger (the normal case before backfill), surface the suggestion with a one-line confirmation: "Suggesting Dispatch №NNN — confirm or override."
+- If the two sources **disagree in a way the max can't reconcile** — a gap in the sequence, the same number used by two different slugs, or a re-record — treat detection as low-confidence and ask the user explicitly which number to use. The canonical re-record example: the Friday 2026-05-22 re-record of dispatch-004.
+- If neither source has any files, ask the user.
+
+Write the confirmed number into the title block as `Dispatch №[NNN]` (zero-padded to three digits), and carry it to step 11 for the ledger breadcrumb.
 
 ### 10. Present to user with the standard gate prompt
 
 Use the gate prompt from the Inputs and Outputs section. Wait for approval or redirect. Do not proceed past this gate without explicit user instruction.
+
+### 11. Write the outputs and the ledger breadcrumb
+
+After the user approves at the gate, write **both** output artifacts:
+
+1. The narration script to `workspace/drafts/<slug>/youtube-narration.md`.
+2. The ledger breadcrumb to `workspace/dispatch-narration/dispatch-<NNN>-<slug>.md`, using the confirmed dispatch number from step 9.
+
+The breadcrumb is **mandatory and idempotent** — overwrite it if a note for the same dispatch+slug already exists; never create a second note for the same dispatch. This write is what keeps step 9's detection honest on the next run; skipping it is what caused №005 and №006 to go undetected. Breadcrumb format:
+
+```markdown
+---
+dispatch: NNN
+slug: <slug>
+title: "<spoken-word title from the title block>"
+narration: "workspace/drafts/<slug>/youtube-narration.md"
+created: YYYY-MM-DD
+recorded: false
+---
+
+Dispatch ledger entry. Full narration script lives at the `narration:` path above.
+This note keeps tcn-youtube-narration step 9 (dispatch-number detection) in sync — every
+narration run writes one of these into workspace/dispatch-narration/.
+```
+
+If detection in step 9 revealed drift (the ledger was behind the drafts outputs), backfill the missing `dispatch-NNN-<slug>.md` breadcrumbs for the gap dispatches in the same pass, so the ledger fully re-syncs rather than only catching up by one.
 
 ---
 
@@ -328,7 +385,8 @@ Use the gate prompt from the Inputs and Outputs section. Wait for approval or re
 - **Voice canonical file missing** — apply the degraded-mode fallback used by `tcn-headline`: flag explicitly to the user, skip voice-aware work (no AI-tells cross-check, no banned-vocabulary substitutions), but continue with the structural work this skill can still do. Do NOT fall back to generic register (per the elasticity-bug failure mode documented in `tcn-headline`).
 - **Article too short for a 5-7 min trailer** (less than ~800 words article-side) — surface to user: "this piece is short enough that the video would cover most of it. Confirm you want a trailer (with curiosity-gap funnel) or a near-full read-through?" Let user override.
 - **Cannot pace to 8-12 scenes** — if the script lands at <8 scenes (too compressed) or >12 scenes (too sprawling), surface to user. <8 usually means the article is too thin for video. >12 usually means the cold-open angle isn't narrow enough. Don't silently exceed; ask the user whether to re-pick the hook or to accept the count.
-- **Beat count outside 80-120** — if total beats land under 80 (scenes too coarse) or over 120 (scenes too granular), surface to user with the actual count. Under 80: ask whether to add more granularity to body scenes. Over 120: ask whether to merge closely related beats.
+- **Beat count outside ~100-130** — if total beats land under ~100, the beats are probably still carrying whole sentences (the motion bug) — re-segment to one clause per beat before surfacing to the user. If over ~140 (approaching the slideshow's 150-slide warning), ask whether to merge closely related beats or drop a scene. Surface the actual count either way.
+- **Dispatch-number drift (detection freezes or repeats a number)** — symptom: step 9 suggests a number that already shipped (e.g., suggests №005 when a №006 narration already exists under `workspace/drafts/`). Root cause: `workspace/dispatch-narration/` is the detection source but is NOT where narration scripts land, so the ledger freezes at the last hand-placed dispatch unless a breadcrumb is written back. This is a real, observed failure — it mis-numbered №006 and would have mis-numbered №007. The fix is built into the flow: step 9 also scans `workspace/drafts/*/youtube-narration.md` (so the max can't freeze), and step 11 writes a ledger breadcrumb every run (so the ledger self-heals). If you still see drift, backfill the missing `dispatch-NNN-<slug>.md` breadcrumbs from the drafts outputs and the counter re-syncs.
 - **No obvious hook angle** (rare) — present 2-3 candidate cold-open frames and ask the user to pick.
 - **Fact-check report has flagged unresolved items** — surface those before drafting. A trailer can't safely include claims the fact-check skill flagged. Override only if the user explicitly accepts the editorial risk.
 - **User redirects** — re-invoke the relevant step:
