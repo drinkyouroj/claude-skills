@@ -13,7 +13,7 @@ A factual claim is any assertion in the article that could be independently veri
 - **Specific numbers:** "$400," "57.2 trillion won," "900,000 wafer starts per month"
 - **Percentages:** "171% year-over-year," "a 294% increase," "57% reduction"
 - **Dates of events:** "On October 1, 2025," "In March," "by Q3 2025"
-- **Attributions:** "HP says," "Gartner projects," "Samsung posted"
+- **Attributions:** "the spokesperson says," "the report projects," "the company posted"
 - **Causal claims:** "triggered a global panic," "caused Apple to lock in deals"
 - **Quantified comparisons:** "up from 15%," "an 8.5x jump year-over-year"
 - **Specific events:** "the Stargate data center expansion was killed," "Sora was shuttered"
@@ -146,4 +146,4 @@ These should always be called out in the report, regardless of verification stat
 4. **A quote attributed to Person A that the source attributes to Person B**
 5. **A figure that appears in the article but in no available source** — may have been hallucinated during drafting
 6. **A URL that returns 404 or redirects to a different article** — dead links undermine trust
-7. **Generic domain links** (e.g., `https://www.reuters.com`) instead of specific article URLs — this signals the link was never verified
+7. **Generic domain links** (e.g., a bare `https://example.com` homepage) instead of specific article URLs — this signals the link was never verified
