@@ -23,7 +23,7 @@ description: >
 
 ## Profile resolution
 
-Resolve the active blog profile per `~/.claude/blog-profiles/_resolution-contract.md` before doing anything else. The orchestrator resolves the profile **once** and passes the resolved profile reference and `quick.*` fields (brand, domain, platform, author-voice short-form) forward to each leaf-skill invocation as a hint. Each leaf skill still self-resolves per the contract — the hint is an optimization, not a bypass.
+Resolve the active blog profile per `~/.claude/blog-profiles/_resolution-contract.md` before doing anything else. The orchestrator resolves the profile **once** and passes the resolved profile reference and `quick.*` fields (brand, domain, platform) forward to each leaf-skill invocation as a hint. Each leaf skill still self-resolves per the contract — the hint is an optimization, not a bypass.
 
 Loads: `profile.yaml` (for `paths.*`, `steps.*` overrides, and `preset`); `identity.md` (brand/platform context); the active preset (step defaults). Individual prose files (`voice.md`, `reader.md`, `templates.md`) are loaded by the leaf skills, not by this orchestrator.
 

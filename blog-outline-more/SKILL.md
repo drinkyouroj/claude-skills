@@ -1,7 +1,7 @@
 ---
 name: blog-outline-more
 description: >
-  Step 1b of the blog article workflow: expands a blog-outline bullet-point outline
+  Detailed-outline step of the blog-article-builder pipeline: expands a blog-outline bullet-point outline
   into a paragraph-level detailed outline with all facts laid out, argument flow mapped, and
   optional rhetorical device suggestions. ALWAYS invoke this skill when the user has an approved
   outline and wants to flesh it out before writing — including phrases like "flesh out the outline",
@@ -11,7 +11,7 @@ description: >
   Does NOT replace blog-draft. The user still writes every sentence.
 ---
 
-# Blog Detailed Outline Generator (Step 1b)
+# Blog Detailed Outline Generator (Detailed-outline step of the blog-article-builder pipeline)
 
 ## What This Skill Does
 
@@ -29,7 +29,7 @@ Loads: `reader.md`, `templates.md`, `voice.md`, and the active preset.
 
 ## Voice & vocabulary canonical source
 
-This skill MUST load the active profile's `voice.md` before making any voice, vocabulary, substitution, or AI-tells decision. That file is the single source of truth for the audience vocabulary list and always-gloss-on-first-use rule (§ 1), the banned-words list (§ 3A), dead phrases / transitions / engagement bait / hype language (§ 3B–§ 3E), the negative-parallelism rule (§ 3F), tribal-coded jargon and operational shibboleths (§ 3G), the dismissal-label rule (§ 3H), the vocabulary cliff rules including the meaning-preservation sub-principle (§ 3I), the closing-line abstraction rule (§ 3J), the broader AI writing patterns to avoid (§ 4), and the anti-overfitting guide (§ 5).
+This skill MUST load the active profile's `voice.md` before making any voice, vocabulary, substitution, or AI-tells decision. That file is the single source of truth for the audience vocabulary list and always-gloss-on-first-use rule, the banned-words list, dead phrases / transitions / engagement bait / hype language, the negative-parallelism rule, tribal-coded jargon and operational shibboleths, the dismissal-label rule, the vocabulary cliff rules including the meaning-preservation sub-principle, the closing-line abstraction rule, the broader AI writing patterns to avoid, and the anti-overfitting guide. See the relevant sections of the active profile's `voice.md` for all of these.
 
 This skill MUST NOT maintain its own duplicate copy of any of the following:
 - The audience vocabulary list
@@ -48,13 +48,13 @@ Note: this is the detailed-outline step. There is still no prose, but the Ground
 3. NOT apply generic vocabulary heuristics from training data — those risk shipping wrong substitutions downstream (the elasticity-bug failure mode).
 4. Continue with non-voice work this skill can still do: still produce the detailed paragraph-level content blocks, rhetorical suggestions, humor location flags, opener and close approach maps, accessibility pre-check, reader-persona pre-assessment, and source gaps. Better to do less than to do harm with stale or generic guidance.
 
-**Future-work hook — adjacency-aware calibration.** The active profile's `voice.md` may note an always-gloss-on-first-use rule; a future enhancement would vary gloss aggressiveness by which adjacent audience cohort each piece targets (domain-specialist pieces gloss general-audience terms more heavily; cross-cutting pieces gloss everything). NOT IN SCOPE this pass. When implemented, the per-paragraph Grounding plan field would consume an adjacency signal to flag which abstractions need extra grounding for the targeted cohort.
+**Future-work hook — adjacency-aware calibration.** The active profile's `voice.md` may note an always-gloss-on-first-use rule; a future enhancement would vary gloss aggressiveness by which adjacent audience cohort each piece targets (domain-specialist pieces gloss general-audience terms more heavily; cross-cutting pieces gloss everything). NOT IN SCOPE this pass. When implemented, the per-paragraph Grounding plan field would consume an adjacency signal to flag which abstractions need extra grounding for the targeted cohort. See the vocabulary cliff and gloss rules in the active profile's `voice.md` for the current baseline.
 
 ---
 
 ## Workflow Position
 
-This is Step 1b — the last step before prose. What comes next:
+This is the detailed-outline step — the last step before prose. What comes next:
 
 - **`blog-draft`** (Step 3) writes the article from this outline, baking accessibility principles in at generation time (paragraph rhythm, grounding cadence, statistic framing, deliberate reader address — see its "Drafting for Accessibility" section).
 - **`blog-readability`** runs after the draft as a structural audit for density and accessibility, against the same five principles.
@@ -142,12 +142,13 @@ Key sentence to land: [Not the prose — describe what the most important senten
 paragraph must achieve. E.g., "The sentence that collapses the official explanation."]
 ```
 
-**Paragraph count guidance by section type:**
-- Spark / Glitch / Definition sections (400 words): 3-4 paragraphs
-- Pattern / Source Code / Mechanics sections (500-600 words): 4-6 paragraphs
-- Protocol / Upgrade / Applications sections (400 words): 3-4 paragraphs
-- Personal reflection sections (200-300 words): 2-3 paragraphs
-- Multi-signal / list-structure items (200-300 words each): 2-3 paragraphs
+**Paragraph count guidance by section word target:**
+- Short sections (~400 words): 3-4 paragraphs
+- Long sections (~500-600 words): 4-6 paragraphs
+- Personal reflection sections (~200-300 words): 2-3 paragraphs
+- Multi-signal / list-structure items (~200-300 words each): 2-3 paragraphs
+
+(Match the active profile's `templates.md` for section names and their assigned word targets; size the paragraph count to the section's target range.)
 
 ---
 

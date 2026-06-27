@@ -85,9 +85,11 @@ Work through the draft top to bottom:
 2. Do NOT change anything the fact-check report didn't flag — this is a correction pass, not a rewrite
 3. If the fact-check report says "recommend finding the correct source" and the correct source URL is not available, leave a visible placeholder (`[NEEDS SOURCE]`) in the draft rather than guessing or using a generic link
 
-### Step 3: Source Archive Audit
+### Step 3: Source Archive Audit (conditional — only if the active profile configures a source archive)
 
-Before writing the new draft, verify that **every URL linked in the article** exists in the source archive — either as an ingested source page (check `source_url` in frontmatter) or as a raw file awaiting ingestion.
+If the active profile does **not** configure a source archive (`profile.yaml.paths.source` is absent or unset), skip this step entirely. The reconciliation continues with Step 4. Under a `general` profile or any profile without `paths.source`, this archival step is a no-op.
+
+If the active profile **does** configure a source archive: before writing the new draft, verify that **every URL linked in the article** exists in the source archive — either as an ingested source page (check `source_url` in frontmatter) or as a raw file awaiting ingestion.
 
 The source archive location comes from `profile.yaml.paths.source` (the active profile's configured seed/source path).
 
@@ -100,7 +102,7 @@ For each linked URL:
 
 This ensures the source archive is a complete record of every source ever cited in a published piece. No article goes out with a source link that isn't tracked in the archive.
 
-**Output for this step:** A list of all linked URLs with their archive status (ingested / raw only / newly created raw file).
+**Output for this step:** A list of all linked URLs with their archive status (ingested / raw only / newly created raw file). If the step was skipped (no archive configured), record "archive audit: skipped (no source archive configured)" in the reconciliation summary.
 
 ### Step 4: Write the New Draft
 

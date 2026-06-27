@@ -100,11 +100,13 @@ Flag any of the following as **link-health issues**, independent of content veri
 
 A link-health issue does not, by itself, make a claim unverified — the content cross-check in 2c-2d may still verify it via the live page or the source archive. But these issues are surfaced separately in the Link Health section of the report because dead/redirected links undermine reader trust regardless.
 
-**2b. Source archive lookup**
+**2b. Source archive lookup (conditional — only if the active profile configures one)**
 
-Search the profile's source archive (path from `profile.yaml.paths.source`, or the default seed location) for a page whose `source_url` matches the URL. If found, load the summary, key points, and extracted quotes. This is the archive's *recorded* version of what the source said at ingestion time.
+If the active profile configures a source archive (`profile.yaml.paths.source` is set), search it for a page whose `source_url` matches the URL. If found, load the summary, key points, and extracted quotes. This is the archive's *recorded* version of what the source said at ingestion time.
 
 If a source archive page exists for a *different* URL on the same topic, surface this as a potential source upgrade — primary sources are always preferred over secondary ones.
+
+If no source archive is configured (e.g., under a `general` profile or any profile without `paths.source`), skip this sub-step entirely. The verification path continues via live fetch in 2c; resolution state will be "Live-only mode" for all URLs.
 
 **2c. Live content fetch (always runs, with escalation chain)**
 
@@ -146,15 +148,13 @@ When automated retrieval fails through both prior steps, emit a structured reque
 > **Why:** [paywall / login wall / PDF / region lock / captcha]
 > **To verify the claim(s) sourced to this URL, please:**
 > 1. Open the URL in your browser (logged in if needed)
-> 2. Save the article as either: (a) "Save as PDF" → save to `{source-archive-root}/raw/_manual/[meaningful-slug].pdf`, or (b) copy the article text into a new markdown file at the same location with a `.md` extension
+> 2. Save the article as either: (a) "Save as PDF" or (b) copy the article text into a markdown file
 > 3. Reply with the file path
->
-> The fact-checker will then ingest that file via the source archive's Ingest flow and resume verification.
 
 When the user replies with a file path:
 1. Read the file.
 2. Use its contents as the live source for verification.
-3. Hand off the file + metadata to the source archive's Ingest flow so a source page is created (see "Ingestion delegation" below).
+3. If the active profile configures a source archive (`profile.yaml.paths.source` is set): save the raw file to `{source-archive-root}/raw/_manual/[meaningful-slug].pdf` (or `.md`), then hand off the file + metadata to the source archive's Ingest flow so a source page is created (see "Ingestion delegation" below). If no source archive is configured, skip the archival step — just use the file for verification.
 
 If the user declines or cannot scrape, proceed to 2d with `live = unavailable` and note the failure reason for the Link Health section.
 
@@ -173,9 +173,11 @@ The point: a claim that previously passed silently because the archive agreed wi
 
 ---
 
-### Step 2.5: Ingestion delegation
+### Step 2.5: Ingestion delegation (conditional — only if the active profile configures a source archive)
 
-When Step 2c escalates to Chrome (2c.2) or manual scrape (2c.3) for a URL that **isn't yet in the source archive**, the fact-checker should hand off to the source archive's Ingest flow so the archive accumulates the work — every escalation makes future fact-checks faster and gives a permanent record of what the source said.
+If the active profile does **not** configure a source archive (`profile.yaml.paths.source` is absent or unset), skip this entire step. The fact-check is self-contained: live fetch is the only verification path, and no archival delegation occurs.
+
+If the active profile **does** configure a source archive, and Step 2c escalated to Chrome (2c.2) or manual scrape (2c.3) for a URL that **isn't yet in the source archive**, the fact-checker should hand off to the source archive's Ingest flow so the archive accumulates the work — every escalation makes future fact-checks faster and gives a permanent record of what the source said.
 
 **When to delegate:**
 

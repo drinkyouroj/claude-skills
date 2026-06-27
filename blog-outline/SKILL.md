@@ -1,7 +1,7 @@
 ---
 name: blog-outline
 description: >
-  Step 1 of the blog article workflow: research, angle/hook + structure selection, and bullet-point
+  Research, angle/hook + structure selection, and bullet-point outline step of the blog-article-builder pipeline.
   outline. ALWAYS invoke this skill when the user wants to start writing a blog article — including
   phrases like "write a blog post", "I want to write about X", "outline a piece about X",
   "help me write an article", "write a newsletter post", "long-form piece about X", or any request
@@ -10,7 +10,7 @@ description: >
   Does NOT apply to social media posts, fiction, or knowledge-base operations.
 ---
 
-# Blog Article Outline Generator (Step 1 of 3)
+# Blog Article Outline Generator (Outline step of the blog-article-builder pipeline)
 
 ## What This Skill Does
 

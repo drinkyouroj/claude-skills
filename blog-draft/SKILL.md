@@ -1,7 +1,7 @@
 ---
 name: blog-draft
 description: >
-  Step 3 of the blog article workflow: full section-by-section draft from an approved
+  Full section-by-section draft step of the blog-article-builder pipeline: from an approved
   outline and headline. Invoke this skill when the user has approved both an outline (blog-outline)
   and a headline (blog-headline) and wants to write the article — including phrases like "write the
   draft", "now draft it", "let's write the piece", "draft the article", "write it up", or when the
@@ -10,7 +10,7 @@ description: >
   knowledge-base operations.
 ---
 
-# Blog Article Draft Generator (Step 3 of 3)
+# Blog Article Draft Generator
 
 ## What This Skill Does
 
@@ -26,7 +26,7 @@ Load the active profile's `templates.md` for section structures, word counts, an
 
 ## Voice & vocabulary canonical source
 
-This skill MUST load the active profile's `voice.md` before making any voice, vocabulary, substitution, or AI-tells decision. That file is the single source of truth for the audience vocabulary list and always-gloss-on-first-use rule (§ 1), the banned-words list (§ 3A), dead phrases / transitions / engagement bait / hype language (§ 3B–§ 3E), the negative-parallelism rule (§ 3F), tribal-coded jargon and operational shibboleths (§ 3G), the dismissal-label rule (§ 3H), the vocabulary cliff rules including the meaning-preservation sub-principle (§ 3I), the closing-line abstraction rule (§ 3J), the broader AI writing patterns to avoid (§ 4), and the anti-overfitting guide (§ 5).
+This skill MUST load the active profile's `voice.md` before making any voice, vocabulary, substitution, or AI-tells decision. That file is the single source of truth for the audience vocabulary list and always-gloss-on-first-use rule, the banned-words list, dead phrases / transitions / engagement bait / hype language, the negative-parallelism rule, tribal-coded jargon and operational shibboleths, the dismissal-label rule, the vocabulary cliff rules including the meaning-preservation sub-principle, the closing-line abstraction rule, the broader AI writing patterns to avoid, and the anti-overfitting guide. See the relevant sections of the active profile's `voice.md` for all of these.
 
 This skill MUST NOT maintain its own duplicate copy of any of the following:
 - The audience vocabulary list
@@ -43,7 +43,7 @@ If a vocabulary or substitution decision is needed mid-task, resolve it by refer
 3. NOT apply generic vocabulary heuristics from training data — those risk shipping wrong substitutions.
 4. Continue with non-voice work this skill can still do: still draft the structural sections (opener, body sections per template, personal reflection, close), still apply the Drafting for Accessibility principles, still cite sources inline, still pass through reader-persona tests. Skip the voice rules pass and note the gap in the draft's "Draft notes" block. Better to do less than to do harm with stale or generic guidance.
 
-**Future-work hook — adjacency-aware calibration.** The canonical file's § 1 may note an always-gloss-on-first-use rule that is conservative; a future enhancement would vary gloss aggressiveness by which adjacent reader cohort each piece targets. NOT IN SCOPE this pass. When implemented, the per-section tone note in the outline would feed an adjacency signal here so the draft tunes which jargon needs gloss vs. plain-language swap.
+**Future-work hook — adjacency-aware calibration.** The active profile's `voice.md` may note an always-gloss-on-first-use rule that is conservative; a future enhancement would vary gloss aggressiveness by which adjacent reader cohort each piece targets. NOT IN SCOPE this pass. When implemented, the per-section tone note in the outline would feed an adjacency signal here so the draft tunes which jargon needs gloss vs. plain-language swap.
 
 ---
 

@@ -1,14 +1,14 @@
 ---
 name: blog-headline
 description: >
-  Step 3 of the blog article workflow: headline and subheadline generation from an
+  Headline and subheadline generation step of the blog-article-builder pipeline: from an
   approved outline. Invoke this skill when the user has an approved article outline and wants to
   move to headlines — including phrases like "write the headline", "give me headlines", "now do
   the headline", "headline options", "title this piece", or when the user approves a blog-outline
   output and asks what's next. Does NOT apply to social media posts, or drafting (that's blog-draft).
 ---
 
-# Blog Headline Generator (Step 3 of the blog-pipeline)
+# Blog Headline Generator (Headlines step of the blog-article-builder pipeline)
 
 Resolve the active blog profile per `~/.claude/blog-profiles/_resolution-contract.md` before doing anything else.
 Loads: `identity.md`, `reader.md`, and the active preset.
@@ -23,7 +23,7 @@ Load the active profile's `voice.md` for this skill's headline-form voice and st
 
 ## Voice & vocabulary canonical source
 
-This skill MUST load the active profile's `voice.md` (resolved via the resolution contract) before making any voice, vocabulary, substitution, or AI-tells decision. That file is the single source of truth for the audience vocabulary list and always-gloss-on-first-use rule (§ 1), the banned-words list (§ 3A), dead phrases / transitions / engagement bait / hype language (§ 3B–§ 3E), the negative-parallelism rule (§ 3F), tribal-coded jargon and operational shibboleths (§ 3G), the dismissal-label rule (§ 3H), the vocabulary cliff rules including the meaning-preservation sub-principle (§ 3I), the closing-line abstraction rule (§ 3J), the broader AI writing patterns to avoid (§ 4), and the anti-overfitting guide (§ 5).
+This skill MUST load the active profile's `voice.md` (resolved via the resolution contract) before making any voice, vocabulary, substitution, or AI-tells decision. That file is the single source of truth for the audience vocabulary list and always-gloss-on-first-use rule, the banned-words list, dead phrases / transitions / engagement bait / hype language, the negative-parallelism rule, tribal-coded jargon and operational shibboleths, the dismissal-label rule, the vocabulary cliff rules including the meaning-preservation sub-principle, the closing-line abstraction rule, the broader AI writing patterns to avoid, and the anti-overfitting guide. See the relevant sections of the active profile's `voice.md` for all of these.
 
 This skill MUST NOT maintain its own duplicate copy of any of the following:
 - The audience vocabulary list
@@ -40,7 +40,7 @@ If a vocabulary or substitution decision is needed mid-task, resolve it by refer
 3. NOT apply generic vocabulary heuristics from training data — those risk shipping wrong substitutions.
 4. Continue with non-voice work this skill can still do: still produce 3 headline + subheadline options using the four hook structures (Borrowed Frame, Premise + Implication, Compressed Narrative, Question That Contains Its Answer), still apply the headline-specific anti-patterns (numbered lists, power words, teaching words, vague theme headlines, question-mark overuse), still run the Signal and Send tests. Flag "voice rules pass" as not enforced in the recommendation. Better to do less than to do harm with stale or generic guidance.
 
-**Future-work hook — adjacency-aware calibration.** The canonical voice file may note an always-gloss-on-first-use rule that is conservative; a future enhancement would vary gloss aggressiveness by which adjacent cohort each piece targets. NOT IN SCOPE this pass. When implemented, the hook-structure selection step would consume an adjacency signal — pieces targeting a wider cohort lean toward hooks that don't assume insider vocabulary; pieces targeting a denser cohort can use compressed-narrative headlines with domain shorthand.
+**Future-work hook — adjacency-aware calibration.** The active profile's `voice.md` may note an always-gloss-on-first-use rule that is conservative; a future enhancement would vary gloss aggressiveness by which adjacent cohort each piece targets. NOT IN SCOPE this pass. When implemented, the hook-structure selection step would consume an adjacency signal — pieces targeting a wider cohort lean toward hooks that don't assume insider vocabulary; pieces targeting a denser cohort can use compressed-narrative headlines with domain shorthand.
 
 ---
 
