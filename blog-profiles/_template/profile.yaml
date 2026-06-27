@@ -1,0 +1,27 @@
+id: template
+name: "Generic Blog (template — clone and edit me)"
+preset: general
+
+paths:
+  identity: identity.md
+  voice: voice.md
+  reader: reader.md
+  templates: templates.md
+  source: ""          # dir or file holding seed material; empty → orchestrator asks
+  workspace: ./drafts # per-article working dirs created here
+
+steps:                # omit a key to inherit the preset default
+  outline: true
+  outline-more: true
+  headline: true
+  opener: true
+  draft: true
+  readability: true
+  humanizer: true
+  fact-check: true
+  fact-reconcile: true
+
+quick:
+  brand: "Your Blog Name"
+  domain: "your subject domain"
+  platform: "your platform"

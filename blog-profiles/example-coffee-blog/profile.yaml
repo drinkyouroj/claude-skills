@@ -1,0 +1,24 @@
+id: example-coffee-blog
+name: "The Daily Grind — home coffee brewing"
+preset: general
+paths:
+  identity: identity.md
+  voice: voice.md
+  reader: reader.md
+  templates: templates.md
+  source: ""
+  workspace: ./drafts
+steps:
+  outline: true
+  outline-more: true
+  headline: true
+  opener: true
+  draft: true
+  readability: true
+  humanizer: true
+  fact-check: true
+  fact-reconcile: true
+quick:
+  brand: "The Daily Grind"
+  domain: "home coffee brewing"
+  platform: "personal blog (Ghost)"
