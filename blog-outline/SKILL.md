@@ -42,7 +42,7 @@ Note: this is the outline step, so voice rules apply lightly here — there is n
 3. NOT apply generic vocabulary heuristics from training data — those risk shipping wrong substitutions downstream.
 4. Continue with non-voice work this skill can still do: still produce the full outline including angle/hook identification, structure selection, section-by-section bullets with sources, opener and close strategy, personal reflection angle, and source gaps. Better to do less than to do harm with stale or generic guidance.
 
-**Future-work hook — adjacency-aware calibration.** A future enhancement would vary gloss aggressiveness by which adjacent audience cohort each piece targets (domain-specialist pieces gloss general-audience terms more heavily; cross-cutting pieces gloss everything). NOT IN SCOPE this pass. When implemented, the structure-selection step would consume an adjacency signal — pieces targeting a wider cohort lean toward explanatory / Concept Decoder-style structures (more vocabulary work needed); pieces targeting a denser cohort can run analytical or multi-signal structures with less inline definition.
+**Future-work hook — adjacency-aware calibration.** A future enhancement would vary gloss aggressiveness by which adjacent audience cohort each piece targets (domain-specialist pieces gloss general-audience terms more heavily; cross-cutting pieces gloss everything). NOT IN SCOPE this pass. When implemented, the structure-selection step would consume an adjacency signal — pieces targeting a wider cohort lean toward explanatory / concept-explainer structures (more vocabulary work needed); pieces targeting a denser cohort can run analytical or multi-signal structures with less inline definition.
 
 ---
 
@@ -63,7 +63,7 @@ The outline must set up an article that can achieve this. If the outline doesn't
 Before choosing a structure, identify what makes this topic worth writing about *right now*.
 
 Ask:
-- What's the spark? A development in the blog's domain (`quick.domain`), a pattern confirmed, a concept the reader needs vocabulary for?
+- What's the catalyst? A development in the blog's domain (`quick.domain`), a pattern confirmed, a concept the reader needs vocabulary for?
 - Which of the five angles does this map to?
 
 | Angle | What it does | Long-form application |
@@ -94,9 +94,9 @@ Default four-structure reference (the active `templates.md` may add, rename, or 
 
 | Structure | Logic | Best when |
 |---|---|---|
-| **Triple Connection** | Current Event → Historical Context → Future Implications | A current event has a precedent nobody is citing |
-| **System Audit** | Problem → Analysis → Solutions | Something is obviously broken and the cause is structural |
-| **Concept Decoder** | Definition → Mechanics → Applications | The reader needs vocabulary for something they're circling |
+| **Context & Implications** | Current Event → Historical Context → Future Implications | A current event has a precedent nobody is citing |
+| **Problem-Analysis-Solution** | Problem → Analysis → Solutions | Something is obviously broken and the cause is structural |
+| **Concept Explainer** | Definition → Mechanics → Applications | The reader needs vocabulary for something they're circling |
 | **Multi-Signal Synthesis** | Multiple signals → Thesis | Several separate developments reveal one structural shift |
 
 See the active profile's `templates.md` for section word counts, tone notes, and angle pairings.

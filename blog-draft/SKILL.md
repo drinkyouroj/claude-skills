@@ -169,9 +169,9 @@ Every factual claim — data points, quotes, dates, dollar figures, percentages 
 **Format:** Choose 2-4 words in the sentence that naturally describe the source or the claim, and link them to the source URL. The linked words should read naturally in the sentence — the reader shouldn't notice the link is there unless they want to verify.
 
 **Examples:**
-- "DRAM contract prices [rose 171% year-over-year](https://url) by Q3 2025."
-- "Apple stationed purchasing executives in [extended hotel stays near Samsung's Hwaseong complex](https://url)."
-- "Samsung posted Q1 2026 operating profit of [57.2 trillion won](https://url) — $37.92 billion."
+- "Quarterly revenue [rose 38% year-over-year](https://url) in the most recent filing."
+- "The committee [met behind closed doors](https://url) twice before the vote."
+- "The company reported [a record operating profit](https://url) — its highest in eight quarters."
 
 **Rules:**
 - One link per claim. Don't double-link the same fact from two places in the sentence.
