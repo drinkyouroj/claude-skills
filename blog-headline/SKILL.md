@@ -87,7 +87,7 @@ Two-part structure: state the fact, then the implication nobody is saying. Can b
 **C. Compressed Narrative**
 A complete story arc in a single phrase. The headline IS the argument, compressed.
 
-> "How Apple Bought South Korea's Memory Supply From a Hotel Lobby"
+> "How One Spreadsheet Error Cost a City Its Pension Fund"
 > "One Side Brought a Policy Paper to a Meme War"
 
 **D. The Question That Contains Its Answer**

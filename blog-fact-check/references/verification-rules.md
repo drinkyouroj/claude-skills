@@ -14,7 +14,7 @@ A factual claim is any assertion in the article that could be independently veri
 - **Percentages:** "171% year-over-year," "a 294% increase," "57% reduction"
 - **Dates of events:** "On October 1, 2025," "In March," "by Q3 2025"
 - **Attributions:** "the spokesperson says," "the report projects," "the company posted"
-- **Causal claims:** "triggered a global panic," "caused Apple to lock in deals"
+- **Causal claims:** "triggered a global panic," "caused the agency to reverse course"
 - **Quantified comparisons:** "up from 15%," "an 8.5x jump year-over-year"
 - **Specific events:** "the Stargate data center expansion was killed," "Sora was shuttered"
 - **Direct quotes:** Any text presented as someone's words
