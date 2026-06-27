@@ -26,7 +26,7 @@ A factual claim is any assertion in the article that could be independently veri
 - **Logical inferences:** "In a three-producer market, that threshold is remarkably low"
 - **Rhetorical framing:** "That's not a technology company posting strong earnings"
 - **Personal reflection section:** First-person experience and opinion
-- **Widely accepted background:** "Samsung and SK Hynix are South Korean companies" (uncontested common knowledge)
+- **Widely accepted background:** "Paris is the capital of France" (uncontested common knowledge)
 - **The article's thesis statement:** This is the writer's argument, not a factual claim
 - **Metaphors and analogies:** Analytical framing, not a factual assertion
 
@@ -104,7 +104,7 @@ Distinguishing these matters for the recommendation:
 
 The split-policy verdict (from Step 3 of SKILL.md) decides whether the report renders a verified/unverified verdict or just surfaces the divergence:
 
-- **Hard facts** (numbers, percentages, dollar figures, dates, direct quotes, named attributions): **Live wins.** The verdict comes from the live page. Corrections to hard facts are almost always authoritative — if Reuters changed "$700M" to "$710M" three months after the original report, $710M is the truth and the article should match.
+- **Hard facts** (numbers, percentages, dollar figures, dates, direct quotes, named attributions): **Live wins.** The verdict comes from the live page. Corrections to hard facts are almost always authoritative — if the original outlet corrected a figure from "$700M" to "$710M" three months after first publishing it, $710M is the truth and the article should match.
 - **Prose claims** (causal language like "triggered a panic," characterizations like "a collapse," qualitative framing): **No verdict.** Surface both excerpts and let the writer judge. Prose drift is more ambiguous: the live page softening "triggered" to "preceded" might be a legitimate correction or might be later-edition hedging the writer chose to ignore. Not a verdict the fact-checker should auto-make.
 
 Every divergence — regardless of verdict — should also note that the archive page may need re-ingestion. Over time this turns the fact-checker into a feedback loop that hardens the archive itself.
@@ -112,8 +112,8 @@ Every divergence — regardless of verdict — should also note that the archive
 ### Secondary vs. primary sources
 
 The fact-checker should note when a claim is sourced to secondary reporting rather than the primary source:
-- **Primary:** Reuters reporting Samsung's earnings directly
-- **Secondary:** A blog post summarizing the Reuters report
+- **Primary:** the original outlet (or the organization itself) reporting a figure directly
+- **Secondary:** a blog post summarizing that original report
 
 Both can be valid, but primary is always preferred. If the source archive has the primary source, recommend linking to it instead.
 
@@ -142,7 +142,7 @@ These should always be called out in the report, regardless of verification stat
 
 1. **A source that doesn't contain the claimed fact at all** — this is the most damaging error for credibility
 2. **A non-authoritative source (blog, YouTube, Medium) cited for a factual claim when primary reporting exists** — the blog's reader clicks through to a blog and credibility collapses. The source archive may contain research inputs (blogs, YouTube transcripts); these are never acceptable as article sources for factual claims. Flag and recommend the primary source.
-3. **A secondary source cited when the primary source is available and accessible** — even credible outlets are secondary when they're reporting someone else's data. Prefer the original: the Reuters earnings report over a tech news site summarizing it
+3. **A secondary source cited when the primary source is available and accessible** — even credible outlets are secondary when they're reporting someone else's data. Prefer the original: the primary source document over a secondary outlet summarizing it
 4. **A quote attributed to Person A that the source attributes to Person B**
 5. **A figure that appears in the article but in no available source** — may have been hallucinated during drafting
 6. **A URL that returns 404 or redirects to a different article** — dead links undermine trust
