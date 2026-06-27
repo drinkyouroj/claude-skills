@@ -84,7 +84,7 @@ Always defer to `voice.md` for the actual author-specific rules; the list above 
 Read the author's rhythm calibration from `voice.md`. Common voice patterns include:
 - Naturally varied sentence length. Short punchy sentence. Then one that takes its time getting somewhere because the idea itself demands the space.
 - No formula. Let the sentence land where it lands.
-- Breaking the rule of three to two or four when the content calls for it.
+- Apply the rule-of-three as the active profile's `voice.md` directs — some profiles break it to two or four, others lean into it; follow the profile, not a baked default.
 
 ### What gets swapped out
 
@@ -99,38 +99,16 @@ Read the author's rhythm calibration from `voice.md`. Common voice patterns incl
 
 ### Voice constants (from `voice.md`)
 
-Load the author's voice constants from the active profile's `voice.md`. Common craft patterns include:
-
-- **Dry and sardonic.** The humor is in the gap between the claim and the reality, not in the punchline.
-- **Deadpan delivery.** The funniest line gets no setup and no explanation.
-- **Never explain the joke.** If it needs explanation it wasn't a joke.
-- **Opinions, not hedges.** The author has a take. Find it and let it be a take.
-- **Parentheses for asides.** (Usually the part that couldn't quite earn its own sentence but you're glad it's there.)
-- **First person when it's honest.** "I keep coming back to..." is more human than "observers have noted."
-
-Always defer to `voice.md` for the actual author-specific calibration; the list above is illustrative only.
+Load the author's voice constants from the active profile's `voice.md`. Voice constants are profile-specific — they define things like the author's register (formal vs. casual), tone (dry vs. earnest), humor stance (deadpan vs. warm), and opinion posture (takes vs. hedges). Do not infer or invent constants; read them from the profile. If the profile does not enumerate them explicitly, treat the voice file's examples and prose style as the calibration source.
 
 ### AI hit list (from `voice.md`)
 
-Load the author's specific AI hit list from the active profile's `voice.md`. These are phrases that kill the voice — never let them survive. Common examples flagged across voice profiles:
+**The enforced hit list is whatever the active profile's `voice.md` specifies.** Load it from there before flagging any phrases — do not apply a generic list.
 
-- "Picture this:"
-- "Not X, but Y." (negative parallelism)
-- "Dive into..." / "Delve into..."
-- "It's important to note..."
-- "It's important to remember..."
-- "Certainly, here are..."
-- "Navigating the complexities of..."
-- "Delving into the intricacies of..."
-- "A testament to..."
-- "Remember that..."
-- "Without further ado..."
-- "Have you ever wondered..."
-- "Based on the information provided..."
-- "That really hits" (AI-native phrase, not human speech)
-- Patterns of exactly three items in every list
+A few phrases are near-universally recognized AI slop (illustrative only — the profile is the authority):
+- "Delve into..." / "It's important to note..." / "In today's fast-paced world..."
 
-The actual enforced list is whatever `voice.md` specifies. The examples above are craft-level defaults that commonly appear; the profile's list overrides or extends them.
+Every other phrase to flag or protect must come from the profile's `voice.md`. Different authors have different tells and different terms they reclaim — the profile knows; this skill does not.
 
 ---
 
