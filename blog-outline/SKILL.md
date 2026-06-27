@@ -2,7 +2,7 @@
 name: blog-outline
 description: >
   Research, angle/hook + structure selection, and bullet-point outline step of the blog-article-builder pipeline.
-  outline. ALWAYS invoke this skill when the user wants to start writing a blog article — including
+  ALWAYS invoke this skill when the user wants to start writing a blog article — including
   phrases like "write a blog post", "I want to write about X", "outline a piece about X",
   "help me write an article", "write a newsletter post", "long-form piece about X", or any request
   to produce a blog article from scratch. Also trigger when the user pastes a source document,
