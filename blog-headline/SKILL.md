@@ -17,7 +17,7 @@ Loads: `identity.md`, `reader.md`, and the active preset.
 
 Produces 3 headline + subheadline options for a blog article, calibrated to the blog's reader persona and tested against the signal and send tests. The user selects one before drafting (`blog-draft`) begins.
 
-Load `references/voice-rules.md` for this skill's headline-form voice and style reference. Banned vocabulary, negative parallelisms, vocabulary cliff, and closing-line abstraction live in the canonical voice file — see next section.
+Load the active profile's `voice.md` for this skill's headline-form voice and style reference. Banned vocabulary, negative parallelisms, vocabulary cliff, and closing-line abstraction live in that canonical voice file — see next section.
 
 ---
 
@@ -191,4 +191,4 @@ These patterns are specifically wrong for the reader persona this blog serves �
 
 ## Reference Files
 
-- `references/voice-rules.md` — Full voice and style reference: punctuation, rhythm, words to love/avoid, model sentences, the AI hit list
+- the active profile's `voice.md` — Full voice and style reference: punctuation, rhythm, words to love/avoid, model sentences, the AI hit list
