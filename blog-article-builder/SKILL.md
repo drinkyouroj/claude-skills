@@ -244,7 +244,7 @@ A workflow blocked here resumes at step 7 (re-humanize), never at step 8 — res
 
 ### Step 10 final voice gate
 
-Before marking the manifest `ready-to-publish`, compare the latest draft after the step 8-9 fact-check/reconcile loop against the draft named in the most recent passing voice audit. If the latest draft differs, run one final voice audit on the latest draft and save it as `09-final-voice-audit.md`. `ready-to-publish` requires `Verdict: PASS` from that final audit. If the final audit is `FAIL`, missing, or unparseable, set manifest `status: blocked (voice audit)`, leave step 10 unchecked, list the residual HARD violations, and do not mark the Issue ready to publish.
+Before marking the manifest `ready-to-publish`, compare the latest draft after the step 8-9 fact-check/reconcile loop against the draft named in the most recent passing voice audit. If the latest draft differs, run one final voice audit on the latest draft and save it as `09-final-voice-audit.md`. `ready-to-publish` requires `Verdict: PASS` from that final audit. If the final audit is `FAIL`, missing, or unparseable, set manifest `status: blocked (voice audit)`, leave step 10 unchecked, list the residual HARD violations, and do not mark the Issue ready to publish. Remediation resumes at step 9 if the violation was introduced by fact reconciliation (revise the reconciled draft, then re-run the final voice audit); otherwise resume at step 7 if broader humanizer work is needed. The manifest must name the remediation target so the next run does not retry the same failing final audit without a draft change.
 
 
 **Loop structure:**
