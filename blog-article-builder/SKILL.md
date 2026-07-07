@@ -50,7 +50,7 @@ Steps that are **disabled** in the active profile (via preset defaults or `profi
 | 4 | Opener variants | `blog-opener` | `04-opener.md` | Pick one variant |
 | 5 | Draft (with locked opener) | `blog-draft` | `05-draft-v1.md` | Approve or redirect |
 | 6 | Density/comprehension audit | `blog-readability` | `06-readability.md` + `05-draft-v2.md` after applying | Approve rewrites |
-| 7 | Voice humanizer | `blog-humanizer` | `05-draft-v3.md` | Approve rewrites |
+| 7 | Voice humanizer | `blog-humanizer` | `05-draft-v3.md` + `07-voice-audit.md` | Approve rewrites; audit verdict gates step 8 |
 | 8 | Fact check | `blog-fact-check` | `08-fact-check-v{N}.md` | Approve recommendations |
 | 9 | Fact reconcile | `blog-fact-reconcile` | `05-draft-v{N+1}.md` | Approve (loop back to 8 until clean or stuck) |
 | 10 | Final read-through | (this skill) | `manifest.md` marked `ready-to-publish` | Confirm ship-ready |
@@ -220,7 +220,18 @@ This is the "locked-opener handoff" — see the "Locked-opener contract with blo
 
 **Output artifact:** `05-draft-v3.md` (humanizer rewrites prose in place; the version increments)
 
-**Gate prompt:** "Voice humanizer pass complete. [N] passages rewritten. Approve, review specific rewrites, or redirect?"
+**Gate prompt:** "Voice humanizer pass complete. [N] passages rewritten. Voice audit verdict: [PASS/FAIL]. Approve, review specific rewrites, or redirect?"
+
+**Voice audit record:** `blog-humanizer` ends with a self-audit of the final text against the profile's `voice.md` and emits a structured audit record with a terminal `Verdict: PASS | FAIL` line (see that skill's Step 4). The orchestrator saves that record as `07-voice-audit.md` alongside `05-draft-v3.md` (the `NN-` numbering is this orchestrator's convention — the leaf skill emits the record inline) and records both artifacts in the manifest, including the verdict.
+
+**Voice audit gate (step 7 → 8):** the audit verdict gates entry to the fact-check loop.
+
+- **PASS** → proceed to steps 8–9 as normal. STRONG/LIGHT findings and the recognizability-judge result are surfaced at the gate for the user's information; they do not block.
+- **FAIL** (at least one residual HARD violation) → do **NOT** enter the step 8–9 fact-check loop. Re-invoke `blog-humanizer` **once**, passing the residual-violation list from the audit record as explicit steering ("fix exactly these residual HARD violations"). Save the new draft version and the new audit record (overwrite `07-voice-audit.md`; the manifest notes the re-run).
+  - If the re-audit returns **PASS**, proceed to step 8.
+  - If the re-audit still returns **FAIL**, halt the workflow and surface to the user: set manifest `status: blocked (voice audit)` and list the residual HARD violations. Never proceed to fact-check on a FAIL verdict, and never infer a PASS that the record does not state.
+
+A workflow blocked here resumes at step 7 (re-humanize), never at step 8 — resume detection must treat the blocked state as "step 7 incomplete."
 
 **Why this comes after readability:** structural cuts (step 6) can eliminate sentences the humanizer would have rewritten — running readability first avoids wasted lexical polish on prose that gets cut. This matches the order asserted by `blog-draft`'s "Workflow Position and Companion Skills" section and `blog-readability`'s "Related Skills" section.
 
@@ -271,7 +282,7 @@ Disabled steps are recorded as `skipped (profile)` — they are not left blank o
 **Seed source:** <file path or "(topic line) '<topic>'" or "(pasted content)">
 **Profile:** <active profile name>
 **Slug:** <real slug if set, else "(temp: wip-...)">
-**Status:** in-progress | paused | ready-to-publish
+**Status:** in-progress | paused | blocked (voice audit) | ready-to-publish
 **Last touched:** 2026-05-18T15:45
 **Current step:** 7 of 10 (humanizer)
 
@@ -283,7 +294,7 @@ Disabled steps are recorded as `skipped (profile)` — they are not left blank o
 - [x] 4. blog-opener → 04-opener.md (selected: Variant A — Analogy That Narrows)
 - [x] 5. blog-draft → 05-draft-v1.md (approved 2026-05-18T15:20; 2400 words)
 - [x] 6. blog-readability → 06-readability.md, applied to 05-draft-v2.md (approved 2026-05-18T15:38)
-- [x] 7. blog-humanizer → 05-draft-v3.md (approved 2026-05-18T15:45)
+- [x] 7. blog-humanizer → 05-draft-v3.md, 07-voice-audit.md (verdict: PASS) (approved 2026-05-18T15:45)
 - [ ] 8. blog-fact-check → pending
 - [ ] 9. blog-fact-reconcile → pending
 - [ ] 10. final read-through → pending
@@ -307,7 +318,16 @@ Example with a disabled step (fiction preset):
 - [ ] 10. final read-through → pending
 ```
 
-The manifest is updated at the end of every step. Resume detection works by reading the manifest and finding the first unchecked (or not-skipped) step.
+The manifest is updated at the end of every step. Resume detection works by reading the manifest and finding the first unchecked (or not-skipped) step. A manifest with `status: blocked (voice audit)` leaves step 7 unchecked (the humanizer pass is not complete until its audit passes), so resume lands at step 7 — re-humanize against the residual violations listed in `07-voice-audit.md`; never resume at step 8.
+
+Example of a voice-audit-blocked manifest excerpt:
+
+```markdown
+**Status:** blocked (voice audit)
+
+- [ ] 7. blog-humanizer → 05-draft-v4.md, 07-voice-audit.md (verdict: FAIL after 1 re-run; residual HARD: [rule → span])
+- [ ] 8. blog-fact-check → pending (gated: voice audit FAIL)
+```
 
 ---
 
