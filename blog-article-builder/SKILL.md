@@ -218,7 +218,7 @@ This is the "locked-opener handoff" — see the "Locked-opener contract with blo
 
 **Inputs:** the latest draft (`05-draft-v2.md` if step 6 produced rewrites, else `05-draft-v1.md`). Invoke `blog-humanizer`.
 
-**Output artifact:** `05-draft-v3.md` (humanizer rewrites prose in place; the version increments)
+**Output artifact:** `05-draft-v3.md` (humanizer rewrites prose in place; the version increments). If step 7 must re-run because the first audit failed, save the re-humanized draft as `05-draft-v3-r1.md` and save the second audit as `07-voice-audit-r1.md` so the failing audit remains reviewable.
 
 **Gate prompt:** "Voice humanizer pass complete. [N] passages rewritten. Voice audit verdict: [PASS/FAIL]. Approve, review specific rewrites, or redirect?"
 
@@ -227,11 +227,12 @@ This is the "locked-opener handoff" — see the "Locked-opener contract with blo
 **Voice audit gate (step 7 → 8):** the audit verdict gates entry to the fact-check loop.
 
 - **PASS** → proceed to steps 8–9 as normal. STRONG/LIGHT findings and the recognizability-judge result are surfaced at the gate for the user's information; they do not block.
-- **FAIL** (at least one residual HARD violation) → do **NOT** enter the step 8–9 fact-check loop. Re-invoke `blog-humanizer` **once**, passing the residual-violation list from the audit record as explicit steering ("fix exactly these residual HARD violations"). Save the new draft version and the new audit record (overwrite `07-voice-audit.md`; the manifest notes the re-run).
-  - If the re-audit returns **PASS**, proceed to step 8.
-  - If the re-audit still returns **FAIL**, halt the workflow and surface to the user: set manifest `status: blocked (voice audit)` and list the residual HARD violations. Never proceed to fact-check on a FAIL verdict, and never infer a PASS that the record does not state.
+- **Missing or unparseable verdict** → treat exactly like a blocking failure: do **not** enter fact-check. Set manifest `status: blocked (voice audit)`, leave step 7 unchecked, and surface that no valid audit verdict was produced.
+- **FAIL** (at least one residual HARD violation) → do **NOT** enter the step 8–9 fact-check loop. Re-invoke `blog-humanizer` **once**, passing the residual-violation list from the audit record as explicit steering ("fix exactly these residual HARD violations"). Keep the first failed audit as `07-voice-audit.md`, save the re-humanized draft as `05-draft-v3-r1.md`, and save the second audit as `07-voice-audit-r1.md`; never overwrite the FAIL record.
+  - If the re-audit returns **PASS**, proceed to step 8 with `05-draft-v3-r1.md` as the canonical current draft and record both audit artifacts in the manifest.
+  - If the re-audit still returns **FAIL**, halt the workflow and surface to the user: set manifest `status: blocked (voice audit)` and list the residual HARD violations from both audit records. Never proceed to fact-check on a FAIL verdict, and never infer a PASS that the record does not state.
 
-A workflow blocked here resumes at step 7 (re-humanize), never at step 8 — resume detection must treat the blocked state as "step 7 incomplete."
+A workflow blocked here resumes at step 7 (re-humanize), never at step 8 — resume detection must treat the blocked state as "step 7 incomplete." Humanizer re-run artifact names use the `-r1` suffix so they cannot collide with fact-reconcile versions such as `05-draft-v4.md`.
 
 **Why this comes after readability:** structural cuts (step 6) can eliminate sentences the humanizer would have rewritten — running readability first avoids wasted lexical polish on prose that gets cut. This matches the order asserted by `blog-draft`'s "Workflow Position and Companion Skills" section and `blog-readability`'s "Related Skills" section.
 
@@ -240,6 +241,11 @@ A workflow blocked here resumes at step 7 (re-humanize), never at step 8 — res
 **Step enable check:** before starting this loop, confirm both `steps.fact-check` and `steps.fact-reconcile` are enabled in the active profile. If either is disabled, mark the affected step(s) as `skipped (profile)` in the manifest and proceed directly to step 10. If `fact-check` is enabled but `fact-reconcile` is disabled, run `blog-fact-check` but skip the reconcile leg; surface the fact-check report for manual action.
 
 **Why this comes last:** every voice/density rewrite that touched a fact-bearing sentence is now subject to source verification. Running fact-check after all voice work catches any subtle drift introduced by the humanizer or readability rewrites (a number rephrased, an attribution dropped, a causal claim sharpened beyond what the source supports).
+
+### Step 10 final voice gate
+
+Before marking the manifest `ready-to-publish`, compare the latest draft after the step 8-9 fact-check/reconcile loop against the draft named in the most recent passing voice audit. If the latest draft differs, run one final voice audit on the latest draft and save it as `09-final-voice-audit.md`. `ready-to-publish` requires `Verdict: PASS` from that final audit. If the final audit is `FAIL`, missing, or unparseable, set manifest `status: blocked (voice audit)`, leave step 10 unchecked, list the residual HARD violations, and do not mark the Issue ready to publish.
+
 
 **Loop structure:**
 
@@ -297,7 +303,7 @@ Disabled steps are recorded as `skipped (profile)` — they are not left blank o
 - [x] 7. blog-humanizer → 05-draft-v3.md, 07-voice-audit.md (verdict: PASS) (approved 2026-05-18T15:45)
 - [ ] 8. blog-fact-check → pending
 - [ ] 9. blog-fact-reconcile → pending
-- [ ] 10. final read-through → pending
+- [ ] 10. final read-through → pending; if step 9 changed the draft, run `09-final-voice-audit.md` before ready-to-publish
 
 ## Fact-check loop history (filled in during steps 8–9)
 
@@ -325,7 +331,7 @@ Example of a voice-audit-blocked manifest excerpt:
 ```markdown
 **Status:** blocked (voice audit)
 
-- [ ] 7. blog-humanizer → 05-draft-v4.md, 07-voice-audit.md (verdict: FAIL after 1 re-run; residual HARD: [rule → span])
+- [ ] 7. blog-humanizer → 05-draft-v3.md, 07-voice-audit.md (verdict: FAIL), 05-draft-v3-r1.md, 07-voice-audit-r1.md (verdict: FAIL after 1 re-run; residual HARD: [rule → span])
 - [ ] 8. blog-fact-check → pending (gated: voice audit FAIL)
 ```
 
