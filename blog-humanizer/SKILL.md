@@ -126,6 +126,43 @@ The Turing test: would someone who reads this blog regularly recognize this as t
 
 ---
 
+## Step 4: Self-Audit and Verdict
+
+After the rewrite and the Step 3 fix-what-you-named pass, audit the **final post-rewrite text** against the active profile's `voice.md` and produce a structured audit record with a terminal verdict. This is a rule-by-rule sweep, not a vibe check — it exists so a downstream gate (e.g. the article-workflow orchestrator) can decide whether the draft may proceed to fact-check.
+
+**Read the rules and their severity grades from `voice.md` at runtime.** The grades (HARD / FATAL / STRONG / LIGHT) are whatever the voice file says they are. Never restate, cache, or hard-code rule text in this skill — profiles differ; some have intake-derived rule spans, some have none. If a grade is ambiguous or a rule carries no grade, treat it as advisory and say so in the record rather than guessing it upward.
+
+Sweep in this order, checking each rule individually against the full final text:
+
+1. **Base Layer HARD rules** — every rule graded HARD (including any rule additionally marked FATAL — call the FATAL marking out explicitly in the record) in the span between the BASE-LAYER markers.
+2. **Client-Layer HARD rules** — every rule graded [HARD] anywhere outside the Base Layer markers: intake-derived spans (e.g. an ELICIT section), operator-authored calibration rules, wherever they appear in the file.
+3. **STRONG rules (both layers)** — fix, or record as deliberate with a one-line reason. STRONG findings never block.
+4. **Presence rules** — any graded rule phrased as a *must-state / must-include* obligation ("every X-adjacent piece must state Y") is checked for **presence**, not absence: first decide whether the rule's trigger condition applies to this text (e.g. is the piece benefits-adjacent?), then, if it applies, verify the required statement actually appears in the final text. A missing required statement is a violation at that rule's grade, exactly like a banned phrase. If the trigger does not apply, record the rule as checked with `trigger: not applicable`.
+
+For each rule swept, record exactly one disposition:
+
+- **clean** — checked, no violation found
+- **fired → fixed** — violation found and repaired in the final text (quote the offending span and the fix)
+- **fired → residual** — violation found and NOT repaired (quote the span and say why it could not be fixed)
+
+"Checked and clean" must be visibly different from "not checked": every rule swept gets its own row in the record, even when nothing fired. If the voice file has no rules in a category (e.g. no client-layer graded rules at all), the record says so in one line and moves on — never invent rules to fill a section.
+
+### Recognizability judge
+
+After the rule sweep, run the recognizability check: **would a regular reader of this author recognize this draft as them?** Judge against the sample-derived voice attributes and in-voice sample sentences in `voice.md` (e.g. a HARVEST span). Record `yes` / `marginal` / `no` plus 2–3 sentences of reasoning.
+
+Preferred mode: dispatch a single fresh-eyes subagent that reads ONLY the active profile's `voice.md` and the final text, and returns the judgment — this avoids the humanizer grading its own rewrite. If the judge must run in-session instead, state that limitation in the record. The judge's result is recorded and surfaced at the gate; it never flips the verdict by itself.
+
+If `voice.md` contains no sample-derived attributes or in-voice sample sentences to judge against, record the judge as `not-run (no sample-derived attributes in voice.md)` — do not invent reference material.
+
+### Verdict
+
+`Verdict: FAIL` if and only if at least one HARD-graded rule (including FATAL) has a **residual** (unfixed) violation — including a presence rule whose required statement is still missing. Everything else — STRONG/LIGHT findings, recorded-as-deliberate exceptions, a `no` or `marginal` from the recognizability judge — is surfaced in the record but yields `Verdict: PASS`.
+
+If `voice.md` is missing, the fallback contract above already applies: no voice file → no rewrite and no audit → return the failure message and exit. Never audit against invented rules.
+
+---
+
 ## Output Format
 
 Present:
@@ -134,8 +171,54 @@ Present:
 2. **Audit** — 2-4 bullets: remaining AI tells (if any)
 3. **Final version** — revised after the audit (skip if audit found nothing significant)
 4. **Brief changelog** — what patterns were removed (optional, skip if user didn't ask)
+5. **Voice audit record** — the Step 4 structured audit of the final version, in this format:
 
-Keep the changelog short. No one needs a 20-bullet itemized list of edits — that's the AI way of documenting work.
+```markdown
+# Voice audit — [working title or slug]
+
+**Audited text:** [artifact filename, or "final version above"]
+**Voice file:** [resolved path to the active profile's voice.md]
+**Date:** [YYYY-MM-DD]
+
+## Rule sweep
+
+### Base Layer HARD rules
+| Rule | Grade | Disposition | Evidence |
+|------|-------|-------------|----------|
+| [rule heading from voice.md] | [HARD or HARD, FATAL] | [clean / fired → fixed / fired → residual] | [offending span + fix, or "—"] |
+
+### Client Layer HARD rules
+| Rule | Grade | Disposition | Evidence |
+|------|-------|-------------|----------|
+| [rule text summary from voice.md] | [HARD] | [clean / fired → fixed / fired → residual] | [offending span + fix, or "—"] |
+
+[If voice.md has no client-layer graded rules: "No client-layer graded rules present in voice.md; nothing to sweep."]
+
+### STRONG rules (both layers)
+| Rule | Grade | Disposition | Evidence |
+|------|-------|-------------|----------|
+| [rule] | [STRONG] | [clean / fired → fixed / fired → residual / deliberate: reason] | [span, or "—"] |
+
+### Presence rules
+| Rule | Trigger | Disposition | Evidence |
+|------|---------|-------------|----------|
+| [must-state rule] | [applies / not applicable] | [clean / fired → fixed / fired → residual] | [required statement location, or what is missing] |
+
+[If voice.md has no presence-shaped rules: "No presence rules present in voice.md."]
+
+## Recognizability judge
+
+**Result:** [yes / marginal / no / not-run ([reason])]
+**Mode:** [fresh-eyes subagent / in-session (self-graded; limitation noted)]
+**Reasoning:** [2–3 sentences against the sample-derived attributes and in-voice sentences]
+
+## Verdict
+
+Verdict: [PASS | FAIL]
+[If FAIL: list each residual HARD violation — rule → offending span or missing statement]
+```
+
+Keep the changelog short. No one needs a 20-bullet itemized list of edits — that's the AI way of documenting work. The voice audit record is the exception: it is deliberately explicit, because a downstream gate reads it.
 
 ---
 
