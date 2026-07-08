@@ -4,7 +4,8 @@ description: >
   End-to-end workflow orchestrator for blog articles. Sequences nine blog-*
   skills in order — blog-outline → blog-outline-more → blog-headline →
   blog-opener → blog-draft → blog-readability → blog-humanizer → blog-fact-check
-  ↔ blog-fact-reconcile (loop) → final read-through. Pauses after every step for
+  ↔ blog-fact-reconcile (legacy loop) or blog-fact-swarm for newsroom profiles
+  → final read-through. Pauses after every step for
   user approval. Detects existing workflow artifacts and offers to resume from
   the furthest completed step. Reads enabled steps from the active profile's
   preset + `profile.yaml.steps` overrides and skips disabled steps cleanly.
@@ -51,11 +52,13 @@ Steps that are **disabled** in the active profile (via preset defaults or `profi
 | 5 | Draft (with locked opener) | `blog-draft` | `05-draft-v1.md` | Approve or redirect |
 | 6 | Density/comprehension audit | `blog-readability` | `06-readability.md` + `05-draft-v2.md` after applying | Approve rewrites |
 | 7 | Voice humanizer | `blog-humanizer` | `05-draft-v3.md` + `07-voice-audit.md` | Approve rewrites; audit verdict gates step 8 |
-| 8 | Fact check | `blog-fact-check` | `08-fact-check-v{N}.md` | Approve recommendations |
-| 9 | Fact reconcile | `blog-fact-reconcile` | `05-draft-v{N+1}.md` | Approve (loop back to 8 until clean or stuck) |
+| 8 | Fact check | `blog-fact-check` (non-newsroom) or `blog-fact-swarm` (newsroom) | `08-fact-check-v{N}.md` or `08-fact-swarm-summary.md` with board section | Approve recommendations or review swarm summary/board |
+| 9 | Fact reconcile | `blog-fact-reconcile` (non-newsroom) or swarm decision gate | `05-draft-v{N+1}.md` or manifest state | Approve (loop back to 8 until clean or stuck) or decide unresolved Claims |
 | 10 | Final read-through | (this skill) | `manifest.md` marked `ready-to-publish` | Confirm ship-ready |
 
-Steps 8 and 9 loop. Termination: the loop stops when fact-check reports zero flagged claims, OR when two consecutive iterations surface the same set of unresolved items (no progress).
+For non-newsroom profiles, steps 8 and 9 keep the legacy loop. Termination: the loop stops when fact-check reports zero flagged claims, OR when two consecutive iterations surface the same set of unresolved items (no progress).
+
+For `preset: newsroom`, step 8 invokes `blog-fact-swarm` for Claim extraction plus bounded swarm verification. Step 9 is not an automatic `blog-fact-reconcile` pass against the swarm summary; it is a user decision gate over unresolved Claims unless the swarm is clean.
 
 Steps disabled by the active profile (e.g. `fact-check` and `fact-reconcile` off under a fiction preset) are marked `skipped (profile)` in the manifest and do not block progress.
 
@@ -236,20 +239,15 @@ A workflow blocked here resumes at step 7 (re-humanize), never at step 8 — res
 
 **Why this comes after readability:** structural cuts (step 6) can eliminate sentences the humanizer would have rewritten — running readability first avoids wasted lexical polish on prose that gets cut. This matches the order asserted by `blog-draft`'s "Workflow Position and Companion Skills" section and `blog-readability`'s "Related Skills" section.
 
-### Step 8 ↔ Step 9 — blog-fact-check ↔ blog-fact-reconcile loop
+### Step 8 ↔ Step 9 — fact verification boundary
 
-**Step enable check:** before starting this loop, confirm both `steps.fact-check` and `steps.fact-reconcile` are enabled in the active profile. If either is disabled, mark the affected step(s) as `skipped (profile)` in the manifest and proceed directly to step 10. If `fact-check` is enabled but `fact-reconcile` is disabled, run `blog-fact-check` but skip the reconcile leg; surface the fact-check report for manual action.
+**Step enable check:** before starting this boundary, confirm `steps.fact-check` is enabled in the active profile. If `steps.fact-check: false`, mark step 8 as `skipped (profile)`. If `steps.fact-reconcile: false`, mark step 9 as `skipped (profile)` and do not invoke reconcile behavior. Disabled steps do not bypass the step 7 voice-audit gate; they only skip fact work after the gate has passed.
+
+**Preset routing:** if the resolved profile uses `preset: newsroom`, run the newsroom swarm path below. All other presets keep the legacy serial path.
 
 **Why this comes last:** every voice/density rewrite that touched a fact-bearing sentence is now subject to source verification. Running fact-check after all voice work catches any subtle drift introduced by the humanizer or readability rewrites (a number rephrased, an attribution dropped, a causal claim sharpened beyond what the source supports).
 
-### Step 10 final voice gate
-
-Before marking the manifest `ready-to-publish`, compare the latest draft after the step 8-9 fact-check/reconcile loop against the draft named in the most recent passing voice audit. If the latest draft differs, run one final voice audit on the latest draft. Save a passing final audit as `09-final-voice-audit.md`; save a failing, missing, or unparseable final-audit attempt as `09-final-voice-audit-fail.md` (or `09-final-voice-audit-fail-r{N}.md` for repeated attempts) so blocking evidence is never overwritten by a later PASS.
-
-`ready-to-publish` requires `Verdict: PASS` from the final audit. If the final audit is `FAIL`, missing, or unparseable, set manifest `status: blocked (voice audit)`, list the residual HARD violations, and do not mark the Issue ready to publish. The manifest must make the remediation step the current unchecked step: leave step 9 unchecked if fact reconciliation introduced the violation and the next action is to revise the reconciled draft, or leave step 7 unchecked if broader humanizer work is needed. Step 10 remains pending until a draft change is made and a final audit passes. The manifest must name the remediation target so the next run does not retry the same failing final audit without a draft change.
-
-
-**Loop structure:**
+**Legacy non-newsroom loop:**
 
 1. **Run `blog-fact-check`** on the current canonical draft (`05-draft-v{latest}.md`). Save report as `08-fact-check-v1.md` on first iteration, `v2`, `v3`, ... on subsequent iterations.
 2. **Gate:** "Fact check complete. [N] verified, [M] flagged. Review the flagged claims — approve recommendations, override specific ones, or stop the loop here?"
@@ -265,6 +263,22 @@ Before marking the manifest `ready-to-publish`, compare the latest draft after t
 - **User override:** at any iteration, the user can say "stop the loop, ship as-is" or "stop, I want to rework this manually." Honor immediately.
 
 Do **not** loop more than necessary. Each iteration costs source-fetches and tokens; the goal is convergence, not exhaustive coverage of every possible recommendation.
+
+**Newsroom swarm path:**
+
+1. Confirm the step 7 voice audit has a terminal `Verdict: PASS` and the current draft is the same draft covered by that passing audit. If missing, unparseable, or failed, use the existing voice-audit block behavior and do not extract Claims.
+2. Invoke `blog-fact-swarm` on the current canonical draft. If `claims/` is absent or stale for the current draft, run extraction first and stop for the swarm skill's Claim extraction approval gate before writing the store.
+3. Run bounded swarm verification through `blog-fact-swarm`. The default limit is the swarm skill default unless the operator gives a per-run limit.
+4. Save the swarm summary as `08-fact-swarm-summary.md` with a `## Fact Swarm Board` section, or save a sibling `08-fact-swarm-board.md` if the board is kept separate.
+5. Update `manifest.md` with the `claims/` directory, `08-fact-swarm-summary.md`, any separate board artifact or board-section pointer, total Claim count, terminal-stage counts, recall flag count, open recall flag count, effective concurrency limit, and unresolved terminal states.
+6. Gate: "Swarm verification complete. Review `08-fact-swarm-summary.md` and its board evidence: [summary counts]. Approve this fact state, adjudicate paused Claims, request manual rewrite/source work for unresolved Claims, or pause?"
+7. Do not run legacy `blog-fact-reconcile` automatically against the Claim-store summary. If `adjudication-paused` Claims remain, surface their Claim ids and tell the Operator to run `blog-fact-swarm` Adjudication Mode before continuing. After adjudication, regenerate `08-fact-swarm-summary.md` and `08-fact-swarm-board.md` (or the board section), update the manifest pointers/counts, and return to this gate. If other unresolved Claims remain (`attention`, `failed`, `no-verdict`, or open recall flags), halt at this gate and ask for operator decision or manual rewrite/source work. If every Claim is `verified` and no recall flags remain open, mark step 9 as `skipped (swarm clean)` and proceed to step 10.
+
+### Step 10 final voice gate
+
+Before marking the manifest `ready-to-publish`, compare the latest draft after fact verification against the draft named in the most recent passing voice audit. If the latest draft differs, run one final voice audit on the latest draft. Save a passing final audit as `09-final-voice-audit.md`; save a failing, missing, or unparseable final-audit attempt as `09-final-voice-audit-fail.md` (or `09-final-voice-audit-fail-r{N}.md` for repeated attempts) so blocking evidence is never overwritten by a later PASS.
+
+`ready-to-publish` requires `Verdict: PASS` from the final audit. If the final audit is `FAIL`, missing, or unparseable, set manifest `status: blocked (voice audit)`, list the residual HARD violations, and do not mark the Issue ready to publish. The manifest must make the remediation step the current unchecked step: leave step 9 unchecked if fact reconciliation or manual swarm follow-up introduced the violation and the next action is to revise the verified draft, or leave step 7 unchecked if broader humanizer work is needed. Step 10 remains pending until a draft change is made and a final audit passes. The manifest must name the remediation target so the next run does not retry the same failing final audit without a draft change.
 
 ### Step 10 — Final read-through gate
 
@@ -303,15 +317,29 @@ Disabled steps are recorded as `skipped (profile)` — they are not left blank o
 - [x] 5. blog-draft → 05-draft-v1.md (approved 2026-05-18T15:20; 2400 words)
 - [x] 6. blog-readability → 06-readability.md, applied to 05-draft-v2.md (approved 2026-05-18T15:38)
 - [x] 7. blog-humanizer → 05-draft-v3.md, 07-voice-audit.md (verdict: PASS) (approved 2026-05-18T15:45)
-- [ ] 8. blog-fact-check → pending
-- [ ] 9. blog-fact-reconcile → pending
+- [ ] 8. blog-fact-check/blog-fact-swarm → pending
+- [ ] 9. blog-fact-reconcile/swarm decision → pending
 - [ ] 10. final read-through → pending; if step 9 changed the draft, run `09-final-voice-audit.md` before ready-to-publish
 
-## Fact-check loop history (filled in during steps 8–9)
+## Fact-check / swarm history (filled in during steps 8–9)
 
 | Iteration | Flagged before | Flagged after reconcile | Outcome |
 |-----------|----------------|--------------------------|---------|
 | 1         | -              | -                        | -       |
+
+For newsroom swarm runs, record the Claim store state in the Notes section:
+
+- `claims_dir`: `<workflow-dir>/claims`
+- `summary`: `08-fact-swarm-summary.md`
+- `board`: `08-fact-swarm-summary.md#fact-swarm-board` or `08-fact-swarm-board.md` if separate
+- `claim_count`: `<N>`
+- `terminal_stage_counts`: `<verified/attention/failed/no-verdict/adjudication-paused/operator-overridden>`
+- `divergence_counts`: `<paused/adjudicated>`
+- `adjudicated_divergence_claims`: `<none or list>`
+- `recall_flag_count`: `<N>`
+- `open_recall_flag_count`: `<N>`
+- `effective_concurrency_limit`: `<N>`
+- `unresolved_terminal_states`: `<none or list>`
 
 ## Notes
 <free-form notes captured during the workflow — user steering, decisions, source gaps surfaced>
@@ -346,7 +374,7 @@ Example of a voice-audit-blocked manifest excerpt:
   - v1 = output of `blog-draft` (step 5)
   - v2 = after readability rewrites applied (step 6)
   - v3 = after voice-humanizer rewrites applied (step 7)
-  - v4, v5, ... = after each fact-reconcile pass (steps 8–9 loop)
+  - v4, v5, ... = after each fact-reconcile pass (legacy steps 8–9 loop) or manual newsroom rewrite after swarm review
 - The manifest's "current step" plus the latest `05-draft-v{N}.md` is always the canonical state. Older versions are kept so the user can diff or revert.
 
 ---
@@ -381,7 +409,9 @@ The locked-opener contract is also documented on the `blog-draft` side. If `blog
 
 **User cancels mid-workflow.** Update the manifest to `status: paused` and tell the user the workflow can be resumed by re-invoking this skill (resume detection will find it).
 
-**Fact-check loop stuck.** Already handled in the step-8/9 specifics — surface the unresolved set and ask for editorial judgment.
+**Legacy fact-check loop stuck.** Already handled in the step-8/9 specifics — surface the unresolved set and ask for editorial judgment.
+
+**Newsroom swarm has unresolved Claims.** Do not auto-reconcile the summary. If `adjudication-paused` Claims exist, surface their Claim ids and route them to `blog-fact-swarm` Adjudication Mode first. After adjudication, regenerate the summary/board artifacts and update the manifest pointers/counts before returning to the fact boundary. For other unresolved Claims, surface `08-fact-swarm-summary.md`, keep the manifest at the fact boundary, and ask whether to rewrite, supply manual source material, or pause. Publish overrides remain Epic 3 scope.
 
 **Manifest corruption.** If the manifest file is missing fields or malformed, surface to the user and ask what state the workflow is actually in. Do not guess.
 
@@ -408,6 +438,7 @@ In invocation order:
 - **blog-readability** — post-draft density/comprehension audit (paragraph length, grounding, statistics, rhythm, sentence drag)
 - **blog-humanizer** — post-draft lexical AI-tell pass, calibrated to the blog's author voice
 - **blog-fact-check** — source verification of every factual claim (no-op if disabled by active profile)
+- **blog-fact-swarm** — newsroom Claim extraction plus bounded swarm verification (no-op if disabled by active profile)
 - **blog-fact-reconcile** — applies fact-check corrections, produces next draft version (no-op if disabled by active profile)
 
 All voice-aware skills in this chain load the active profile's `voice.md` at runtime as their canonical source for vocabulary, banned words, AI-tell patterns, and voice calibration. The pre-flight check ensures those profile files are present before the chain starts.
