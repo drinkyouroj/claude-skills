@@ -52,7 +52,7 @@ Steps that are **disabled** in the active profile (via preset defaults or `profi
 | 5 | Draft (with locked opener) | `blog-draft` | `05-draft-v1.md` | Approve or redirect |
 | 6 | Density/comprehension audit | `blog-readability` | `06-readability.md` + `05-draft-v2.md` after applying | Approve rewrites |
 | 7 | Voice humanizer | `blog-humanizer` | `05-draft-v3.md` + `07-voice-audit.md` | Approve rewrites; audit verdict gates step 8 |
-| 8 | Fact check | `blog-fact-check` (non-newsroom) or `blog-fact-swarm` (newsroom) | `08-fact-check-v{N}.md` or `08-fact-swarm-summary.md` with board section | Approve recommendations or review swarm summary/board |
+| 8 | Fact check | `blog-fact-check` (non-newsroom) or `blog-fact-swarm` (newsroom) | `08-fact-check-v{N}.md` or `08-fact-swarm-summary.md` with board section plus `receipt.md` for newsroom | Approve recommendations or review swarm summary/board/Receipt |
 | 9 | Fact reconcile | `blog-fact-reconcile` (non-newsroom) or swarm decision gate | `05-draft-v{N+1}.md` or manifest state | Approve (loop back to 8 until clean or stuck) or decide unresolved Claims |
 | 10 | Final read-through | (this skill) | `manifest.md` marked `ready-to-publish` | Confirm ship-ready |
 
@@ -271,8 +271,9 @@ Do **not** loop more than necessary. Each iteration costs source-fetches and tok
 3. Run bounded swarm verification through `blog-fact-swarm`. The default limit is the swarm skill default unless the operator gives a per-run limit.
 4. Save the swarm summary as `08-fact-swarm-summary.md` with a `## Fact Swarm Board` section, or save a sibling `08-fact-swarm-board.md` if the board is kept separate.
 5. Update `manifest.md` with the `claims/` directory, `08-fact-swarm-summary.md`, any separate board artifact or board-section pointer, total Claim count, terminal-stage counts, recall flag count, open recall flag count, effective concurrency limit, and unresolved terminal states.
-6. Gate: "Swarm verification complete. Review `08-fact-swarm-summary.md` and its board evidence: [summary counts]. Approve this fact state, adjudicate paused Claims, request manual rewrite/source work for unresolved Claims, or pause?"
-7. Do not run legacy `blog-fact-reconcile` automatically against the Claim-store summary. If `adjudication-paused` Claims remain, surface their Claim ids and tell the Operator to run `blog-fact-swarm` Adjudication Mode before continuing. After adjudication, regenerate `08-fact-swarm-summary.md` and `08-fact-swarm-board.md` (or the board section), update the manifest pointers/counts, and return to this gate. If other unresolved Claims remain (`attention`, `failed`, `no-verdict`, or open recall flags), halt at this gate and ask for operator decision or manual rewrite/source work. If every Claim is `verified` and no recall flags remain open, mark step 9 as `skipped (swarm clean)` and proceed to step 10.
+6. If `receipt.md` already exists, run `blog-fact-swarm` Receipt Mode freshness check. If it is stale, record `receipt_status: stale` in `manifest.md` and route to Receipt Mode before any later sign-off wording.
+7. Gate: "Swarm verification complete. Review `08-fact-swarm-summary.md` and its board evidence: [summary counts]. Approve this fact state, generate or refresh the retained Receipt, adjudicate paused Claims, request manual rewrite/source work for unresolved Claims, or pause?"
+8. Do not run legacy `blog-fact-reconcile` automatically against the Claim-store summary. If `adjudication-paused` Claims remain, surface their Claim ids and tell the Operator to run `blog-fact-swarm` Adjudication Mode before continuing. After adjudication, regenerate `08-fact-swarm-summary.md` and `08-fact-swarm-board.md` (or the board section), update the manifest pointers/counts, mark any existing Receipt stale, and return to this gate. If other unresolved Claims remain (`attention`, `failed`, `no-verdict`, or open recall flags), halt at this gate and ask for operator decision, Receipt generation for retained evidence, or manual rewrite/source work. When the Operator requests Receipt generation or refresh, run `blog-fact-swarm` Receipt Mode, write `<workflow-dir>/receipt.md`, and update `manifest.md` with `receipt`, `receipt_source_hash`, `receipt_status`, unresolved counts, open recall count, and divergence counts. If every Claim is `verified`, no recall flags remain open, and the Receipt is fresh, mark step 9 as `skipped (swarm clean)` and proceed to step 10.
 
 ### Step 10 final voice gate
 
@@ -340,6 +341,9 @@ For newsroom swarm runs, record the Claim store state in the Notes section:
 - `open_recall_flag_count`: `<N>`
 - `effective_concurrency_limit`: `<N>`
 - `unresolved_terminal_states`: `<none or list>`
+- `receipt`: `<workflow-dir>/receipt.md` or `<none yet>`
+- `receipt_source_hash`: `<sha256>` or `<none yet>`
+- `receipt_status`: `fresh | stale | missing`
 
 ## Notes
 <free-form notes captured during the workflow — user steering, decisions, source gaps surfaced>
@@ -411,7 +415,9 @@ The locked-opener contract is also documented on the `blog-draft` side. If `blog
 
 **Legacy fact-check loop stuck.** Already handled in the step-8/9 specifics — surface the unresolved set and ask for editorial judgment.
 
-**Newsroom swarm has unresolved Claims.** Do not auto-reconcile the summary. If `adjudication-paused` Claims exist, surface their Claim ids and route them to `blog-fact-swarm` Adjudication Mode first. After adjudication, regenerate the summary/board artifacts and update the manifest pointers/counts before returning to the fact boundary. For other unresolved Claims, surface `08-fact-swarm-summary.md`, keep the manifest at the fact boundary, and ask whether to rewrite, supply manual source material, or pause. Publish overrides remain Epic 3 scope.
+**Newsroom swarm has unresolved Claims.** Do not auto-reconcile the summary. If `adjudication-paused` Claims exist, surface their Claim ids and route them to `blog-fact-swarm` Adjudication Mode first. After adjudication, regenerate the summary/board artifacts, mark any existing Receipt stale, and update the manifest pointers/counts before returning to the fact boundary. For other unresolved Claims, surface `08-fact-swarm-summary.md`, keep the manifest at the fact boundary, and ask whether to generate/refresh the retained Receipt, rewrite, supply manual source material, or pause. Publish overrides remain later Epic 3 scope.
+
+**Newsroom Receipt stale or missing.** If `receipt.md` is absent or its `source_hash` does not match the current validated Claim store, record `receipt_status: missing` or `stale` in `manifest.md` and route to `blog-fact-swarm` Receipt Mode before any later attorney sign-off wording. A fresh Receipt is retained evidence only; it does not mark the Issue ready to publish.
 
 **Manifest corruption.** If the manifest file is missing fields or malformed, surface to the user and ask what state the workflow is actually in. Do not guess.
 
