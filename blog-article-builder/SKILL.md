@@ -293,7 +293,7 @@ Present the final draft to the user with this prompt:
 
 For non-newsroom profiles, if the user says ship, update the manifest to `status: ready-to-publish` and announce the workflow is complete.
 
-For `preset: newsroom`, **before** treating ship as available, present the delivered-draft base capture, attorney sign-off gate, returned-edit capture option, Rule Patch proposal option for non-empty returned edits, and then the Claim-store publish gate (do not infer approval from silence):
+For `preset: newsroom`, **before** treating ship as available, present the delivered-draft base capture, attorney sign-off gate, returned-edit capture option, Rule Patch proposal option for non-empty returned edits, optional Rule Patch Confirmation Mode only after explicit Client confirmation, and then the Claim-store publish gate (do not infer approval from silence):
 
 1. Identify the current canonical draft as `05-draft-v{latest}.md`, the Receipt path (`receipt.md`), and the Receipt `source_hash` from Receipt metadata / manifest.
 2. Before sending the draft to the Client, present the base-record command and tell the Operator this must capture the exact delivered draft:
@@ -320,15 +320,23 @@ python3 ~/.claude/skills/blog-voice-patch/scripts/write_rule_patch_proposals.py 
 
 Stop and Present `rule-patch-proposals.json`, `rule-patch-proposals.md`, proposal count, proposal ids, grades, cited pair ids, rationales, and `confirmation_status: unconfirmed`. Proposal Mode reads the current profile `voice.md` for duplicate/conflict checks but does not mutate it. If `edit-diff.json` is empty, stale, missing, malformed, or duplicate-only, record or present `no-proposals` rather than fabricating rules.
 
-5. Run the sign-off checker against that exact draft path (required `--expected-draft`):
+5. If the Client explicitly confirms one proposed `patch_id`, present Confirmation Mode as a voice-learning handoff:
+
+```text
+python3 ~/.claude/skills/blog-voice-patch/scripts/confirm_rule_patch.py --workflow-dir <workflow-dir> --proposals rule-patch-proposals.json --patch-id PATCH-001 --profile <name-or-path> --confirmed-by "<client name>" --confirmation-method "<source>" --confirmation-evidence "<evidence>"
+```
+
+Stop and Present `rule-patch-confirmation.md`, the confirmed patch id, the updated `voice.md` path, the commit SHA/subject, and `git revert <patch-commit>`. Rule Patch confirmation updates `voice.md` only; it does not approve the article, publish, clear Claim blockers, refresh Receipts, mutate draft text, mutate Claim files, mutate `receipt.md`, or mutate `approval.json`.
+
+6. Run the sign-off checker against that exact draft path (required `--expected-draft`):
 
 ```text
 python3 ~/.claude/blog-profiles/scripts/record_attorney_signoff.py --workflow-dir <workflow-dir> --check --expected-draft 05-draft-v{latest}.md
 ```
 
-6. Present draft path, Receipt path, Receipt `source_hash`, Edit Diff status/path if present, Rule Patch proposal status/path if present, and the checker outcome. Ask the Operator to **record attorney approval or pause**. Do not proceed to `ready-to-publish` until the checker returns `approved:` exit 0 for that canonical draft and a fresh Receipt.
+7. Present draft path, Receipt path, Receipt `source_hash`, Edit Diff status/path if present, Rule Patch proposal/confirmation status/path if present, and the checker outcome. Ask the Operator to **record attorney approval or pause**. Do not proceed to `ready-to-publish` until the checker returns `approved:` exit 0 for that canonical draft and a fresh Receipt.
 
-The Edit Diff capture, Rule Patch proposal, and sign-off gate are independent gates. Edit Diff capture and proposal output do not bypass sign-off, final voice/read-through, Claim-store, or Receipt gates; sign-off does not replace any Claim-store or Receipt gate. The sign-off checker updates `approval_status` (and related mirrors) in the newsroom Claim-store Notes list of `manifest.md`.
+The Edit Diff capture, Rule Patch proposal, Rule Patch confirmation, and sign-off gate are independent gates. Edit Diff capture, proposal output, and confirmation do not bypass sign-off, final voice/read-through, Claim-store, or Receipt gates; sign-off does not replace any Claim-store or Receipt gate. The sign-off checker updates `approval_status` (and related mirrors) in the newsroom Claim-store Notes list of `manifest.md`.
 
 If the checker returns non-zero, keep the manifest non-ready with `status: awaiting-attorney-signoff` or `status: blocked (sign-off)`, set `publication_action: not-triggered`, keep the checker-written `approval_status`, and keep resume detection pointed at this gate. Ask the Operator to record attorney approval with:
 
@@ -342,7 +350,7 @@ If `approval.json` was written but the manifest mirrors failed (exit 15), repair
 python3 ~/.claude/blog-profiles/scripts/record_attorney_signoff.py --workflow-dir <workflow-dir> --sync-manifest
 ```
 
-Do not infer approval from silence, returned edits, or proposal output. Do not publish, distribute, upload, post, trigger a webhook, mutate `voice.md`, apply Rule Patches, confirm Rule Patches, or hand-edit `edit-diff.json` / `rule-patch-proposals.json`. Do not hand-edit Claim JSON or invent silent approvals. Explicit Claim-store publish exceptions are allowed only via Story 3.3 helpers `write_claim_override.py` and `write_recall_flag.py`. After approval is valid, run the publish gate checker against the same canonical draft:
+Do not infer attorney approval or Rule Patch confirmation from silence, returned edits, or proposal output. Do not publish, distribute, upload, post, trigger a webhook, hand-edit `voice.md`, hand-apply Rule Patches, or hand-edit `edit-diff.json` / `rule-patch-proposals.json`. Do not hand-edit Claim JSON or invent silent approvals. Explicit Claim-store publish exceptions are allowed only via Story 3.3 helpers `write_claim_override.py` and `write_recall_flag.py`. After approval is valid, run the publish gate checker against the same canonical draft:
 
 ```text
 python3 ~/.claude/skills/blog-fact-swarm/scripts/check_publish_gate.py --workflow-dir <workflow-dir> --expected-draft 05-draft-v{latest}.md
