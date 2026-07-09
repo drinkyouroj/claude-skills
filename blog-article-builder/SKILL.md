@@ -54,11 +54,13 @@ Steps that are **disabled** in the active profile (via preset defaults or `profi
 | 7 | Voice humanizer | `blog-humanizer` | `05-draft-v3.md` + `07-voice-audit.md` | Approve rewrites; audit verdict gates step 8 |
 | 8 | Fact check | `blog-fact-check` (non-newsroom) or `blog-fact-swarm` (newsroom) | `08-fact-check-v{N}.md` or `08-fact-swarm-summary.md` with board section plus `receipt.md` for newsroom | Approve recommendations or review swarm summary/board/Receipt |
 | 9 | Fact reconcile | `blog-fact-reconcile` (non-newsroom) or swarm decision gate | `05-draft-v{N+1}.md` or manifest state | Approve (loop back to 8 until clean or stuck) or decide unresolved Claims |
-| 10 | Final read-through | (this skill) | `manifest.md` marked `ready-to-publish` | Confirm ship-ready |
+| 10 | Final read-through | (this skill) | `manifest.md` marked `ready-to-publish` only after all active gates pass | Confirm ship-ready; newsroom also requires attorney sign-off |
 
 For non-newsroom profiles, steps 8 and 9 keep the legacy loop. Termination: the loop stops when fact-check reports zero flagged claims, OR when two consecutive iterations surface the same set of unresolved items (no progress).
 
 For `preset: newsroom`, step 8 invokes `blog-fact-swarm` for Claim extraction plus bounded swarm verification. Step 9 is not an automatic `blog-fact-reconcile` pass against the swarm summary; it is a user decision gate over unresolved Claims unless the swarm is clean.
+
+For `preset: newsroom`, final readiness also requires a fresh retained Receipt plus attorney sign-off in `<workflow-dir>/approval.json` for the exact delivered draft and Receipt `source_hash`. Sign-off is a recorded document exchange; it is not publication and it is not a Claim override.
 
 Steps disabled by the active profile (e.g. `fact-check` and `fact-reconcile` off under a fiction preset) are marked `skipped (profile)` in the manifest and do not block progress.
 
@@ -289,7 +291,25 @@ Present the final draft to the user with this prompt:
 
 > Final draft is `<working-dir>/<slug>/05-draft-v{latest}.md`. Read the whole thing as the blog's reader persona would — opener through close, no skimming. The audits caught structural, lexical, and factual issues, but they can't tell you whether the piece *feels* finished. Anything remaining to fix before this ships?
 
-If the user says ship, update the manifest to `status: ready-to-publish` and announce the workflow is complete. If the user flags any specific issue, ask which step they want to revisit (rerun readability on the post-humanizer version? rerun the humanizer on a specific section? do a manual edit then loop fact-check again?). Route accordingly.
+For non-newsroom profiles, if the user says ship, update the manifest to `status: ready-to-publish` and announce the workflow is complete.
+
+For `preset: newsroom`, if the user says ship, first run the attorney sign-off checker:
+
+```text
+skills/blog-profiles/scripts/record_attorney_signoff.py --workflow-dir <workflow-dir> --check
+```
+
+The checker must return `approved:` exit 0 for the current delivered draft and fresh Receipt before the manifest can become `ready-to-publish`. The sign-off gate is an additional independent gate; it does not bypass the final voice/read-through gate and it does not replace any Claim-store or Receipt gate.
+
+If the checker returns non-zero, keep the manifest non-ready with `status: awaiting-attorney-signoff` or `status: blocked (sign-off)`, set `publication_action: not-triggered`, update `approval_status` from the checker result, and keep resume detection pointed at this gate. Present the final draft path, Receipt path, Receipt `source_hash`, and the checker outcome. Ask the Operator to record attorney approval with:
+
+```text
+skills/blog-profiles/scripts/record_attorney_signoff.py --workflow-dir <workflow-dir> --approver "<name>" --approver-role "<role>" --approval-method "<source>" --approval-evidence "<operator note>" --draft-path <latest draft> --receipt-path receipt.md
+```
+
+Do not infer approval from silence. Do not publish, distribute, upload, post, trigger a webhook, create publish overrides, clear extraction-recall flags, mutate Claim files, or mutate `voice.md`. After approval is valid and the final voice/read-through gate has passed, mark the Issue ready for publication as manifest state only and keep `publication_action: not-triggered`.
+
+If the user flags any specific issue, ask which step they want to revisit (rerun readability on the post-humanizer version? rerun the humanizer on a specific section? do a manual edit then loop fact-check again?). Route accordingly.
 
 ---
 
@@ -344,6 +364,13 @@ For newsroom swarm runs, record the Claim store state in the Notes section:
 - `receipt`: `<workflow-dir>/receipt.md` or `<none yet>`
 - `receipt_source_hash`: `<sha256>` or `<none yet>`
 - `receipt_status`: `fresh | stale | missing`
+- `approval`: `<workflow-dir>/approval.json` or `<none yet>`
+- `approval_status`: `approved | missing | stale-draft | stale-receipt | missing-receipt | invalid`
+- `approval_approver`: approver name or `<none yet>`
+- `approval_approved_at`: ISO-8601 UTC `Z` timestamp or `<none yet>`
+- `approval_draft_sha256`: `<sha256>` or `<none yet>`
+- `approval_receipt_source_hash`: `<write_receipt.py source_hash>` or `<none yet>`
+- `publication_action`: `not-triggered`
 
 ## Notes
 <free-form notes captured during the workflow — user steering, decisions, source gaps surfaced>
@@ -418,6 +445,8 @@ The locked-opener contract is also documented on the `blog-draft` side. If `blog
 **Newsroom swarm has unresolved Claims.** Do not auto-reconcile the summary. If `adjudication-paused` Claims exist, surface their Claim ids and route them to `blog-fact-swarm` Adjudication Mode first. After adjudication, regenerate the summary/board artifacts, mark any existing Receipt stale, and update the manifest pointers/counts before returning to the fact boundary. For other unresolved Claims, surface `08-fact-swarm-summary.md`, keep the manifest at the fact boundary, and ask whether to generate/refresh the retained Receipt, rewrite, supply manual source material, or pause. Publish overrides remain later Epic 3 scope.
 
 **Newsroom Receipt stale or missing.** If `receipt.md` is absent or its `source_hash` does not match the current validated Claim store, record `receipt_status: missing` or `stale` in `manifest.md` and route to `blog-fact-swarm` Receipt Mode before any later attorney sign-off wording. A fresh Receipt is retained evidence only; it does not mark the Issue ready to publish.
+
+**Newsroom attorney sign-off missing, invalid, or stale.** Run `record_attorney_signoff.py --check` at the final read-through gate. Map checker outcomes into manifest `approval_status`: `approved` -> `approved`; `missing-approval` -> `missing`; `stale-draft` -> `stale-draft`; `stale-receipt-source` -> `stale-receipt`; `invalid-approval` -> `invalid`; `missing-receipt` -> `missing-receipt`; `missing-draft` -> `stale-draft`. Any non-zero checker exit blocks `ready-to-publish`, keeps `publication_action: not-triggered`, and resumes at the sign-off gate. Re-sign-off means intentionally archive the prior `approval.json` to `approval.json.revoked.<YYYYMMDDTHHMMSSZ>` (add a suffix such as `-2` if the archive name already exists), then record fresh approval for the current delivered draft and Receipt.
 
 **Manifest corruption.** If the manifest file is missing fields or malformed, surface to the user and ask what state the workflow is actually in. Do not guess.
 
