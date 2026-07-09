@@ -293,18 +293,34 @@ Present the final draft to the user with this prompt:
 
 For non-newsroom profiles, if the user says ship, update the manifest to `status: ready-to-publish` and announce the workflow is complete.
 
-For `preset: newsroom`, **before** treating ship as available, present the attorney sign-off gate and then the Claim-store publish gate (do not infer approval from silence):
+For `preset: newsroom`, **before** treating ship as available, present the delivered-draft base capture, attorney sign-off gate, returned-edit capture option, and then the Claim-store publish gate (do not infer approval from silence):
 
 1. Identify the current canonical draft as `05-draft-v{latest}.md`, the Receipt path (`receipt.md`), and the Receipt `source_hash` from Receipt metadata / manifest.
-2. Run the checker against that exact draft path (required `--expected-draft`):
+2. Before sending the draft to the Client, present the base-record command and tell the Operator this must capture the exact delivered draft:
+
+```text
+python3 ~/.claude/skills/blog-voice-patch/scripts/capture_edit_diff.py --record-base --workflow-dir <workflow-dir> --draft-path 05-draft-v{latest}.md --delivery-method "<method>" --delivery-evidence "<operator note>"
+```
+
+Stop and Present the recorded base path, SHA-256, byte count, and `edit_diff_status: base-recorded`. Do not proceed as though the Client reviewed the draft until the Operator confirms this is the exact version being sent.
+
+3. If the Operator already has a returned Markdown/plain-text document from the Client, present capture mode:
+
+```text
+python3 ~/.claude/skills/blog-voice-patch/scripts/capture_edit_diff.py --capture-return --workflow-dir <workflow-dir> --returned-path <returned-file.md> --return-method "<method>" --return-evidence "<operator note>"
+```
+
+Stop and Present the `edit-diff.json` path, pair count, and whether the diff is empty. Returned edits are voice-signal capture only; they do not imply attorney approval and do not clear Receipt, sign-off, final voice/read-through, or Claim-store publish blockers.
+
+4. Run the sign-off checker against that exact draft path (required `--expected-draft`):
 
 ```text
 python3 ~/.claude/blog-profiles/scripts/record_attorney_signoff.py --workflow-dir <workflow-dir> --check --expected-draft 05-draft-v{latest}.md
 ```
 
-3. Present draft path, Receipt path, Receipt `source_hash`, and the checker outcome. Ask the Operator to **record attorney approval or pause**. Do not proceed to `ready-to-publish` until the checker returns `approved:` exit 0 for that canonical draft and a fresh Receipt.
+5. Present draft path, Receipt path, Receipt `source_hash`, Edit Diff status/path if present, and the checker outcome. Ask the Operator to **record attorney approval or pause**. Do not proceed to `ready-to-publish` until the checker returns `approved:` exit 0 for that canonical draft and a fresh Receipt.
 
-The sign-off gate is an additional independent gate; it does not bypass the final voice/read-through gate and it does not replace any Claim-store or Receipt gate. The checker updates `approval_status` (and related mirrors) in the newsroom Claim-store Notes list of `manifest.md`.
+The Edit Diff capture and sign-off gate are independent gates. Edit Diff capture does not bypass sign-off, final voice/read-through, Claim-store, or Receipt gates; sign-off does not replace any Claim-store or Receipt gate. The sign-off checker updates `approval_status` (and related mirrors) in the newsroom Claim-store Notes list of `manifest.md`.
 
 If the checker returns non-zero, keep the manifest non-ready with `status: awaiting-attorney-signoff` or `status: blocked (sign-off)`, set `publication_action: not-triggered`, keep the checker-written `approval_status`, and keep resume detection pointed at this gate. Ask the Operator to record attorney approval with:
 
@@ -318,7 +334,7 @@ If `approval.json` was written but the manifest mirrors failed (exit 15), repair
 python3 ~/.claude/blog-profiles/scripts/record_attorney_signoff.py --workflow-dir <workflow-dir> --sync-manifest
 ```
 
-Do not infer approval from silence. Do not publish, distribute, upload, post, trigger a webhook, or mutate `voice.md`. Do not hand-edit Claim JSON or invent silent approvals. Explicit Claim-store publish exceptions are allowed only via Story 3.3 helpers `write_claim_override.py` and `write_recall_flag.py`. After approval is valid, run the publish gate checker against the same canonical draft:
+Do not infer approval from silence or from the presence of returned edits. Do not publish, distribute, upload, post, trigger a webhook, mutate `voice.md`, propose/apply Rule Patches, or hand-edit `edit-diff.json`. Do not hand-edit Claim JSON or invent silent approvals. Explicit Claim-store publish exceptions are allowed only via Story 3.3 helpers `write_claim_override.py` and `write_recall_flag.py`. After approval is valid, run the publish gate checker against the same canonical draft:
 
 ```text
 python3 ~/.claude/skills/blog-fact-swarm/scripts/check_publish_gate.py --workflow-dir <workflow-dir> --expected-draft 05-draft-v{latest}.md
