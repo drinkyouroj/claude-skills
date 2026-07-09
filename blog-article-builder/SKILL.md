@@ -318,7 +318,7 @@ If `approval.json` was written but the manifest mirrors failed (exit 15), repair
 python3 ~/.claude/blog-profiles/scripts/record_attorney_signoff.py --workflow-dir <workflow-dir> --sync-manifest
 ```
 
-Do not infer approval from silence. Do not publish, distribute, upload, post, trigger a webhook, create publish overrides, clear extraction-recall flags, mutate Claim files, or mutate `voice.md`. After approval is valid, run the publish gate checker against the same canonical draft:
+Do not infer approval from silence. Do not publish, distribute, upload, post, trigger a webhook, or mutate `voice.md`. Do not hand-edit Claim JSON or invent silent approvals. Explicit Claim-store publish exceptions are allowed only via Story 3.3 helpers `write_claim_override.py` and `write_recall_flag.py`. After approval is valid, run the publish gate checker against the same canonical draft:
 
 ```text
 python3 ~/.claude/skills/blog-fact-swarm/scripts/check_publish_gate.py --workflow-dir <workflow-dir> --expected-draft 05-draft-v{latest}.md
