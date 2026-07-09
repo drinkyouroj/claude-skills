@@ -293,18 +293,29 @@ Present the final draft to the user with this prompt:
 
 For non-newsroom profiles, if the user says ship, update the manifest to `status: ready-to-publish` and announce the workflow is complete.
 
-For `preset: newsroom`, if the user says ship, first run the attorney sign-off checker:
+For `preset: newsroom`, **before** treating ship as available, present the attorney sign-off gate (do not infer approval from silence):
+
+1. Identify the current canonical draft as `05-draft-v{latest}.md`, the Receipt path (`receipt.md`), and the Receipt `source_hash` from Receipt metadata / manifest.
+2. Run the checker against that exact draft path (required `--expected-draft`):
 
 ```text
-skills/blog-profiles/scripts/record_attorney_signoff.py --workflow-dir <workflow-dir> --check
+python3 ~/.claude/blog-profiles/scripts/record_attorney_signoff.py --workflow-dir <workflow-dir> --check --expected-draft 05-draft-v{latest}.md
 ```
 
-The checker must return `approved:` exit 0 for the current delivered draft and fresh Receipt before the manifest can become `ready-to-publish`. The sign-off gate is an additional independent gate; it does not bypass the final voice/read-through gate and it does not replace any Claim-store or Receipt gate.
+3. Present draft path, Receipt path, Receipt `source_hash`, and the checker outcome. Ask the Operator to **record attorney approval or pause**. Do not proceed to `ready-to-publish` until the checker returns `approved:` exit 0 for that canonical draft and a fresh Receipt.
 
-If the checker returns non-zero, keep the manifest non-ready with `status: awaiting-attorney-signoff` or `status: blocked (sign-off)`, set `publication_action: not-triggered`, update `approval_status` from the checker result, and keep resume detection pointed at this gate. Present the final draft path, Receipt path, Receipt `source_hash`, and the checker outcome. Ask the Operator to record attorney approval with:
+The sign-off gate is an additional independent gate; it does not bypass the final voice/read-through gate and it does not replace any Claim-store or Receipt gate. The checker updates `approval_status` (and related mirrors) in the newsroom Claim-store Notes list of `manifest.md`.
+
+If the checker returns non-zero, keep the manifest non-ready with `status: awaiting-attorney-signoff` or `status: blocked (sign-off)`, set `publication_action: not-triggered`, keep the checker-written `approval_status`, and keep resume detection pointed at this gate. Ask the Operator to record attorney approval with:
 
 ```text
-skills/blog-profiles/scripts/record_attorney_signoff.py --workflow-dir <workflow-dir> --approver "<name>" --approver-role "<role>" --approval-method "<source>" --approval-evidence "<operator note>" --draft-path <latest draft> --receipt-path receipt.md
+python3 ~/.claude/blog-profiles/scripts/record_attorney_signoff.py --workflow-dir <workflow-dir> --approver "<name>" --approver-role "<role>" --approval-method "<source>" --approval-evidence "<operator note>" --draft-path 05-draft-v{latest}.md --receipt-path receipt.md
+```
+
+If `approval.json` was written but the manifest mirrors failed (exit 15), repair with:
+
+```text
+python3 ~/.claude/blog-profiles/scripts/record_attorney_signoff.py --workflow-dir <workflow-dir> --sync-manifest
 ```
 
 Do not infer approval from silence. Do not publish, distribute, upload, post, trigger a webhook, create publish overrides, clear extraction-recall flags, mutate Claim files, or mutate `voice.md`. After approval is valid and the final voice/read-through gate has passed, mark the Issue ready for publication as manifest state only and keep `publication_action: not-triggered`.
@@ -446,7 +457,7 @@ The locked-opener contract is also documented on the `blog-draft` side. If `blog
 
 **Newsroom Receipt stale or missing.** If `receipt.md` is absent or its `source_hash` does not match the current validated Claim store, record `receipt_status: missing` or `stale` in `manifest.md` and route to `blog-fact-swarm` Receipt Mode before any later attorney sign-off wording. A fresh Receipt is retained evidence only; it does not mark the Issue ready to publish.
 
-**Newsroom attorney sign-off missing, invalid, or stale.** Run `record_attorney_signoff.py --check` at the final read-through gate. Map checker outcomes into manifest `approval_status`: `approved` -> `approved`; `missing-approval` -> `missing`; `stale-draft` -> `stale-draft`; `stale-receipt-source` -> `stale-receipt`; `invalid-approval` -> `invalid`; `missing-receipt` -> `missing-receipt`; `missing-draft` -> `stale-draft`. Any non-zero checker exit blocks `ready-to-publish`, keeps `publication_action: not-triggered`, and resumes at the sign-off gate. Re-sign-off means intentionally archive the prior `approval.json` to `approval.json.revoked.<YYYYMMDDTHHMMSSZ>` (add a suffix such as `-2` if the archive name already exists), then record fresh approval for the current delivered draft and Receipt.
+**Newsroom attorney sign-off missing, invalid, or stale.** At final read-through, present draft path / Receipt path / `source_hash` and run `python3 ~/.claude/blog-profiles/scripts/record_attorney_signoff.py --workflow-dir <workflow-dir> --check --expected-draft 05-draft-v{latest}.md`. The helper maps outcomes into Claim-store Notes `approval_status`: `approved` -> `approved`; `missing-approval` -> `missing`; `stale-draft` -> `stale-draft` (also when `--expected-draft` does not match stored `draft_path`); `stale-receipt-source` -> `stale-receipt`; `invalid-approval` -> `invalid`; `missing-receipt` -> `missing-receipt`; `missing-draft` -> `stale-draft`. Any non-zero checker exit blocks `ready-to-publish`, keeps `publication_action: not-triggered`, and resumes at the sign-off gate. Re-sign-off means intentionally archive the prior `approval.json` to `approval.json.revoked.<YYYYMMDDTHHMMSSZ>` (add a suffix such as `-2` if the archive name already exists), then record fresh approval for the current delivered draft and Receipt.
 
 **Manifest corruption.** If the manifest file is missing fields or malformed, surface to the user and ask what state the workflow is actually in. Do not guess.
 
